@@ -8,7 +8,11 @@ find_package(catkin REQUIRED COMPONENTS
   pr2_moveit_generated
   roscpp
   moveit_ros_planning_interface
+  rospy 
+  std_msgs 
+  message_generation
 )
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -51,11 +55,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   t_move_srv.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -65,10 +68,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -84,6 +87,7 @@ catkin_package(
 #  LIBRARIES testnode_manipulation
 #  CATKIN_DEPENDS pr2_moveit_generated roscpp
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 ###########
@@ -168,3 +172,11 @@ find_package(Eigen REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 add_definitions(${EIGEN_DEFINITIONS})
+
+add_executable(test_move src/test_move.cpp)
+target_link_libraries(test_move ${catkin_LIBRARIES})
+add_dependencies(test_move testnode_manipulation_gencpp)
+
+add_executable(test_move_client src/test_move_client.cpp)
+target_link_libraries(test_move_client ${catkin_LIBRARIES})
+add_dependencies(test_move_client testnode_manipulation_gencpp)

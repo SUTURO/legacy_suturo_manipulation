@@ -7,9 +7,10 @@ int main(int argc, char **argv)
   ros::AsyncSpinner spinner(1);
   spinner.start();
   // this connecs to a running instance of the move_group node
-  move_group_interface::MoveGroup group("right_arm");
+  move_group_interface::MoveGroup group("left_arm");
   // specify that our target will be a random one
-  group.setRandomTarget();
+  // group.setRandomTarget();
+  group.setNamedTarget("left_arm");
   // plan the motion and then move the group to the sampled target 
   group.move();
   ros::waitForShutdown();
