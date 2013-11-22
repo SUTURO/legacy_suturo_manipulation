@@ -1,10 +1,9 @@
 #include "ros/ros.h"
-#include "suturo_manipulation_service/suturo_manipulation_srv.h"
 #include <cstdlib>
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "t_move_client");
+  /*ros::init(argc, argv, "t_move_client");
   if (argc != 5)
   {
     ROS_INFO("usage: t_move X Y Z");
@@ -26,7 +25,7 @@ int main(int argc, char **argv)
   {
     ROS_ERROR("Failed to call service t_move");
     return 1;
-  }
+  }*/
 
   return 0;
 }

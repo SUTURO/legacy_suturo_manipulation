@@ -1,7 +1,4 @@
-float64 x
-float64 y
-float64 z
+PerceivedObject p
 string arm
-PerceivedObject
 ---
 int64 succ

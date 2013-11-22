@@ -1,5 +1,4 @@
 #include "ros/ros.h"
-#include "suturo_manipulation_service/suturo_manipulation_srv.h"
 #include <stdio.h>
 #include <moveit/move_group_interface/move_group.h>
 
@@ -11,7 +10,7 @@ int kinectToOdom(double &x, double &y, double &z)
 	return 0;
 }
 
-bool moveb(suturo_manipulation_service::suturo_manipulation_srv::Request  &req,
+/*bool moveb(suturo_manipulation_service::suturo_manipulation_srv::Request  &req,
          suturo_manipulation_service::suturo_manipulation_srv::Response &res)
 {
     ros::AsyncSpinner spinner(1);
@@ -40,16 +39,16 @@ bool moveb(suturo_manipulation_service::suturo_manipulation_srv::Request  &req,
 		ROS_INFO("Error while moving %s to x=%f y=%f z=%f", req.arm.c_str(), req.x, req.y, req.z);
 	}
 	return res.succ != 0;
-}
+}*/
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "t_move", ros::init_options::AnonymousName);
+ /* ros::init(argc, argv, "t_move", ros::init_options::AnonymousName);
   ros::NodeHandle n;
 
   ros::ServiceServer service = n.advertiseService("t_move_srv", moveb);
   ROS_INFO("Ready to moveit!.");
   ros::spin();
-
+*/
   return 0;
 }

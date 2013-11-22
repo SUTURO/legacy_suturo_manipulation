@@ -5,11 +5,9 @@ project(suturo_manipulation_service)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   moveit_ros_planning_interface
   roscpp
   rospy
-  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,10 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   suturo_manipulation_srv.srv
- )
+
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -66,10 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
+
 
 ###################################
 ## catkin specific configuration ##
@@ -83,7 +75,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES suturo_manipulation_service
-#  CATKIN_DEPENDS message_generation moveit_ros_planning_interface roscpp rospy std_msgs
+#  CATKIN_DEPENDS message_generation moveit_ros_planning_interface roscpp rospy std_msgs suturo_perception_msgs
 #  DEPENDS system_lib
 )
 
