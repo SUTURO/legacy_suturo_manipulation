@@ -5,11 +5,11 @@ project(suturo_manipulation_service)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  suturo_manipulation_msgs
   moveit_ros_planning_interface
   roscpp
-  suturo_manipulation_msgs
   rospy
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -164,8 +164,8 @@ add_definitions(${EIGEN_DEFINITIONS})
 
 add_executable(suturo_manipulation_service_node src/suturo_manipulation_service_node.cpp)
 target_link_libraries(suturo_manipulation_service_node ${catkin_LIBRARIES})
-add_dependencies(suturo_manipulation_service_node suturo_manipulation_service_node_gencpp suturo_manipulation_msgs)
+add_dependencies(suturo_manipulation_service_node suturo_manipulation_msgs)
 
 add_executable(test_move_client src/test_move_client.cpp)
 target_link_libraries(test_move_client ${catkin_LIBRARIES})
-add_dependencies(test_move_client testnode_manipulation_gencpp suturo_manipulation_msgs)
+add_dependencies(test_move_client suturo_manipulation_msgs)
