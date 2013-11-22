@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "../../../../devel/include/testnode_manipulation/t_move_srv.h"
+#include "suturo_manipulation_service/suturo_manipulation_srv.h"
 #include <cstdlib>
 
 int main(int argc, char **argv)
@@ -12,8 +12,8 @@ int main(int argc, char **argv)
   }
 
   ros::NodeHandle n;
-  ros::ServiceClient client = n.serviceClient<testnode_manipulation::t_move_srv>("t_move_srv");
-  testnode_manipulation::t_move_srv srv;
+  ros::ServiceClient client = n.serviceClient<suturo_manipulation_service::suturo_manipulation_srv>("t_move_srv");
+  suturo_manipulation_service::suturo_manipulation_srv srv;
   srv.request.arm = argv[1];  
   srv.request.x = atof(argv[2]);
   srv.request.y = atof(argv[3]);

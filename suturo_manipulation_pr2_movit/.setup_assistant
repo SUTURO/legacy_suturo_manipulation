@@ -1,8 +1,8 @@
 moveit_setup_assistant_config:
   URDF:
-    package: pr2_moveit_config
-    relative_path: temp/pr2.urdf
+    package: ""
+    relative_path: /home/ichumuh/pr2.urdf
   SRDF:
     relative_path: config/pr2.srdf
   CONFIG:
-    generated_timestamp: 1383908167
+    generated_timestamp: 1385130412

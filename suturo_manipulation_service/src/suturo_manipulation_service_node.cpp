@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "../../../../devel/include/testnode_manipulation/t_move_srv.h"
+#include "suturo_manipulation_service/suturo_manipulation_srv.h"
 #include <stdio.h>
 #include <moveit/move_group_interface/move_group.h>
 
@@ -11,8 +11,8 @@ int kinectToOdom(double &x, double &y, double &z)
 	return 0;
 }
 
-bool moveb(testnode_manipulation::t_move_srv::Request  &req,
-         testnode_manipulation::t_move_srv::Response &res)
+bool moveb(suturo_manipulation_service::suturo_manipulation_srv::Request  &req,
+         suturo_manipulation_service::suturo_manipulation_srv::Response &res)
 {
     ros::AsyncSpinner spinner(1);
 	spinner.start();
