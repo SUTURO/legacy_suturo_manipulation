@@ -1,0 +1,4 @@
+PerceivedObject p
+string arm
+---
+int64 succ
