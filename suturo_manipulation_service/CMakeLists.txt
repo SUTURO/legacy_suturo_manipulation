@@ -7,7 +7,9 @@ project(suturo_manipulation_service)
 find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   roscpp
+  suturo_manipulation_msgs
   rospy
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
