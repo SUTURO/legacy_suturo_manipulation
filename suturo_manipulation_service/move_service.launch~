@@ -1,0 +1,8 @@
+<launch>
+ <include file="$(find pr2_moveit_generated)/launch/move_group.launch">
+  <arg name="publish_monitored_planning_scene" value="true" />
+ </include>
+
+  <node pkg="testnode_manipulation" name="testnode_manipulation" type="t_move" respawn="true"/>
+
+</launch>

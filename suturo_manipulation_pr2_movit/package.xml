@@ -1,6 +1,6 @@
 <package>
 
-  <name>pr2_moveit_generated</name>
+  <name>suturo_manipulation_pr2_movit</name>
   <version>0.2.0</version>
   <description>
      An automatically generated package with all the configuration and launch files for using the pr2 with the MoveIt Motion Planning Framework

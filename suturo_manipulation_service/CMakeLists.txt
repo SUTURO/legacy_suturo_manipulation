@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(testnode_manipulation)
+project(suturo_manipulation_service)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  pr2_moveit_generated
+  suturo_manipulation_pr2_movit
   roscpp
   moveit_ros_planning_interface
   rospy 
@@ -57,7 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
-   t_move.srv
+   t_move_srv.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -107,8 +107,8 @@ include_directories(
 # )
 
 ## Declare a cpp executable
- add_executable(testnode_manipulation_node src/random_move.cpp)
- target_link_libraries(testnode_manipulation_node ${catkin_LIBRARIES})
+ add_executable(suturo_manipulation_service src/suturo_manipulation_service_node.cpp)
+ target_link_libraries(suturo_manipulation_service ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -173,9 +173,9 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 
 add_definitions(${EIGEN_DEFINITIONS})
 
-add_executable(test_move src/test_move.cpp)
-target_link_libraries(test_move ${catkin_LIBRARIES})
-add_dependencies(test_move testnode_manipulation_gencpp)
+add_executable(suturo_manipulation_service_node src/suturo_manipulation_service_node.cpp)
+target_link_libraries(suturo_manipulation_service_node ${catkin_LIBRARIES})
+add_dependencies(suturo_manipulation_service_node suturo_manipulation_service_node_gencpp)
 
 add_executable(test_move_client src/test_move_client.cpp)
 target_link_libraries(test_move_client ${catkin_LIBRARIES})
