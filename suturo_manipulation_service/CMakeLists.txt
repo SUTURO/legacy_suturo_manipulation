@@ -164,8 +164,8 @@ add_definitions(${EIGEN_DEFINITIONS})
 
 add_executable(suturo_manipulation_service_node src/suturo_manipulation_service_node.cpp)
 target_link_libraries(suturo_manipulation_service_node ${catkin_LIBRARIES})
-add_dependencies(suturo_manipulation_service_node suturo_manipulation_service_node_gencpp)
+add_dependencies(suturo_manipulation_service_node suturo_manipulation_service_node_gencpp suturo_manipulation_msgs)
 
 add_executable(test_move_client src/test_move_client.cpp)
 target_link_libraries(test_move_client ${catkin_LIBRARIES})
-add_dependencies(test_move_client testnode_manipulation_gencpp)
+add_dependencies(test_move_client testnode_manipulation_gencpp suturo_manipulation_msgs)
