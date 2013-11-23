@@ -1,0 +1,8 @@
+#goal definition
+string arm
+---
+#result definition
+ActionAnswer succ
+---
+#feedback
+int32[] sequence
