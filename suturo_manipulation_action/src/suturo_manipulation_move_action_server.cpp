@@ -3,10 +3,34 @@
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
+#include <tf/transform_listener.h>
 
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
+
+tf::TransformListener* listener = NULL;
+geometry_msgs::PoseStamped kinectPose;
+geometry_msgs::PoseStamped odomPose;
+
+int kinectToOdom(double &x, double &y, double &z, const char* s)
+{ 
+	kinectPose.header.frame_id = s;
+    kinectPose.pose.position.x = x;
+    kinectPose.pose.position.y = y;
+    kinectPose.pose.position.z = z;
+    kinectPose.pose.orientation.x = 1;
+
+    const string odom = "/odom_combined";
+    listener->transformPose(odom, kinectPose, odomPose);
+
+    x = odomPose.pose.position.x;
+    y = odomPose.pose.position.y;
+    z = odomPose.pose.position.z;
+
+    return 0;
+}
+
 
 void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* as)
 {	
@@ -17,7 +41,7 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	string arm = goal->arm;
 	
 	ROS_INFO("received arm: %s, x: %f, y: %f, z: %f", arm.c_str(), x, y, z);
-	//kinectToOdom(req.x, req.y, req.z);
+	kinectToOdom(x, y, z, goal->p.frame_id.c_str());
 	ROS_INFO("transformed to x: %f, y: %f, z: %f", x, y, z);
 	move_group_interface::MoveGroup group(arm);
 	
@@ -52,6 +76,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "suturo_manipulation_move_server");
   ros::NodeHandle n;
+  listener = new (tf::TransformListener);
   Server server(n, "move_action_server", boost::bind(&execute, _1, &server), false);
   server.start();
   ROS_INFO("Ready to moveit!.");

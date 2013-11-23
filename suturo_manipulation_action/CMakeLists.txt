@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   suturo_manipulation_msgs
   actionlib 
   actionlib_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
