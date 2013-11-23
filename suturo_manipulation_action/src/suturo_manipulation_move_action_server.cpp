@@ -10,6 +10,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* as)
 {	
+	suturo_manipulation_msgs::suturo_manipulation_moveResult r;	
 	double x = goal->p.c_centroid.x;
 	double y = goal->p.c_centroid.y;
 	double z = goal->p.c_centroid.z;
@@ -20,29 +21,31 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	ROS_INFO("transformed to x: %f, y: %f, z: %f", x, y, z);
 	move_group_interface::MoveGroup group(arm);
 	
-	suturo_manipulation_msgs::ActionAnswer answ;
-	answ.header.stamp;
-	answ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
-	
+	r.succ.header.stamp;
+	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+	ROS_INFO("link: %s", group.getEndEffectorLink().c_str());
 	if (x == 0 && y == 0 && z == 0){
 		group.setNamedTarget(arm+"_home");
+		ROS_INFO("current pos: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
+				group.getCurrentPose().pose.position.y,
+				group.getCurrentPose().pose.position.z);
 	} else {
-		cout << "current pos\n";
-		cout << group.getCurrentPose().pose.position.x << endl;
-		cout << group.getCurrentPose().pose.position.y << endl;
-		cout << group.getCurrentPose().pose.position.z << endl;
-		
+		ROS_INFO("current pos: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
+				group.getCurrentPose().pose.position.y,
+				group.getCurrentPose().pose.position.z);
 		group.setPositionTarget(x, y, z);	
 	}
-	int res = group.move();
-	if (group.move()){
-	    answ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-	} else {
-		answ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-	}	
-	ROS_INFO("moved: %i", answ.type);
 	
-	as->setSucceeded();
+	if (group.move()){
+	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+	    as->setSucceeded(r);
+	} else {
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+		as->setAborted(r);
+	}	
+	ROS_INFO("moved: %i", r.succ.type);
+	
+
 }
 
 int main(int argc, char** argv)

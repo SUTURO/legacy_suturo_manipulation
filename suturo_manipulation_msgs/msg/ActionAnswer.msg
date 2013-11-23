@@ -10,5 +10,5 @@ uint8 FAIL=3
 # header for time/frame information
 Header header
 
-# the type (SUCCES, NOPLAN, etc)
+# the type (SUCCESS, NOPLAN, etc)
 int32 type

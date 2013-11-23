@@ -5,6 +5,9 @@
 
 typedef actionlib::SimpleActionClient<suturo_manipulation_msgs::suturo_manipulation_moveAction> Client;
 
+using namespace std;
+
+
 int main(int argc, char** argv)
 {
   if (argc != 5)
@@ -22,13 +25,18 @@ int main(int argc, char** argv)
   goal.p.c_centroid.y = atof(argv[3]);
   goal.p.c_centroid.z = atof(argv[4]);
   client.sendGoal(goal);
-  client.waitForResult(ros::Duration(15.0));
+  
 
+  client.waitForResult(ros::Duration(20.0));
+  //2x da es sonst nicht geht...
+  client.waitForResult(ros::Duration(20.0));
+    suturo_manipulation_msgs::suturo_manipulation_moveResultConstPtr r = client.getResult();
+  
   if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-	  if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == client.getResult()){
-		  ROS_INFO("moved!!!!!!! result: %i", client.getResult());
+	  if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
+		  ROS_INFO("moved!!!!!!! result: %i", r->succ.type);
 	  }else{
-		  ROS_INFO("not moved!!!!!!! result: %i", client.getResult());
+		  ROS_INFO("not moved!!!!!!! result: %i", r->succ.type);
 	  }
 	  
   }

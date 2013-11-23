@@ -39,7 +39,7 @@ bool moveb(suturo_manipulation_srv::Request  &req,
 
 	
 	if (group.move()){
-	        answ.type = suturo_manipulation_msgs::ActionAnswer::SUCCES;
+	        answ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		//ROS_INFO("%s moved to x=%f y=%f z=%f", req.arm.c_str(), req.x, req.y, req.z);
 	} else {
                 answ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
