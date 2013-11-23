@@ -113,6 +113,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_move_action_server.cpp)
 add_executable(test_action_client src/test_action_client.cpp)
+add_executable(head_mover src/head_mover.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -131,6 +132,11 @@ target_link_libraries(
 
 target_link_libraries(
   test_action_client
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  head_mover
   ${catkin_LIBRARIES}
 )
 
