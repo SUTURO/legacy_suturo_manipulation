@@ -2,6 +2,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
 #include <moveit/move_group_interface/move_group.h>
+#include <suturo_manipulation_msgs/ActionAnswer.h>
 
 using namespace std;
 
@@ -19,6 +20,10 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	ROS_INFO("transformed to x: %f, y: %f, z: %f", x, y, z);
 	move_group_interface::MoveGroup group(arm);
 	
+	suturo_manipulation_msgs::ActionAnswer answ;
+	answ.header.stamp;
+	answ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+	
 	if (x == 0 && y == 0 && z == 0){
 		group.setNamedTarget(arm+"_home");
 	} else {
@@ -30,7 +35,12 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		group.setPositionTarget(x, y, z);	
 	}
 	int res = group.move();
-	ROS_INFO("moved: %i", res);
+	if (group.move()){
+	    answ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+	} else {
+		answ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+	}	
+	ROS_INFO("moved: %i", answ.type);
 	
 	as->setSucceeded();
 }

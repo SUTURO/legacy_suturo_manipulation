@@ -1,3 +1,5 @@
+#include <ros/ros.h>
+#include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
 #include <actionlib/client/simple_action_client.h>
 
@@ -22,8 +24,14 @@ int main(int argc, char** argv)
   client.sendGoal(goal);
   client.waitForResult(ros::Duration(15.0));
 
-  if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    printf("Yay! The dishes are now clean");
+  if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+	  if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == client.getResult()){
+		  ROS_INFO("moved!!!!!!! result: %i", client.getResult());
+	  }else{
+		  ROS_INFO("not moved!!!!!!! result: %i", client.getResult());
+	  }
+	  
+  }
   printf("Current State: %s\n", client.getState().toString().c_str());
   return 0;
 }

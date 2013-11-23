@@ -117,6 +117,7 @@ add_executable(test_action_client src/test_action_client.cpp)
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_action_node suturo_manipulation_action_generate_messages_cpp)
 add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_action_node
