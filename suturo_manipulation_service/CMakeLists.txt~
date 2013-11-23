@@ -169,3 +169,6 @@ add_dependencies(suturo_manipulation_service_node suturo_manipulation_msgs)
 add_executable(test_move_client src/test_move_client.cpp)
 target_link_libraries(test_move_client ${catkin_LIBRARIES})
 add_dependencies(test_move_client suturo_manipulation_msgs)
+
+ add_dependencies(suturo_manipulation_service_node ${catkin_EXPORTED_TARGETS})
+ add_dependencies(test_move_client ${catkin_EXPORTED_TARGETS})
