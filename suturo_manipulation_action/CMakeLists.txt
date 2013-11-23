@@ -1,20 +1,23 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(suturo_manipulation_msgs)
+project(suturo_manipulation_action)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   message_generation
-  suturo_perception_msgs
-  geometry_msgs
+  moveit_ros_planning_interface
+  roscpp
+  rospy
+  suturo_manipulation_msgs
+  actionlib 
   actionlib_msgs
-  genmsg
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Boost REQUIRED COMPONENTS system)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -46,32 +49,31 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
- FILES
- ActionAnswer.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   suturo_manipulation_srv.srv
- )
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate actions in the 'action' folder
- add_action_files(
-   DIRECTORY action
-   FILES suturo_manipulation_move.action suturo_manipulation_home.action
-
- )
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  suturo_perception_msgs
-  geometry_msgs
-  actionlib_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   suturo_perception_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -84,11 +86,9 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES suturo_manipulation_msgs
-#  CATKIN_DEPENDS message_generation suturo_perception_msgs
+#  LIBRARIES suturo_manipulation_action
+#  CATKIN_DEPENDS message_generation moveit_ros_planning_interface roscpp rospy suturo_manipulation_msgs/ suturo_perception_msgs
 #  DEPENDS system_lib
-  CATKIN_DEPENDS
-  actionlib_msgs 
 )
 
 ###########
@@ -98,26 +98,47 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+#include_directories(
+#  ${catkin_INCLUDE_DIRS}
+#)
 
 ## Declare a cpp library
-# add_library(suturo_manipulation_msgs
-#   src/${PROJECT_NAME}/suturo_manipulation_msgs.cpp
+# add_library(suturo_manipulation_action
+#   src/${PROJECT_NAME}/suturo_manipulation_action.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(suturo_manipulation_msgs_node src/suturo_manipulation_msgs_node.cpp)
+# add_executable(suturo_manipulation_action_node src/suturo_manipulation_action_node.cpp)
+
+add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_move_action_server.cpp)
+add_executable(test_action_client src/test_action_client.cpp)
+add_executable(head_mover src/head_mover.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(suturo_manipulation_msgs_node suturo_manipulation_msgs_generate_messages_cpp)
+# add_dependencies(suturo_manipulation_action_node suturo_manipulation_action_generate_messages_cpp)
+add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(suturo_manipulation_msgs_node
+# target_link_libraries(suturo_manipulation_action_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(
+  suturo_manipulation_move_action_server
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_action_client
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  head_mover
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -134,7 +155,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS suturo_manipulation_msgs suturo_manipulation_msgs_node
+# install(TARGETS suturo_manipulation_action suturo_manipulation_action_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -159,7 +180,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_suturo_manipulation_msgs.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_suturo_manipulation_action.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
