@@ -4,6 +4,7 @@
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="true"/>
   <arg name="throttled" default="false"/>
+  <arg name="world" />
 
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">
@@ -14,18 +15,18 @@
   <!-- start empty world -->
   <group if="$(arg paused)">
     <group if="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/pr2_table.world" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
     </group>
     <group unless="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/pr2_table.world" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
     </group>
   </group>
   <group unless="$(arg paused)">
     <group if="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/pr2_table.world" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
     </group>
     <group unless="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/pr2_table.world" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
     </group>
   </group>
 
