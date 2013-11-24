@@ -12,20 +12,20 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-int kinectToOdom(geometry_msgs::PoseStamped &pose,
+int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
 	//save goal position in pose
-	pose.header.frame_id = s;
-    pose.pose.position.x = goalPoint.x;
-    pose.pose.position.y = goalPoint.y;
-    pose.pose.position.z = goalPoint.z;
-    pose.pose.orientation.w = 1;
+	goalPose.header.frame_id = s;
+    goalPose.pose.position.x = goalPoint.x;
+    goalPose.pose.position.y = goalPoint.y;
+    goalPose.pose.position.z = goalPoint.z;
+    goalPose.pose.orientation.w = 1;
 	
     const string odom = "/odom_combined";
     try{
 		//transform pose from s to odom_combined and save it in pose again
-		listener->transformPose(odom, pose, pose);
+		listener->transformPose(odom, goalPose, goalPose);
 	}catch(...){
 		ROS_INFO("ERROR: Transformation failed.");
 		return 0;
