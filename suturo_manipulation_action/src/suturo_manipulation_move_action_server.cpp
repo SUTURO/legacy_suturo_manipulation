@@ -20,7 +20,7 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 	goalPose.header.frame_id = s;
     goalPose.pose.position.x = goalPoint.x;
     goalPose.pose.position.y = goalPoint.y;
-    goalPose.pose.position.z = goalPoint.z;
+    goalPose.pose.position.z = goalPoint.z+0.3;
     goalPose.pose.orientation.w = 1;
 	
     const string odom = "/odom_combined";
