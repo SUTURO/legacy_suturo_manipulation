@@ -15,18 +15,18 @@
   <!-- start empty world -->
   <group if="$(arg paused)">
     <group if="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find suturo_manipulation_gazebo)/$(arg world)" respawn="false" output="screen"/>
     </group>
     <group unless="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="-u $(find suturo_manipulation_gazebo)/$(arg world)" respawn="false" output="screen"/>
     </group>
   </group>
   <group unless="$(arg paused)">
     <group if="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find suturo_manipulation_gazebo)/$(arg world)" respawn="false" output="screen"/>
     </group>
     <group unless="$(arg throttled)">
-      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find learning_tf)/$(arg world)" respawn="false" output="screen"/>
+      <node name="gazebo" pkg="gazebo" type="gazebo" args="$(find suturo_manipulation_gazebo)/$(arg world)" respawn="false" output="screen"/>
     </group>
   </group>
 
