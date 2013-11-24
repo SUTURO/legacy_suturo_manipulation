@@ -8,7 +8,8 @@
 
 using namespace std;
 
-typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
+typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server_move;
+typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server_home;
 
 tf::TransformListener* listener = NULL;
 
@@ -35,7 +36,7 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 }
 
 
-void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* as)
+void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server_move* as)
 {	
 	string arm = goal->arm;
 	suturo_manipulation_msgs::suturo_manipulation_moveResult r;	
@@ -76,9 +77,9 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	ROS_INFO("moved: %i", r.succ.type);
 }
 
-void home(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* as)
+void home(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, Server_home* as)
 {	
-	suturo_manipulation_msgs::suturo_manipulation_moveResult r;	
+	suturo_manipulation_msgs::suturo_manipulation_homeResult r;	
 	string arm = goal->arm;
 	
 	move_group_interface::MoveGroup group(arm);
@@ -108,8 +109,8 @@ int main(int argc, char** argv)
 	ros::NodeHandle n;
 	listener = new (tf::TransformListener);
 	
-	Server server(n, "move_action_server", boost::bind(&execute, _1, &server), false);
-	Server server_home(n, "home_action_server", boost::bind(&home, _1, &server_home), false);
+	Server_move server(n, "move_action_server", boost::bind(&execute, _1, &server), false);
+	Server_home server_home(n, "home_action_server", boost::bind(&home, _1, &server_home), false);
 	server.start();
 	server_home.start();
 	
