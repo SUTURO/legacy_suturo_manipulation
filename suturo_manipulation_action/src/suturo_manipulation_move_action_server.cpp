@@ -20,7 +20,7 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 	goalPose.header.frame_id = s;
     goalPose.pose.position.x = goalPoint.x;
     goalPose.pose.position.y = goalPoint.y;
-    goalPose.pose.position.z = goalPoint.z+0.3;
+    goalPose.pose.position.z = goalPoint.z;
     goalPose.pose.orientation.w = 1;
 	
     const string odom = "/odom_combined";
@@ -60,7 +60,9 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	
 	//set goal Pose
 	move_group_interface::MoveGroup group(arm);
-	
+
+	odomPose.pose.position.z += 0.3;
+
 	group.setPoseTarget(odomPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
