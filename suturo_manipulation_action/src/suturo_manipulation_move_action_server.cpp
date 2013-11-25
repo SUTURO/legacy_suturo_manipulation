@@ -54,7 +54,12 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		as->setAborted(r);
 		return;
 	}
-	
+
+	//Orientierung des End-Effektors wieder auf w=1 setzen
+	odomPose.pose.orientation.x = 0;
+	odomPose.pose.orientation.y = 0;
+	odomPose.pose.orientation.z = 0;
+	odomPose.pose.orientation.w = 1;
 	ROS_INFO("transformed to x: %f, y: %f, z: %f", odomPose.pose.position.x,
 		odomPose.pose.position.y, odomPose.pose.position.z);	
 	
