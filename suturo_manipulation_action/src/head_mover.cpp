@@ -6,109 +6,44 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <shape_tools/solid_primitive_dims.h>
+#include <sensor_msgs/PointCloud2.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
-void pick(moveit::planning_interface::MoveGroup &group)
+int senden;
+ros::NodeHandle *nh = NULL;
+ros::Publisher *pub = NULL;
+
+void umleiter(const sensor_msgs::PointCloud2ConstPtr& inputCloud)
 {
-  std::vector<manipulation_msgs::Grasp> grasps;
-
-  geometry_msgs::PoseStamped p;
-  p.header.frame_id = "base_footprint";
-  p.pose.position.x = 0.32;
-  p.pose.position.y = -0.7;
-  p.pose.position.z = 0.5;
-  p.pose.orientation.x = 0;
-  p.pose.orientation.y = 0;
-  p.pose.orientation.z = 0;
-  p.pose.orientation.w = 1;
-  manipulation_msgs::Grasp g;
-  g.grasp_pose = p;
-
-  g.approach.direction.vector.x = 1.0;
-  g.approach.direction.header.frame_id = "r_wrist_roll_link";
-  g.approach.min_distance = 0.2;
-  g.approach.desired_distance = 0.4;
-
-  g.retreat.direction.header.frame_id = "base_footprint";
-  g.retreat.direction.vector.z = 1.0;
-  g.retreat.min_distance = 0.1;
-  g.retreat.desired_distance = 0.25;
-
-  g.pre_grasp_posture.name.resize(1, "r_gripper_joint");
-  g.pre_grasp_posture.position.resize(1);
-  g.pre_grasp_posture.position[0] = 1;
-
-  g.grasp_posture.name.resize(1, "r_gripper_joint");
-  g.grasp_posture.position.resize(1);
-  g.grasp_posture.position[0] = 0;
-
-  grasps.push_back(g);
-  group.setSupportSurfaceName("table");
-  group.pick("part", grasps);
+	
+	if (senden > 0){
+		ROS_INFO_STREAM("asdasdasd-----------------------" << senden);
+		pub->publish(*inputCloud);
+		//senden--;	
+	}
 }
 
-void place(moveit::planning_interface::MoveGroup &group)
+int pub_new_scene()
 {
-  std::vector<manipulation_msgs::PlaceLocation> loc;
-
-  geometry_msgs::PoseStamped p;
-  p.header.frame_id = "base_footprint";
-  p.pose.position.x = 0.7;
-  p.pose.position.y = 0.0;
-  p.pose.position.z = 0.5;
-  p.pose.orientation.x = 0;
-  p.pose.orientation.y = 0;
-  p.pose.orientation.z = 0;
-  p.pose.orientation.w = 1;
-  manipulation_msgs::PlaceLocation g;
-  g.place_pose = p;
-
-  g.approach.direction.vector.z = -1.0;
-  g.retreat.direction.vector.x = -1.0;
-  g.retreat.direction.header.frame_id = "base_footprint";
-  g.approach.direction.header.frame_id = "r_wrist_roll_link";
-  g.approach.min_distance = 0.1;
-  g.approach.desired_distance = 0.2;
-  g.retreat.min_distance = 0.1;
-  g.retreat.desired_distance = 0.25;
-
-  g.post_place_posture.name.resize(1, "r_gripper_joint");
-  g.post_place_posture.position.resize(1);
-  g.post_place_posture.position[0] = 1;
-
-  loc.push_back(g);
-  group.setSupportSurfaceName("table");
-
-
-  // add path constraints
-  moveit_msgs::Constraints constr;
-  constr.orientation_constraints.resize(1);
-  moveit_msgs::OrientationConstraint &ocm = constr.orientation_constraints[0];
-  ocm.link_name = "r_wrist_roll_link";
-  ocm.header.frame_id = p.header.frame_id;
-  ocm.orientation.x = 0.0;
-  ocm.orientation.y = 0.0;
-  ocm.orientation.z = 0.0;
-  ocm.orientation.w = 1.0;
-  ocm.absolute_x_axis_tolerance = 0.2;
-  ocm.absolute_y_axis_tolerance = 0.2;
-  ocm.absolute_z_axis_tolerance = M_PI;
-  ocm.weight = 1.0;
-  group.setPathConstraints(constr);
-  group.setPlannerId("RRTConnectkConfigDefault");
-
-  group.place("part", loc);
+	ros::Subscriber sub = nh->subscribe("head_mount_kinect/depth_registered/points", 1000, &umleiter);
 }
+
 
 int main(int argc, char **argv)
 {
+  senden = 1;
   ros::init (argc, argv, "right_arm_pick_place");
   ros::AsyncSpinner spinner(1);
   spinner.start();
-
-  ros::NodeHandle nh;
-  ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+  nh = new (ros::NodeHandle);
+  ros::WallDuration sleep_time(10.0);
+  pub = new (ros::Publisher);
+  *pub = nh->advertise<sensor_msgs::PointCloud2>("blubb", 1);
+  ros::Subscriber sub = nh->subscribe("head_mount_kinect/depth_registered/points", 1000, &umleiter);
+    ros::WallDuration(1.0).sleep();
+    senden = true;
+/*  ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 
   ros::WallDuration(1.0).sleep();
 
@@ -175,20 +110,84 @@ int main(int argc, char **argv)
   // wait a bit for ros things to initialize
   ros::WallDuration(1.0).sleep();
 //------------------------------
-	collision_detection::AllowedCollisionMatrix acm = planning_scene.getAllowedCollisionMatrix();  
-	ROS_INFO_STREAM(acm.hasEntry("part"));
+  */
+  
+  
+
+  
+  ros::Publisher planning_scene_diff_publisher = nh->advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
+  while(planning_scene_diff_publisher.getNumSubscribers() < 1)
+  {
+    ros::WallDuration sleep_t(0.5);
+    sleep_t.sleep();
+  }
+  
+  moveit_msgs::PlanningScene planning_scene;
+  
+  
+  ROS_INFO("1");
+  moveit_msgs::CollisionObject co;
+  co.header.stamp = ros::Time::now();
+  co.header.frame_id = "odom_combined";
+  co.id = "part";
+  //co.operation = moveit_msgs::CollisionObject::REMOVE;
+ // planning_scene.world.collision_objects.push_back(co);
+ // planning_scene.is_diff = true;
+ //  planning_scene_diff_publisher.publish(planning_scene); 
+  
+ROS_INFO("2");
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives.resize(1);
+  co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+  co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);  
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.4;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.3;
+ROS_INFO("3");
+  co.primitive_poses.resize(1);
+  co.primitive_poses[0].position.x = 0.7;
+  co.primitive_poses[0].position.y = 0.0;
+  co.primitive_poses[0].position.z = 0.7;  
+ROS_INFO("4");
+
+
+  /* PUT THE OBJECT IN THE ENVIRONMENT*/
+  ROS_INFO("Putting the object back into the environment");
+
+  planning_scene.world.collision_objects.push_back(co);
+  
+  
+	/*planning_scene.allowed_collision_matrix.entry_names.resize(1);
+	planning_scene.allowed_collision_matrix.entry_names[0] = "part";
+	planning_scene.allowed_collision_matrix.entry_values.resize(1);
+	planning_scene.allowed_collision_matrix.entry_values[0].enabled.resize(1);
+	planning_scene.allowed_collision_matrix.entry_values[0].enabled[0] = true;
+
 	
+	planning_scene.allowed_collision_matrix.default_entry_names.resize(1);
+	planning_scene.allowed_collision_matrix.default_entry_names[0] = "part";
+	planning_scene.allowed_collision_matrix.default_entry_values.resize(1);
+	planning_scene.allowed_collision_matrix.default_entry_values[0] = true;
+  */
+	planning_scene.is_diff = true;  
+  planning_scene_diff_publisher.publish(planning_scene);
+  sleep_time.sleep();
+senden = -1;
+co.operation = moveit_msgs::CollisionObject::REMOVE;
+ planning_scene.world.collision_objects.clear();
+ planning_scene.world.collision_objects.push_back(co);
 
+planning_scene_diff_publisher.publish(planning_scene);
+sleep_time.sleep();
 
-
+  moveit::planning_interface::MoveGroup group("right_arm");
+  group.setPlanningTime(20.0);
   group.setPositionTarget(0.7, 0.0, 0.7);
   group.move();
-  
-  //pick(group);
+senden = 1;
 
   ros::WallDuration(1.0).sleep();
 
-  //place(group);
 
   ros::waitForShutdown();
   return 0;
