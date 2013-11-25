@@ -4928,7 +4928,7 @@
         <kinematic>0</kinematic>
         <gravity>1</gravity>
       </link>
-      <pose>0.760000 0.400000 0.550000 0.000000 0.000000 0.000000</pose>
+      <pose>0.660000 0.400000 0.550000 0.000000 0.000000 0.000000</pose>
       <static>0</static>
     </model>
     <model name='beer_2'>
@@ -4985,7 +4985,7 @@
         <kinematic>0</kinematic>
         <gravity>1</gravity>
       </link>
-      <pose>0.760000 0.000000 0.550000 0.000000 0.000000 0.000000</pose>
+      <pose>0.660000 0.000000 0.550000 0.000000 0.000000 0.000000</pose>
       <static>0</static>
     </model>
     <model name='beer_3'>
@@ -5042,7 +5042,7 @@
         <kinematic>0</kinematic>
         <gravity>1</gravity>
       </link>
-      <pose>0.760000 -0.400000 0.550000 0.000000 0.000000 0.000000</pose>
+      <pose>0.660000 -0.400000 0.550000 0.000000 0.000000 0.000000</pose>
       <static>0</static>
     </model>
   </world>
