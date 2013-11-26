@@ -23,7 +23,8 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.position.z = goalPoint.z;
     goalPose.pose.orientation.w = 1;
 	
-    const string odom = "/odom_combined";
+    const string odom = "/base_link";
+ROS_INFO("Beginn der Transformation von %s zu /base_link", s);
     try{
 		//transform pose from s to odom_combined and save it in pose again
 		listener->transformPose(odom, goalPose, goalPose);
@@ -60,8 +61,8 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	odomPose.pose.orientation.y = 0;
 	odomPose.pose.orientation.z = 0;
 	odomPose.pose.orientation.w = 1;
-	ROS_INFO("transformed to x: %f, y: %f, z: %f", odomPose.pose.position.x,
-		odomPose.pose.position.y, odomPose.pose.position.z);	
+	ROS_INFO("transformed to x: %f, y: %f, z: %f in Frame %s", odomPose.pose.position.x,
+		odomPose.pose.position.y, odomPose.pose.position.z, odomPose.header.frame_id.c_str());	
 	
 	//set goal Pose
 	move_group_interface::MoveGroup group(arm);
@@ -69,9 +70,9 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 //	odomPose.pose.position.z += 0.3;
 
 	group.setPoseTarget(odomPose);
-	ROS_INFO("current Position: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
+	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
-			group.getCurrentPose().pose.position.z);
+			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
 		
 	//move arm
 	if (group.move()){
