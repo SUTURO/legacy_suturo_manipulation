@@ -64,6 +64,9 @@ void MyControllerClass::update()
   ros::Duration dt = robot_->getTime() - time_of_last_cycle_;
   time_of_last_cycle_ = robot_->getTime();
   joint_state_->commanded_effort_ = pid_controller_.updatePid(current_pos-desired_pos, dt);
+  ROS_INFO("current pos: %f", current_pos);
+  ROS_INFO("desired pos: %f", desired_pos);
+
 }
 
 
