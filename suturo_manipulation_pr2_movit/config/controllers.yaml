@@ -22,3 +22,31 @@ controller_list:
       - l_forearm_roll_joint
       - l_wrist_flex_joint
       - l_wrist_roll_joint
+  - name: r_gripper_controller
+    action_ns: gripper_action
+    default: true
+    joints:
+      - r_gripper_l_finger_tip_joint
+      - r_gripper_joint
+      - r_gripper_r_finger_joint
+      - r_gripper_r_finger_tip_joint
+      - r_gripper_motor_screw_joint
+      - r_gripper_motor_slider_joint
+      - r_gripper_l_finger_joint
+  - name: l_gripper_controller
+    action_ns: gripper_action
+    default: true
+    joints:
+      - l_gripper_joint
+      - l_gripper_l_finger_joint
+      - l_gripper_r_finger_joint
+      - l_gripper_l_finger_tip_joint
+      - l_gripper_r_finger_tip_joint
+      - l_gripper_motor_screw_joint
+      - l_gripper_motor_slider_joint
+  - name: head_traj_controller
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - head_pan_joint
+      - head_tilt_joint
