@@ -155,7 +155,10 @@ void spawnMesh(ros::Publisher pub_co)
 
 void openhand()
 {
-	moveit::planning_interface::MoveGroup group("right_gripper");
+	
+	Gripper g;
+	g.open_r_gripper();
+	/*moveit::planning_interface::MoveGroup group("right_gripper");
   group.setPlanningTime(30.0);	
 	//group.setNamedTarget("r_gripper_open");
   
@@ -166,7 +169,7 @@ void openhand()
     std::vector< double >a = group.getCurrentJointValues();
     for (int i = 0; i<a.size(); i++)
 		ROS_INFO_STREAM("  " << a.at(i));
-	ROS_INFO("");*/
+	ROS_INFO("");
 	
 	std::vector< double > t;
 	t.push_back(0.5555);
@@ -177,7 +180,7 @@ void openhand()
 	ROS_INFO_STREAM("goal joint tolerance " << group.getGoalJointTolerance());
 	group.setGoalJointTolerance(0.01);
 	group.setJointValueTarget(t);
-	group.move();
+	group.move();*/
 }
 
 int main(int argc, char **argv)
@@ -256,13 +259,13 @@ int main(int argc, char **argv)
   // wait a bit for ros things to initialize
   ros::WallDuration(1.0).sleep();
 
-//openhand();
+openhand();
 
 ROS_INFO("pick");
 
   //group.pick("part");
 
-  pick(group);
+  //pick(group);
 
   ros::WallDuration(5.0).sleep();
   ROS_INFO("PLACE");
