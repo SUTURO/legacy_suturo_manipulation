@@ -1,6 +1,5 @@
 #goal definition
 suturo_perception_msgs/PerceivedObject p
-string arm
 ---
 #result definition
 ActionAnswer succ

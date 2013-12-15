@@ -112,6 +112,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 # add_executable(suturo_manipulation_action_node src/suturo_manipulation_action_node.cpp)
 
 add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_move_action_server.cpp)
+add_executable(suturo_manipulation_move_head_server src/suturo_manipulation_move_head_server.cpp)
 add_executable(test_action_client src/test_action_client.cpp)
 add_executable(head_mover src/head_mover.cpp)
 
@@ -119,6 +120,7 @@ add_executable(head_mover src/head_mover.cpp)
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_action_node suturo_manipulation_action_generate_messages_cpp)
 add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_move_head_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(head_mover suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
@@ -128,6 +130,11 @@ add_dependencies(head_mover suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 # )
 target_link_libraries(
   suturo_manipulation_move_action_server
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  suturo_manipulation_move_head_server
   ${catkin_LIBRARIES}
 )
 
