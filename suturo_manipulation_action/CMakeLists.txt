@@ -115,8 +115,6 @@ add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_mo
 add_executable(test_action_client src/test_action_client.cpp)
 add_executable(head_mover src/head_mover.cpp)
 
-add_executable(test src/test.cpp)
-
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -124,8 +122,6 @@ add_executable(test src/test.cpp)
 add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(head_mover suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
-
-add_dependencies(test ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_action_node
@@ -146,9 +142,6 @@ target_link_libraries(
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
-
-
-target_link_libraries(test ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 #############
 ## Install ##
