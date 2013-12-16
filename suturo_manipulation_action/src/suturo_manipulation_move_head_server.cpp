@@ -1,8 +1,8 @@
 /**
-*
-*
-*
-*
+* This class implements the action server for moving the head.
+* If the action server is called, the server publishes 
+* the goal to a topic. The topic is
+* /suturo/head_controller_goal_point .
 */
 
 #include <ros/ros.h>
@@ -10,8 +10,6 @@
 #include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <tf/transform_listener.h>
-#include "std_msgs/String.h"
-#include <sstream>
 
 using namespace std;
 
@@ -19,9 +17,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-ros::Publisher head_publisher;
-
-// Tranfsorm the incoming frame to ??? for the head move controller
+// Tranfsorm the incoming frame to /head_mount_kinect_rgb_optical_frame for the head move controller
 int tranform(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
@@ -32,8 +28,11 @@ int tranform(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.position.z = goalPoint.z;
     goalPose.pose.orientation.w = 1;
 	
-    const string goal_frame = "/base_link";
-	// ROS_INFO("Beginn der Transformation von %s zu " + goal_frame, s);
+	// goal_frame
+    const string goal_frame = "/head_mount_kinect_rgb_optical_frame";
+    // const string goal_frame = "/base_link";
+
+	ROS_INFO("Beginn der Transformation");
     try{
 		//transform pose from s to odom_combined and save it in pose again
 		listener->transformPose(goal_frame, goalPose, goalPose);
@@ -45,8 +44,11 @@ int tranform(geometry_msgs::PoseStamped &goalPose,
     return 1;
 }
 
-
-void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, Server_head* head_server)
+/**
+* This method starts the transformation to the right frame and 
+* publishes the tranformed goal.
+*/
+void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::Publisher* publisher, Server_head* head_server)
 {	
 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
 	
@@ -64,11 +66,15 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPt
 		return;
 	}
 
-	std_msgs::String msg;
-	// std::stringstream ss;
-	// ss = "hello world "
- //    msg.data = ss.str();
-	head_publisher.publish(msg);	
+	// Publish goal on topic /suturo/head_controller
+	if( !publisher ) {
+  		ROS_WARN("Publisher invalid!");
+  		head_server->setAborted(r);
+	} else {
+	 	ROS_INFO("Goal published!");
+		publisher->publish(odomPose);
+		head_server->setSucceeded(r);
+	}
 
 }
 
@@ -80,11 +86,10 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 	
 	// Publish a topic for the head controller
-	// ros::Publisher head_publisher = n.advertise<suturo_manipulation_msgs::suturo_manipulation_headAction>("/suturo/head_controller", 1000);
-	ros::Publisher head_publisher = n.advertise<std_msgs::String>("/suturo/head_controller", 1000);
+	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// create the action server
-	Server_head head_server(n, "move_head_server", boost::bind(&execute, _1, &head_server), false);
+	Server_head head_server(n, "move_head_server", boost::bind(&execute, _1, &head_publisher, &head_server), false);
 	// start the server
 	head_server.start();
 
