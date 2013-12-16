@@ -19,6 +19,8 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
+ros::Publisher head_publisher;
+
 // Tranfsorm the incoming frame to ??? for the head move controller
 int tranform(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
@@ -62,6 +64,12 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPt
 		return;
 	}
 
+	std_msgs::String msg;
+	// std::stringstream ss;
+	// ss = "hello world "
+ //    msg.data = ss.str();
+	head_publisher.publish(msg);	
+
 }
 
 
@@ -71,15 +79,15 @@ int main(int argc, char** argv)
 	ros::NodeHandle n;
 	listener = new (tf::TransformListener);
 	
+	// Publish a topic for the head controller
+	// ros::Publisher head_publisher = n.advertise<suturo_manipulation_msgs::suturo_manipulation_headAction>("/suturo/head_controller", 1000);
+	ros::Publisher head_publisher = n.advertise<std_msgs::String>("/suturo/head_controller", 1000);
+
 	// create the action server
 	Server_head head_server(n, "move_head_server", boost::bind(&execute, _1, &head_server), false);
 	// start the server
 	head_server.start();
 
-	// Publish a topic for the head controller
-	// ros::Publisher head_publisher = n.advertise<suturo_manipulation_msgs::suturo_manipulation_headAction>("/suturo/head_controller", 1000);
-	// ros::Publisher head_publisher = n.advertise<std_msgs::String>("/suturo/head_controller", 1000);
-	
 	ROS_INFO("Ready to move the head!");
 	ros::spin();
 	return 0;
