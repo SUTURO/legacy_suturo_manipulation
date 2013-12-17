@@ -1,3 +1,7 @@
+/**
+* This clas implements a dummy client for our head action server.
+* The client sends a goal to the server, which have to publish this data.
+*/
 #include <ros/ros.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
@@ -11,17 +15,12 @@ typedef actionlib::SimpleActionClient<suturo_manipulation_msgs::suturo_manipulat
 
 using namespace std;
 
+
 int main(int argc, char** argv)
 {
-	
-	// if (argc != 6)
-	// {
-	// 	ROS_INFO("usage: arm X Y Z start_frame_id");
-	// 	return 1;
-	// }
-
 	// Dummy Percived Object
 	suturo_perception_msgs::PerceivedObject *p_goal = new suturo_perception_msgs::PerceivedObject();
+
 	p_goal->c_id = 1;
 	p_goal->c_shape = 2;
 	p_goal->c_volume = 0.0005;
@@ -35,6 +34,8 @@ int main(int argc, char** argv)
 	// these are not set for now
 	p_goal->recognition_label_2d = "";
 
+	ROS_INFO("PerceivedObject done!");
+
 	// Dummy Goal
 	suturo_manipulation_msgs::suturo_manipulation_headGoal goal;
 
@@ -46,62 +47,15 @@ int main(int argc, char** argv)
 	goal.p.c_volume = p_goal->c_volume;
 	goal.p.frame_id = p_goal->frame_id;
 
+	ROS_INFO("HeadGoal done!");
+
+	// initiliaze the client
 	ros::init(argc, argv, "test_head_client");
 	Head_client client("move_head_server", true); 
+	// waiting for connection
 	client.waitForServer();
+	ROS_INFO("connected!");
+	// send the goal
 	client.sendGoal(goal);
-		
-	// 	suturo_manipulation_msgs::suturo_manipulation_headGoal goal;
-	// 	//goal.p.frame_id = frame;
-		
-	// 	goal.arm = argv[1];
-	// 	client.sendGoal(goal);
-		
-		
-	// 	//2x da es sonst nicht geht...
-	// 	client.waitForResult(ros::Duration(20.0));
-	// 	client.waitForResult(ros::Duration(20.0));
-	// 	suturo_manipulation_msgs::suturo_manipulation_headResultConstPtr r = client.getResult();
-		
-	// 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-	// 		if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
-	// 			ROS_INFO("moved!!!!!!! result: %i", r->succ.type);
-	// 		}else{
-	// 			ROS_INFO("not moved!!!!!!! result: %i", r->succ.type);
-	// 		}
-			
-	// 	}
-	// 	printf("Current State: %s\n", client.getState().toString().c_str());
-	// } else {
-	
-	// 	suturo_manipulation_msgs::suturo_manipulation_moveGoal goal;
-	// 	goal.p.frame_id = frame;
-		
-	// 	ros::init(argc, argv, "test_action_client");
-	// 	Client client("move_action_server", true); // true -> don't need ros::spin()
-	// 	client.waitForServer();
-		
-	// 	goal.arm = argv[1];
-	// 	goal.p.c_centroid.x = atof(argv[2]);
-	// 	goal.p.c_centroid.y = atof(argv[3]);
-	// 	goal.p.c_centroid.z = atof(argv[4]);
-	// 	client.sendGoal(goal);
-		
-		
-	// 	//2x da es sonst nicht geht...
-	// 	client.waitForResult(ros::Duration(20.0));
-	// 	client.waitForResult(ros::Duration(20.0));
-	// 	suturo_manipulation_msgs::suturo_manipulation_moveResultConstPtr r = client.getResult();
-		
-	// 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
-	// 		if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
-	// 			ROS_INFO("moved!!!!!!! result: %i", r->succ.type);
-	// 		}else{
-	// 			ROS_INFO("not moved!!!!!!! result: %i", r->succ.type);
-	// 		}
-			
-	// 	}
-	// 	printf("Current State: %s\n", client.getState().toString().c_str());
-	// }
-	// return 0;
+	ROS_INFO("goal sended!");
 }

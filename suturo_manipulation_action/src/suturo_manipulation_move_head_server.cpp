@@ -71,8 +71,10 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPt
   		ROS_WARN("Publisher invalid!");
   		head_server->setAborted(r);
 	} else {
-	 	ROS_INFO("Goal published!");
+		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", odomPose.pose.position.x,
+		odomPose.pose.position.y, odomPose.pose.position.z, odomPose.header.frame_id.c_str());	
 		publisher->publish(odomPose);
+		ROS_INFO("Goal published!");
 		head_server->setSucceeded(r);
 	}
 
