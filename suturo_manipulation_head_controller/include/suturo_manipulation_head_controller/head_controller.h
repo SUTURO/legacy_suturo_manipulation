@@ -10,6 +10,8 @@
 #include <kdl/jacobian.hpp>
 #include <kdl/jntarray.hpp>
 
+#include <geometry_msgs/PoseStamped.h>
+
 
 namespace my_controller_ns{
 
@@ -57,5 +59,9 @@ namespace my_controller_ns{
             void starting();
             void update();
             void stopping();
+        private:
+            void setGoalCB(geometry_msgs::PoseStamped msg);
+
+            ros::Subscriber sub_;
     };
 }

@@ -1,9 +1,20 @@
 #include "suturo_manipulation_head_controller/head_controller.h"
 #include <pluginlib/class_list_macros.h>
 
+#include "ros/ros.h"
+#include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
+#include <tf/transform_listener.h>
+
+#include <ros/callback_queue.h>
+
 using namespace my_controller_ns;
 
 
+void MyCartControllerClass::setGoalCB(geometry_msgs::PoseStamped msg)
+{
+  ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
+        msg.pose.position.y, msg.pose.position.z, msg.header.frame_id.c_str());
+}
 /// Controller initialization in non-realtime
 bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
         ros::NodeHandle &n)
@@ -57,6 +68,9 @@ bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
     Kp_.rot(0) = 100.0;  Kd_.rot(0) = 1.0;        // Rotation x
     Kp_.rot(1) = 100.0;  Kd_.rot(1) = 1.0;        // Rotation y
     Kp_.rot(2) = 100.0;  Kd_.rot(2) = 1.0;        // Rotation z
+
+    sub_ = n.subscribe("/suturo/head_controller_goal_point", 1, &MyCartControllerClass::setGoalCB, this);
+    ROS_INFO("Subscribed!");
 
     return true;
 }
@@ -149,7 +163,6 @@ void MyCartControllerClass::stopping()
 
 
 /// Register controller to pluginlib
-PLUGINLIB_REGISTER_CLASS(MyCartControllerPlugin,
-        my_controller_ns::MyCartControllerClass,
+PLUGINLIB_EXPORT_CLASS(my_controller_ns::MyCartControllerClass,
         pr2_controller_interface::Controller)
 

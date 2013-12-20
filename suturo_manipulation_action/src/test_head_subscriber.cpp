@@ -4,7 +4,6 @@
 * the action server.
 */
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
 #include <tf/transform_listener.h>
 
