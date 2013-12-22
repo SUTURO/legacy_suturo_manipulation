@@ -3,8 +3,6 @@
 #include <actionlib/client/simple_action_client.h>
 #include "suturo_manipulation_gripper_controller.h"
 
-// Our Action interface type, provided as a typedef for convenience
-
   //Action client initialization
 Gripper::Gripper()
 {
@@ -15,13 +13,9 @@ Gripper::Gripper()
 	l_gripper_client_ = new GripperClient("l_gripper_controller/gripper_action", true);
     
     //wait for the gripper action server to come up 
-    while(!r_gripper_client_->waitForServer(ros::Duration(5.0))){
-		ROS_INFO("Waiting for the r_gripper_controller/gripper_action action server to come up");
-    }
-    
-    //wait for the gripper action server to come up 
-    while(!l_gripper_client_->waitForServer(ros::Duration(5.0))){
-		ROS_INFO("Waiting for the l_gripper_controller/gripper_action action server to come up");
+    while(!r_gripper_client_->waitForServer(ros::Duration(5.0)) &&
+				!l_gripper_client_->waitForServer(ros::Duration(5.0))){
+		ROS_INFO("Waiting for the l/r_gripper_controller/gripper_action action server to come up");
     }
 }
 

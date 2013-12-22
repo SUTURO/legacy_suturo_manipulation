@@ -10,9 +10,9 @@ project(suturo_manipulation_gripper_controller)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   roscpp
-
-  pluginlib
-
+  tf
+  moveit_ros_planning_interface
+  rospy
 )
 
 ## System dependencies are found with CMake's conventions
@@ -86,7 +86,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES suturo_manipulation_gripper_controller
+#   LIBRARIES suturo_manipulation_gripper_controller
+	#suturo_manipulation_grasping
 #  CATKIN_DEPENDS actionlib pr2_controllers_msgs roscpp
 #  DEPENDS system_lib
 )
@@ -105,9 +106,9 @@ include_directories(
 )
 
 ## Declare a cpp library
- add_library(suturo_manipulation_gripper_controller
+add_library(suturo_manipulation_gripper_controller
    src/suturo_manipulation_gripper_controller.cpp
- )
+)
 
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_gripper_controller src/suturo_manipulation_gripper_controller.cpp)
@@ -116,8 +117,6 @@ include_directories(
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_gripper_controller_node suturo_manipulation_gripper_controller_generate_messages_cpp)
-
-#add_dependencies(suturo_manipulation_gripper_controller ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_gripper_controller_node

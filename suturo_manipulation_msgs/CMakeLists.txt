@@ -50,6 +50,7 @@ add_message_files(
  FILES
  ActionAnswer.msg
  RobotBodyPart.msg
+ suturo_manipulation_grasping_goal.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -61,7 +62,7 @@ add_message_files(
 ## Generate actions in the 'action' folder
  add_action_files(
    DIRECTORY action
-   FILES suturo_manipulation_move.action suturo_manipulation_home.action
+   FILES suturo_manipulation_move.action suturo_manipulation_home.action suturo_manipulation_grasping.action
 
  )
 

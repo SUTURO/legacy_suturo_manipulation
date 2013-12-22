@@ -3,8 +3,10 @@
 // MoveIt!
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <suturo_manipulation_gripper_controller.h>
+#include <suturo_manipulation_grasping.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <shape_tools/solid_primitive_dims.h>
+#include <suturo_manipulation_planning_scene_interface.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
@@ -16,7 +18,7 @@ void pick(moveit::planning_interface::MoveGroup &group)
   p.header.frame_id = "base_footprint";
   p.pose.position.x = 0.585;
   p.pose.position.y = 0;
-  p.pose.position.z = 0.7;
+  p.pose.position.z = 0.625;
   p.pose.orientation.x = 0;
   p.pose.orientation.y = 0;
   p.pose.orientation.z = 0;
@@ -39,10 +41,10 @@ void pick(moveit::planning_interface::MoveGroup &group)
   g.pre_grasp_posture.position[0] = 0.55;
   g.grasp_posture.name.resize(1, "r_gripper_l_finger_joint");
   g.grasp_posture.position.resize(1);
-  g.grasp_posture.position[0] = 0.3;
+  g.grasp_posture.position[0] = 0;
 
   grasps.push_back(g);
-  group.setSupportSurfaceName("table");
+ // group.setSupportSurfaceName("table");
   group.pick("part", grasps);
 }
 
@@ -99,7 +101,135 @@ void place(moveit::planning_interface::MoveGroup &group)
   group.place("part", loc);
 }
 
-void spawnMesh(ros::Publisher pub_co)
+void putObjects(ros::Publisher pub_co)
+{
+  ros::WallDuration(1.0).sleep();
+
+  moveit_msgs::CollisionObject co;
+  co.header.stamp = ros::Time::now();
+  co.header.frame_id = "/base_footprint";
+
+  // remove pole
+  co.id = "pole";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  //pub_co.publish(co);
+
+  // add pole
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives.resize(1);
+  co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+  co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.3;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 1.0;
+  co.primitive_poses.resize(1);
+  co.primitive_poses[0].position.x = 0.7;
+  co.primitive_poses[0].position.y = -0.4;
+  co.primitive_poses[0].position.z = 0.85;
+  co.primitive_poses[0].orientation.w = 1.0;
+ // pub_co.publish(co);
+
+
+
+  // remove table
+  co.id = "table";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  pub_co.publish(co);
+
+  // add table
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 1;
+  co.primitive_poses[0].position.x = 1.5;
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = 0.01;
+  pub_co.publish(co);
+
+
+
+  co.id = "part";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  pub_co.publish(co);
+
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
+  co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.25;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.03;
+
+  co.primitive_poses[0].position.x = 0.76;
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = 0.635;
+  pub_co.publish(co);
+  
+
+  
+  // wait a bit for ros things to initialize
+  ros::WallDuration(2.0).sleep();
+}
+
+void openhand()
+{
+	
+	Gripper g;
+	g.open_r_gripper();
+}
+
+int main(int argc, char **argv)
+{
+	ros::init (argc, argv, "right_arm_pick_place");
+	ros::AsyncSpinner spinner(1);
+	spinner.start();
+
+	ros::NodeHandle nh;
+	
+	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	putObjects(pub_co);
+	
+	
+
+
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	moveit_msgs::PlanningScene ps;
+	
+	moveit_msgs::CollisionObject co2;
+	
+	ROS_INFO_STREAM("5 " << pi.getObject("part", co2));
+	ROS_INFO_STREAM("   " << co2.id);
+
+	/*move_group_interface::MoveGroup group("right_arm");	
+	group.setPlanningTime(45.0);
+	pick(group);*/
+	Grasping grasper(&pi);
+	geometry_msgs::PoseStamped p;
+	p.header.frame_id = "/base_footprint";
+	p.pose.position.x = 0.585;
+	p.pose.position.y = 0;
+	p.pose.position.z = 0.625;
+	p.pose.orientation.x = 0;
+	p.pose.orientation.y = 0;
+	p.pose.orientation.z = 0;
+	p.pose.orientation.w = 1;
+	
+	grasper.r_arm_pick("part", p);
+	
+	//move_group_interface::MoveGroup group("right_arm");
+	//pick(group);
+	//pi.attachObject("part", "r_wrist_roll_link");
+	//pi.getPlanningScene(ps);
+	//ROS_INFO_STREAM("ps " << ps);
+	//ros::Publisher pub2 = nh.advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
+	//pub2.publish(ps);
+
+	//ROS_INFO_STREAM("dsads  " << ps);
+	
+	ros::waitForShutdown();
+	return 0;
+}
+
+/*
+ * void spawnMesh(ros::Publisher pub_co)
 {
   moveit_msgs::CollisionObject co2;
   co2.header.stamp = ros::Time::now();
@@ -152,125 +282,4 @@ void spawnMesh(ros::Publisher pub_co)
   co2.mesh_poses[0].orientation.w=1.0;
   pub_co.publish(co2);	
 }
-
-void openhand()
-{
-	
-	Gripper g;
-	g.open_r_gripper();
-	/*moveit::planning_interface::MoveGroup group("right_gripper");
-  group.setPlanningTime(30.0);	
-	//group.setNamedTarget("r_gripper_open");
-  
-   /* std::vector< std::string > b = group.getJoints();
-    for (int i = 0; i<b.size(); i++)
-		ROS_INFO_STREAM("  " << b.at(i));
-    
-    std::vector< double >a = group.getCurrentJointValues();
-    for (int i = 0; i<a.size(); i++)
-		ROS_INFO_STREAM("  " << a.at(i));
-	ROS_INFO("");
-	
-	std::vector< double > t;
-	t.push_back(0.5555);
-	t.push_back(0);
-	t.push_back(0);
-	t.push_back(0);
-	
-	ROS_INFO_STREAM("goal joint tolerance " << group.getGoalJointTolerance());
-	group.setGoalJointTolerance(0.01);
-	group.setJointValueTarget(t);
-	group.move();*/
-}
-
-int main(int argc, char **argv)
-{
-  ros::init (argc, argv, "right_arm_pick_place");
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
-  ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-
-  ros::WallDuration(1.0).sleep();
-
-  moveit::planning_interface::MoveGroup group("right_arm");
-  group.setPlanningTime(30.0);
-
-  moveit_msgs::CollisionObject co;
-  co.header.stamp = ros::Time::now();
-  co.header.frame_id = "/base_footprint";
-
-  // remove pole
-  co.id = "pole";
-  co.operation = moveit_msgs::CollisionObject::REMOVE;
-  //pub_co.publish(co);
-
-  // add pole
-  co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives.resize(1);
-  co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
-  co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.3;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 1.0;
-  co.primitive_poses.resize(1);
-  co.primitive_poses[0].position.x = 0.7;
-  co.primitive_poses[0].position.y = -0.4;
-  co.primitive_poses[0].position.z = 0.85;
-  co.primitive_poses[0].orientation.w = 1.0;
- // pub_co.publish(co);
-
-
-
-  // remove table
-  co.id = "table";
-  co.operation = moveit_msgs::CollisionObject::REMOVE;
-  pub_co.publish(co);
-
-  // add table
-  co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.5;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 1.5;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.69;
-  co.primitive_poses[0].position.x = 0.7;
-  co.primitive_poses[0].position.y = -0.2;
-  co.primitive_poses[0].position.z = 0;
-  pub_co.publish(co);
-
-
-
-  co.id = "part";
-  co.operation = moveit_msgs::CollisionObject::REMOVE;
-  pub_co.publish(co);
-
-  co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.08;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.08;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.23;
-
-  co.primitive_poses[0].position.x = 0.8;
-  co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.7;
-  pub_co.publish(co);
-  
-
-  
-  // wait a bit for ros things to initialize
-  ros::WallDuration(1.0).sleep();
-
-openhand();
-
-ROS_INFO("pick");
-
-  //group.pick("part");
-
-  //pick(group);
-
-  ros::WallDuration(5.0).sleep();
-  ROS_INFO("PLACE");
-  //place(group);
-
-  ros::waitForShutdown();
-  return 0;
-}
+*/

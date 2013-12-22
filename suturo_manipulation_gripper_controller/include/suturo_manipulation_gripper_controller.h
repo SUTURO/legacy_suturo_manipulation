@@ -1,3 +1,5 @@
+#ifndef SUTURO_MANIPULATION_GRIPPER_CONTROLLER
+#define SUTURO_MANIPULATION_GRIPPER_CONTROLLER
 
 #include <ros/ros.h>
 #include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
@@ -29,3 +31,4 @@ public:
   actionlib::SimpleClientGoalState close_l_gripper();
 };
      
+#endif
