@@ -171,7 +171,7 @@ void putObjects(ros::Publisher pub_co)
     tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
     tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
     ROS_INFO("RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, M_PI_4, M_PI_4);
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, 0, 0);
   ROS_INFO_STREAM(co.primitive_poses[0].orientation);
   pub_co.publish(co);
   

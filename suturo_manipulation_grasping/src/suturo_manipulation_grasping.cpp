@@ -51,6 +51,27 @@ int Grasping::calcCylinderGraspPosition(geometry_msgs::PoseStamped &pose, moveit
 	return 1;
 }
 
+int calcCylinderGraspPositionGammelig(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co)
+{
+	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
+		//fehlermeldung
+		return 0;
+	}
+	double h = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT];
+  double r = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS];
+	
+	if (r*2 > Gripper::GRIPPER_MAX_POSITION){
+		//fehlermeldung
+		return 0;
+	}
+		
+	pose.pose.position = co.primitive_poses[0].position;
+	pose.pose.orientation.w = 1;
+	pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
+	
+	return 1;
+}
+
 int Grasping::calcGraspPosition(geometry_msgs::PoseStamped &pose, string objectName)
 {
 	//get object from planningscene
@@ -62,17 +83,28 @@ int Grasping::calcGraspPosition(geometry_msgs::PoseStamped &pose, string objectN
 	return 1;
 }
 
-int Grasping::r_arm_pick(string objectName, geometry_msgs::PoseStamped &pose)
+int r_arm_pick(std::string objectName)
 {
-	return pick(objectName, R_ARM, pose);
+	
 }
 
-int Grasping::l_arm_pick(string objectName, geometry_msgs::PoseStamped &pose)
+int Grasping::r_arm_pick(string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
 {
-	return pick(objectName, L_ARM, pose);
+	return pick(objectName, R_ARM, pose, pre_pose);
 }
 
-int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose)
+int l_arm_pick(std::string objectName)
+{
+	
+}
+
+
+int Grasping::l_arm_pick(string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
+{
+	return pick(objectName, L_ARM, pose, pre_pose);
+}
+
+int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
 {
 	move_group_interface::MoveGroup group(*group_r_arm_);
 	if (arm == L_ARM){
@@ -80,8 +112,6 @@ int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose)
 	}
 	
 	//go into pregraspposition
-	geometry_msgs::PoseStamped pre_pose(pose);
-	pre_pose.pose.position.x -= 0.1;
 	group.setPoseTarget(pre_pose);
 	group.move();
 	

@@ -22,9 +22,9 @@ private:
 	
 	int calcCylinderGraspPosition(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co);
 	
+	int calcCylinderGraspPositionGammelig(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co);
 	
-	
-	int pick(std::string objectName, int arm, geometry_msgs::PoseStamped &pose);
+	int pick(std::string objectName, int arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 	
 public:
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
@@ -33,8 +33,11 @@ public:
 
 	int calcGraspPosition(geometry_msgs::PoseStamped &pose, std::string objectName);
 
-	int r_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose);
-	int l_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose);
+	int r_arm_pick(std::string objectName);
+	int r_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
+
+	int l_arm_pick(std::string objectName);
+	int l_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 	
 	int drop(std::string objectName);
 };
