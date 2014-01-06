@@ -27,13 +27,21 @@ Grasping::~Grasping()
 
 }
 
-int Grasping::calcBoxGraspPosition(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co)
+int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
+				geometry_msgs::PoseStamped &pre_pose)
 {
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX) return 0;
 	return 1;
 }
 
-int Grasping::calcCylinderGraspPosition(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co)
+int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
+				geometry_msgs::PoseStamped &pre_pose)
+{
+	return 1;
+}
+
+int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
+				geometry_msgs::PoseStamped &pre_pose)
 {
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
 		//fehlermeldung
@@ -51,41 +59,74 @@ int Grasping::calcCylinderGraspPosition(geometry_msgs::PoseStamped &pose, moveit
 	return 1;
 }
 
-int calcCylinderGraspPositionGammelig(geometry_msgs::PoseStamped &pose, moveit_msgs::CollisionObject co)
+int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
+				geometry_msgs::PoseStamped &pre_pose)
 {
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
-		//fehlermeldung
+		ROS_ERROR_STREAM("Wenn der Fehler auftaucht hat Simon Mist gebaut!");
 		return 0;
 	}
-	double h = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT];
-  double r = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS];
 	
+	double r = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS];
 	if (r*2 > Gripper::GRIPPER_MAX_POSITION){
-		//fehlermeldung
+		ROS_ERROR_STREAM("Object to big!");
 		return 0;
 	}
-		
+	
+	pose.header.frame_id = "/base_footprint";
+	
+	//copy position of object
 	pose.pose.position = co.primitive_poses[0].position;
+	
+	//choose default orientation for hand
 	pose.pose.orientation.w = 1;
+	
+	//grab object form the front
 	pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
 	
+	pre_pose.header.frame_id = "/base_footprint";
+	pre_pose = pose;
+	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
+	
 	return 1;
 }
 
-int Grasping::calcGraspPosition(geometry_msgs::PoseStamped &pose, string objectName)
+int Grasping::calcGraspPosition(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
 {
 	//get object from planningscene
-	moveit_msgs::CollisionObject co2;
-	if (!pi_->getObject(objectName, co2)) return 0;
+	moveit_msgs::CollisionObject co;
+	if (!pi_->getObject(objectName, co)){
+		//errormessage printed by getObject
+		return 0;
+	}
 	
-	//if (co2.)
+	//choose the right grasppositoncalculationfunction
+	switch (co.primitives[0].type){
+		case shape_msgs::SolidPrimitive::CYLINDER:
+			calcCylinderGraspPositionGammelig(co, pose, pre_pose);
+			break;
+		
+		case shape_msgs::SolidPrimitive::BOX:
+			calcBoxGraspPositionGammelig(co, pose, pre_pose);
+			break;
+		
+		default: 
+			ROS_ERROR_STREAM("Can't calculate grasppositon for objecttype: " << co.primitives[0].type);
+			break;
+	}
 
 	return 1;
 }
 
-int r_arm_pick(std::string objectName)
+int Grasping::r_arm_pick(std::string objectName)
 {
-	
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	if (!calcGraspPosition(objectName, pose, pre_pose)){
+		//errormessage printed by calcGraspPosition
+		return 0;
+	}
+	return r_arm_pick(objectName, pose, pre_pose);
 }
 
 int Grasping::r_arm_pick(string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
@@ -93,9 +134,15 @@ int Grasping::r_arm_pick(string objectName, geometry_msgs::PoseStamped &pose, ge
 	return pick(objectName, R_ARM, pose, pre_pose);
 }
 
-int l_arm_pick(std::string objectName)
+int Grasping::l_arm_pick(std::string objectName)
 {
-	
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	if (!calcGraspPosition(objectName, pose, pre_pose)){
+		//errormessage printed by calcGraspPosition
+		return 0;
+	}
+	return l_arm_pick(objectName, pose, pre_pose);
 }
 
 
@@ -127,7 +174,7 @@ int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose,
 	
 	//move Arm to goalpose
 	if (!group.move()){
-		ROS_INFO_STREAM("Failed to move to " << objectName << " at: " << pose);
+		ROS_ERROR_STREAM("Failed to move to " << objectName << " at: " << pose);
 		 return 0;
 	 }
 	
@@ -140,7 +187,12 @@ int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose,
 	
 	//attach object
 	pi_->attachObject(objectName, group.getEndEffectorLink());
+	
 	//lift object
+	geometry_msgs::PoseStamped pose2 = pose;
+	pose2.pose.position.z += 0.05;
+	group.setPoseTarget(pose2);
+	group.move();
 	
 	return 1;
 }

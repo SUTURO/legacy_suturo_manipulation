@@ -11,7 +11,6 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	nh_ = nodehandle;
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
 	ros::WallDuration(2.0).sleep();
-	ROS_INFO_STREAM("mUH " << attached_object_publisher_.getNumSubscribers());
 }
 
 Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scene_Interface()
@@ -111,7 +110,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string objectNa
 		}
 		//Object not found
 		if (co.id != objectName){
-			ROS_INFO_STREAM("Object: " << objectName << " not found!!");
+			ROS_ERROR_STREAM("Object: " << objectName << " not found!!");
 		}
 	}
 	else

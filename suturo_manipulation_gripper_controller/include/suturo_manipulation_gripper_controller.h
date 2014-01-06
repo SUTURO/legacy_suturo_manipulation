@@ -17,7 +17,7 @@ private:
 public:
   static const double GRIPPER_MAX_POSITION = 0.09;
   static const double GRIPPER_MIN_POSITION = 0.0;
-  static const double GRIPPER_DEPTH = 0.1;
+  static const double GRIPPER_DEPTH = 0.17;
   
   //Action client initialization
   Gripper();

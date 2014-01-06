@@ -38,7 +38,7 @@ actionlib::SimpleClientGoalState open_gripper(GripperClient* gripper_client_)
     if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
       ROS_INFO("The gripper opened!");
     else 
-      ROS_INFO_STREAM("The gripper failed to open! :(");
+      ROS_ERROR_STREAM("The gripper failed to open! :(");
     return gripper_client_->getState();
 }
 
@@ -64,9 +64,9 @@ actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
     gripper_client_->waitForResult(ros::Duration(5.5));
     ROS_INFO_STREAM(gripper_client_->getState().toString());
     if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-		ROS_INFO("The gripper closed!");
+			ROS_INFO("The gripper closed!");
     else
-		ROS_INFO("The gripper failed to close.");
+			ROS_INFO_STREAM("The gripper didn't close completely.");
 	return gripper_client_->getState();
 }
 

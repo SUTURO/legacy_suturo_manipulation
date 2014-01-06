@@ -144,7 +144,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.x = 1.5;
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = 0.01;
- // pub_co.publish(co);
+  pub_co.publish(co);
 
 
 
@@ -161,28 +161,28 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.x = 0.76;
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = 0.635;
-  co.primitive_poses[0].orientation.x = 0.5;
-  co.primitive_poses[0].orientation.y = 0.5;
-  co.primitive_poses[0].orientation.z = 0.5;
-  co.primitive_poses[0].orientation.w = 0.5;
-  
+  co.primitive_poses[0].orientation.x = 0;
+  co.primitive_poses[0].orientation.y = 0;
+  co.primitive_poses[0].orientation.z = 0;
+  co.primitive_poses[0].orientation.w = 1;
+  /*
     tf::Quaternion q;
     double roll, pitch, yaw;
     tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
     tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
     ROS_INFO("RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, 0, 0);
-  ROS_INFO_STREAM(co.primitive_poses[0].orientation);
+  ROS_INFO_STREAM(co.primitive_poses[0].orientation);*/
   pub_co.publish(co);
   
-  tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
+  /*tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
 tf::Vector3 vector(0, 0, 1);
 tf::Vector3 rotated_vector = tf::quatRotate(q, vector);
 
 	geometry_msgs::Vector3 v3;
 	tf::vector3TFToMsg(rotated_vector, v3);
 
-  ROS_INFO_STREAM("v3 " << v3);
+  ROS_INFO_STREAM("v3 " << v3);*/
   // wait a bit for ros things to initialize
   ros::WallDuration(2.0).sleep();
 }
@@ -205,8 +205,8 @@ int main(int argc, char **argv)
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
 	
-	/*
-move_group_interface::MoveGroup group("right_arm");
+	
+/*move_group_interface::MoveGroup group("right_arm");
 	geometry_msgs::PoseStamped p;
 	p.header.frame_id = "/base_footprint";
 	p.pose.position.x = 0.59;
@@ -216,26 +216,28 @@ move_group_interface::MoveGroup group("right_arm");
 group.setPoseTarget(p);
 group.move();*/
 
-//	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-	//moveit_msgs::PlanningScene ps;
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	Grasping grasper(&pi);
+	grasper.r_arm_pick("part");
 	
+	//moveit_msgs::PlanningScene ps;
 	//move_group_interface::MoveGroup group("right_arm");	
 	//group.setPlanningTime(45.0);
 	/*pick(group);*/
-	//Grasping grasper(&pi);
-	//geometry_msgs::PoseStamped p;
-	//p.header.frame_id = "/base_footprint";
-	//p.pose.position.x = 0.59;
-	//p.pose.position.y = 0;
-	//p.pose.position.z = 0.625;
-	//p.pose.orientation.x = 0;
-	//p.pose.orientation.y = 0;
-	//p.pose.orientation.z = 0;
-	//p.pose.orientation.w = 1;
+	
+	/*geometry_msgs::PoseStamped p;
+	p.header.frame_id = "/base_footprint";
+	p.pose.position.x = 0.59;
+	p.pose.position.y = 0;
+	p.pose.position.z = 0.625;
+	p.pose.orientation.x = 0;
+	p.pose.orientation.y = 0;
+	p.pose.orientation.z = 0;
+	p.pose.orientation.w = 1;*/
 	
 	//group.setPoseTarget(p);
 	//group.move();
-	//grasper.r_arm_pick("part", p);
+	
 	
 	//move_group_interface::MoveGroup group("right_arm");
 	//pick(group);
@@ -247,6 +249,7 @@ group.move();*/
 
 	//ROS_INFO_STREAM("dsads  " << ps);
 	
+	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();
 	return 0;
 }
