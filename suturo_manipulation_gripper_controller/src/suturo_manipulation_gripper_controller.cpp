@@ -29,7 +29,7 @@ Gripper::~Gripper()
 actionlib::SimpleClientGoalState open_gripper(GripperClient* gripper_client_)
 {
 	pr2_controllers_msgs::Pr2GripperCommandGoal open;
-    open.command.position = 0.085;
+    open.command.position = Gripper::GRIPPER_MAX_POSITION;
     open.command.max_effort = -1.0;  // Do not limit effort (negative)
     
     ROS_INFO("Sending open goal");
@@ -56,12 +56,13 @@ actionlib::SimpleClientGoalState Gripper::open_l_gripper()
 actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
 {
     pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
-    squeeze.command.position = 0.0;
+    squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
     squeeze.command.max_effort = 50.0;  // Close gently
     
     ROS_INFO("Sending squeeze goal");
     gripper_client_->sendGoal(squeeze);
-    gripper_client_->waitForResult();
+    gripper_client_->waitForResult(ros::Duration(5.5));
+    ROS_INFO_STREAM(gripper_client_->getState().toString());
     if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 		ROS_INFO("The gripper closed!");
     else

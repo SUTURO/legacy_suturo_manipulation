@@ -15,6 +15,10 @@ private:
   GripperClient* l_gripper_client_;  
 
 public:
+  static const double GRIPPER_MAX_POSITION = 0.09;
+  static const double GRIPPER_MIN_POSITION = 0.0;
+  static const double GRIPPER_DEPTH = 0.1;
+  
   //Action client initialization
   Gripper();
 
