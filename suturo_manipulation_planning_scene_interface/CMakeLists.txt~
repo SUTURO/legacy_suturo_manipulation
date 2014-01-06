@@ -10,7 +10,6 @@ project(suturo_manipulation_planning_scene_interface)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   roscpp
-  tf
   moveit_ros_planning_interface
   rospy
 )

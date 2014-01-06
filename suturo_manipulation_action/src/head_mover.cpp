@@ -178,7 +178,11 @@ void putObjects(ros::Publisher pub_co)
   tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
 tf::Vector3 vector(0, 0, 1);
 tf::Vector3 rotated_vector = tf::quatRotate(q, vector);
-  ROS_INFO_STREAM("v3 " << vector << " rotated " << rotated_vector);
+
+	geometry_msgs::Vector3 v3;
+	tf::vector3TFToMsg(rotated_vector, v3);
+
+  ROS_INFO_STREAM("v3 " << v3);
   // wait a bit for ros things to initialize
   ros::WallDuration(2.0).sleep();
 }
