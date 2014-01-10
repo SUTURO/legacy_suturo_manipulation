@@ -109,27 +109,27 @@ void putObjects(ros::Publisher pub_co)
   co.header.stamp = ros::Time::now();
   co.header.frame_id = "/base_footprint";
 
-  // remove pole
-  co.id = "pole";
-  co.operation = moveit_msgs::CollisionObject::REMOVE;
-  //pub_co.publish(co);
-
-  // add pole
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives.resize(1);
   co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.3;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 1.0;
   co.primitive_poses.resize(1);
-  co.primitive_poses[0].position.x = 0.7;
-  co.primitive_poses[0].position.y = -0.4;
-  co.primitive_poses[0].position.z = 0.85;
-  co.primitive_poses[0].orientation.w = 1.0;
- // pub_co.publish(co);
 
+  co.id = "box2";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  pub_co.publish(co);
 
+  // add table
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.15;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.07;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.2;
+  co.primitive_poses[0].position.x = 0.65;
+  co.primitive_poses[0].position.y = 0.3;
+  co.primitive_poses[0].position.z = 0.621;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  
+  pub_co.publish(co);
 
   // remove table
   co.id = "table";
@@ -138,44 +138,62 @@ void putObjects(ros::Publisher pub_co)
 
   // add table
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 2;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 2;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 1;
-  co.primitive_poses[0].position.x = 1.5;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 3;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 1.8;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.04;
+  co.primitive_poses[0].position.x = 2;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.01;
+  co.primitive_poses[0].position.z = 0.5;
+	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
   pub_co.publish(co);
 
+  // remove table
+  co.id = "box1";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  pub_co.publish(co);
 
+  // add table
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.07;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.15;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.2;
+  co.primitive_poses[0].position.x = 0.65;
+  co.primitive_poses[0].position.y = -0.3;
+  co.primitive_poses[0].position.z = 0.621;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  
+  pub_co.publish(co);
 
-  co.id = "part";
+  co.id = "beer2";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
   co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.25;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.2;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.03;
 
-  co.primitive_poses[0].position.x = 0.76;
+  co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.635;
+  co.primitive_poses[0].position.z = 0.621;
   co.primitive_poses[0].orientation.x = 0;
   co.primitive_poses[0].orientation.y = 0;
   co.primitive_poses[0].orientation.z = 0;
   co.primitive_poses[0].orientation.w = 1;
-  /*
+  pub_co.publish(co);
+  
+    
+    
+    /*
     tf::Quaternion q;
     double roll, pitch, yaw;
     tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
     tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
     ROS_INFO("RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, 0, 0);
-  ROS_INFO_STREAM(co.primitive_poses[0].orientation);*/
-  pub_co.publish(co);
-  
-  /*tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
+  ROS_INFO_STREAM(co.primitive_poses[0].orientation);
+  tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
 tf::Vector3 vector(0, 0, 1);
 tf::Vector3 rotated_vector = tf::quatRotate(q, vector);
 
@@ -218,9 +236,15 @@ group.move();*/
 
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 	Grasping grasper(&pi);
-	grasper.r_arm_pick("part");
 	
-	//moveit_msgs::PlanningScene ps;
+	//geometry_msgs::PoseStamped p;
+	//p.header.frame_id = "/base_footprint";
+	//p.pose.position.x = 0.65;
+	//p.pose.position.y = -0.3;
+	//p.pose.position.z = 0.821;
+	//p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, M_PI_4);
+	grasper.l_arm_pick("box2");
+	
 	//move_group_interface::MoveGroup group("right_arm");	
 	//group.setPlanningTime(45.0);
 	/*pick(group);*/
@@ -241,9 +265,13 @@ group.move();*/
 	
 	//move_group_interface::MoveGroup group("right_arm");
 	//pick(group);
-	//pi.attachObject("part", "r_wrist_roll_link");
+	//Gripper g;
+	//pi.attachObject("box1", "r_wrist_roll_link", Gripper::get_r_gripper_links());
+	//moveit_msgs::PlanningScene ps;
 	//pi.getPlanningScene(ps);
-	//ROS_INFO_STREAM("ps " << ps);
+	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
+	//ROS_INFO_STREAM("objects " << muh.at(0));
+	//ROS_INFO_STREAM("ps " << ps.robot_state);
 	//ros::Publisher pub2 = nh.advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
 	//pub2.publish(ps);
 

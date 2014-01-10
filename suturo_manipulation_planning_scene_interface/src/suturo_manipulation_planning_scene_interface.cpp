@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <moveit_msgs/GetPlanningScene.h>
 #include <moveit/move_group/capability_names.h>
+#include <string>
 
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
@@ -44,43 +45,41 @@ int Suturo_Manipulation_Planning_Scene_Interface::setPlanningScene(moveit_msgs::
 	
 }*/
 
-int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objectName, std::string linkName)
+int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objectName, std::string linkName,
+							std::vector<std::string> gripper_links)
 {
 	if (linkName.empty())
     {
-      ROS_ERROR("No known link to attach object '%s' to", objectName.c_str());
+      ROS_ERROR("No link specified to attach the object '%s' to", objectName.c_str());
       return false;
     }
     
-    //subscribe to attach object topic
+  //subscribe to attach object topic
 	moveit_msgs::AttachedCollisionObject attached_object;
 	
-	attached_object.link_name = "r_wrist_roll_link";
-	getObject("part", attached_object.object);
-	/*attached_object.object.header.frame_id = "r_wrist_roll_link";
-	attached_object.object.id = "part";
-	geometry_msgs::Pose pose;
-	pose.orientation.w = 1.0;
-	pose.position.x = 0.11;
-	shape_msgs::SolidPrimitive primitive;
-	primitive.type = primitive.CYLINDER;  
-	primitive.dimensions.resize(2);
-	primitive.dimensions[0] = 0.23;
-	primitive.dimensions[1] = 0.03; 
-	attached_object.object.primitives.push_back(primitive);
-	attached_object.object.primitive_poses.push_back(pose);*/
+	attached_object.link_name = linkName;
+	getObject(objectName, attached_object.object);
 	attached_object.object.operation = attached_object.object.ADD;
 	
-	//attached_object.touch_links.resize();
-	attached_object.touch_links.push_back("r_gripper_l_finger_link");
-	attached_object.touch_links.push_back("r_gripper_l_finger_tip_link");
-	attached_object.touch_links.push_back("r_gripper_motor_accelerometer_link");
-	attached_object.touch_links.push_back("r_gripper_palm_link");
-	attached_object.touch_links.push_back("r_gripper_r_finger_link");
-	attached_object.touch_links.push_back("r_gripper_r_finger_tip_link");
+	attached_object.touch_links = gripper_links;
 	
 	attached_object_publisher_.publish(attached_object); 
 	ros::WallDuration(2.0).sleep();
+	return 1;
+}
+
+int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objectName)
+{
+    
+  //subscribe to attach object topic
+	moveit_msgs::AttachedCollisionObject attached_object;
+	
+	getObject(objectName, attached_object.object);
+	attached_object.object.operation = attached_object.object.REMOVE;
+	
+	attached_object_publisher_.publish(attached_object); 
+	ros::WallDuration(2.0).sleep();
+	
 	return 1;
 }
 
@@ -120,4 +119,44 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string objectNa
 	}
 	return 1;
 }
+
+std::vector<moveit_msgs::AttachedCollisionObject> Suturo_Manipulation_Planning_Scene_Interface::getAttachedObjects()
+{
+	moveit_msgs::PlanningScene ps;
+	if (!getPlanningScene(ps)){
+		ROS_ERROR_STREAM("Failed to get planningscene");
+	}
+	return ps.robot_state.attached_collision_objects;
+}
+
+int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string objectName, moveit_msgs::AttachedCollisionObject &co)
+{
+	std::vector<moveit_msgs::AttachedCollisionObject> attachedObjects = getAttachedObjects();
+	for (int i = 0; i < attachedObjects.size(); i++){
+		co = attachedObjects.at(i)
+		if (co.id == objectName){
+			return 1;
+		}
+	}
+	ROS_ERROR_STREAM("Didn't found Object: " << objectName);
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

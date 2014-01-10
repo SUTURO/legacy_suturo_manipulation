@@ -16,13 +16,18 @@ public:
 
 	~Suturo_Manipulation_Planning_Scene_Interface();
 	
-	int attachObject(std::string objectName, std::string linkName);
+	int attachObject(std::string objectName, std::string linkName,
+							std::vector<std::string> gripper_links);
 	
-	int detachObject(std::string objectName, std::string linkName);
+	int detachObject(std::string objectName);
 	
 	int getObject(std::string objectName, moveit_msgs::CollisionObject &co);
 	
 	int getPlanningScene(moveit_msgs::PlanningScene &ps);	
+	
+	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
+	
+	int getAttachedObject(std::string objectName, moveit_msgs::AttachedCollisionObject &co);
 };
      
 #endif
