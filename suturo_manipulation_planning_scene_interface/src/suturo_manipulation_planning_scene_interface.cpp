@@ -133,8 +133,8 @@ int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string 
 {
 	std::vector<moveit_msgs::AttachedCollisionObject> attachedObjects = getAttachedObjects();
 	for (int i = 0; i < attachedObjects.size(); i++){
-		co = attachedObjects.at(i)
-		if (co.id == objectName){
+		co = attachedObjects.at(i);
+		if (co.object.id == objectName){
 			return 1;
 		}
 	}
