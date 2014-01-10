@@ -12,6 +12,7 @@
     <depend package="pr2_mechanism_model"/>
     <depend package="pluginlib"/>
     <depend package="control_toolbox"/>
+    <depend package="visualization_msgs"/>
     <rosdep name="eigen"/>
     <depend package="kdl"/>
     <export>

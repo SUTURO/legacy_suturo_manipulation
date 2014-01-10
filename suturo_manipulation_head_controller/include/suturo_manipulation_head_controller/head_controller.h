@@ -43,6 +43,8 @@ namespace my_controller_ns{
             KDL::Twist     xdot_;         // Cart velocity 
             KDL::Wrench    F_;            // Cart effort
             KDL::Jacobian  J_;            // Jacobian
+            
+            KDL::Vector    goal_pose_;    // Goal position
 
             // Note the gains are incorrectly typed as a twist,
             // as there is no appropriate type!
@@ -52,6 +54,8 @@ namespace my_controller_ns{
             // The trajectory variables
             double    circle_phase_;      // Phase along the circle
             ros::Time last_time_;         // Time of the last servo cycle
+
+            ros::Publisher vis_pub;
 
         public:
             bool init(pr2_mechanism_model::RobotState *robot,
