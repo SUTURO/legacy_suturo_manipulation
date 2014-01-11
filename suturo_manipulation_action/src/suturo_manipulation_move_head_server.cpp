@@ -59,7 +59,7 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPt
 	
 	//tranform pose
 	geometry_msgs::PoseStamped odomPose;
-	if (!tranform(odomPose, goal->p.c_centroid, goal->p.frame_id.c_str())){
+	if (!tranform(odomPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		head_server->setAborted(r);
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// create the action server
-	Server_head head_server(n, "move_head_server", boost::bind(&execute, _1, &head_publisher, &head_server), false);
+	Server_head head_server(n, "suturo_man_move_head_server", boost::bind(&execute, _1, &head_publisher, &head_server), false);
 	// start the server
 	head_server.start();
 

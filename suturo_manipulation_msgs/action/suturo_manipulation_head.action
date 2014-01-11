@@ -1,5 +1,5 @@
 #goal definition
-suturo_perception_msgs/PerceivedObject p
+geometry_msgs/PoseStamped ps
 ---
 #result definition
 ActionAnswer succ
