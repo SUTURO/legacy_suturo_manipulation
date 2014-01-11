@@ -11,6 +11,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 {
 	nh_ = nodehandle;
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
+	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	ros::WallDuration(2.0).sleep();
 }
 
@@ -61,23 +62,6 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	
 	attached_object_publisher_.publish(attached_object); 
 	ros::WallDuration(2.0).sleep();
-	return 1;
-}
-
-int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objectName)
-{
-    
-  //subscribe to attach object topic
-	moveit_msgs::AttachedCollisionObject attached_object;
-	moveit_msgs::AttachedCollisionObject detached_object;
-	
-	getObject(objectName, attached_object.object);
-	detached_object.object.operation = attached_object.object.REMOVE;
-	detached_object.object.id = attached_object.object.id;
-	detached_object.link_name = attached_object.link_name;
-	attached_object_publisher_.publish(detached_object); 
-	ros::WallDuration(2.0).sleep();
-	
 	return 1;
 }
 
@@ -140,7 +124,23 @@ int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string 
 	return 0;
 }
 
-
+int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objectName)
+{
+  
+	moveit_msgs::AttachedCollisionObject attached_object;
+	moveit_msgs::AttachedCollisionObject detached_object;
+	
+	if (!getAttachedObject(objectName, attached_object)){
+		return 0;
+	}
+	detached_object.object.operation = attached_object.object.REMOVE;
+	detached_object.object.id = attached_object.object.id;
+	detached_object.link_name = attached_object.link_name;
+	attached_object_publisher_.publish(detached_object); 
+	ros::WallDuration(2.0).sleep();
+	
+	return 1;
+}
 
 
 

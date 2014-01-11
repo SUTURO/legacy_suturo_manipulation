@@ -10,6 +10,7 @@ class Suturo_Manipulation_Planning_Scene_Interface{
 private:
 	ros::NodeHandle* nh_; 
 	ros::Publisher attached_object_publisher_;
+	ros::Publisher collision_object_publisher_;
 
 public:
 	Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle);
