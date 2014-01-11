@@ -14,13 +14,24 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+	if (argc != 5)
+	{
+		ROS_INFO("usage: X Y Z frame_id");
+		return 1;
+	}
+
 	// Dummy PosedStamped Object
 	geometry_msgs::PoseStamped ps;
 
-	ps.pose.position.x = -0.378;
-	ps.pose.position.y = 0.187;
-	ps.pose.position.z = 0.991;
-	ps.header.frame_id = "/head_mount_kinect_rgb_optical_frame";
+	// ps.pose.position.x = -0.378;
+	// ps.pose.position.y = 0.187;
+	// ps.pose.position.z = 0.991;
+	// ps.header.frame_id = "/head_mount_kinect_rgb_optical_frame";
+	ps.pose.position.x = atof(argv[1]);
+	ps.pose.position.y = atof(argv[2]);
+	ps.pose.position.z = atof(argv[3]);
+	ps.header.frame_id = argv[4];
+	ps.header.stamp = ros::Time::now();
 
 	ROS_INFO("PosedStamped Object done!");
 
