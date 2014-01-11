@@ -1,10 +1,9 @@
-#right arm
+#strings
 string RIGHT_ARM="right_arm"
 string LEFT_ARM="left_arm"
-string HEAD="head"
 
 #goal definition
-suturo_perception_msgs/PerceivedObject p
+geometry_msgs/PoseStamped ps
 string arm
 ---
 #result definition

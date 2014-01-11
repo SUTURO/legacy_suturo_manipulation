@@ -3,6 +3,6 @@
   <arg name="publish_monitored_planning_scene" value="true" />
  </include>
 
-  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_action_server" type="suturo_manipulation_move_action_server" respawn="true" output="screen"/>
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_home_server" type="suturo_manipulation_move_home_server" respawn="true" output="screen"/>
 
 </launch>

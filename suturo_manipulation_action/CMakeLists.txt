@@ -114,7 +114,8 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_action_node src/suturo_manipulation_action_node.cpp)
 
-add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_move_action_server.cpp)
+add_executable(suturo_manipulation_move_home_server src/suturo_manipulation_move_home_server.cpp)
+add_executable(suturo_manipulation_move_arm_server src/suturo_manipulation_move_arm_server.cpp)
 add_executable(suturo_manipulation_grasping_action_server src/suturo_manipulation_grasping_action_server.cpp)
 add_executable(test_action_client src/test_action_client.cpp)
 add_executable(head_mover src/head_mover.cpp)
@@ -123,7 +124,8 @@ add_executable(head_mover src/head_mover.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_action_node suturo_manipulation_action_generate_messages_cpp)
-add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_move_home_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_move_arm_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(suturo_manipulation_grasping_action_server suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(head_mover suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
@@ -133,7 +135,12 @@ add_dependencies(head_mover suturo_manipulation_msgs suturo_manipulation_gripper
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(
-  suturo_manipulation_move_action_server
+  suturo_manipulation_move_home_server
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  suturo_manipulation_move_arm_server
   ${catkin_LIBRARIES}
 )
 

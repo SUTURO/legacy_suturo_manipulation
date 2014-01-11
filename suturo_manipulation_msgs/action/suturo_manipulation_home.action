@@ -1,5 +1,10 @@
+#strings
+string RIGHT_ARM="right_arm"
+string LEFT_ARM="left_arm"
+string HEAD="head"
+
 #goal definition
-string arm
+string bodypart
 ---
 #result definition
 ActionAnswer succ
