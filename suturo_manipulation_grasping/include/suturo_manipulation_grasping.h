@@ -29,7 +29,7 @@ private:
 	int calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);
 	
-	int pick(std::string objectName, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
+	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
 public:
 	static const std::string R_ARM;
@@ -39,15 +39,9 @@ public:
 
 	~Grasping();
 
-	int calcGraspPosition(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
+	int calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
 	int pick(std::string objectName, std::string arm);
-
-	int r_arm_pick(std::string objectName);
-	int r_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
-
-	int l_arm_pick(std::string objectName);
-	int l_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 	
 	int drop(std::string objectName);
 };

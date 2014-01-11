@@ -24,6 +24,10 @@ public:
 	
 	int getObject(std::string objectName, moveit_msgs::CollisionObject &co);
 	
+	int addObject(moveit_msgs::CollisionObject co);
+	
+	int removeObject(moveit_msgs::CollisionObject co);
+	
 	int getPlanningScene(moveit_msgs::PlanningScene &ps);	
 	
 	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();

@@ -12,6 +12,9 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	nh_ = nodehandle;
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
 	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	//planning_scene_publisher_ = nh_->advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
+	
+	
 	ros::WallDuration(2.0).sleep();
 }
 
@@ -122,6 +125,24 @@ int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string 
 	}
 	ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject| Didn't found Object: " << objectName);
 	return 0;
+}
+
+
+int Suturo_Manipulation_Planning_Scene_Interface::addObject(moveit_msgs::CollisionObject co)
+{
+	co.operation = moveit_msgs::CollisionObject::REMOVE;
+  collision_object_publisher_.publish(co);
+  
+	co.operation = moveit_msgs::CollisionObject::ADD;
+  collision_object_publisher_.publish(co);
+	return 1;
+}
+
+int Suturo_Manipulation_Planning_Scene_Interface::removeObject(moveit_msgs::CollisionObject co)
+{
+	co.operation = moveit_msgs::CollisionObject::REMOVE;
+  collision_object_publisher_.publish(co);
+  return 1;
 }
 
 int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objectName)

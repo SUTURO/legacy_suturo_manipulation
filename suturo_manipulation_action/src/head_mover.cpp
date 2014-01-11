@@ -10,97 +10,6 @@
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
-void pick(moveit::planning_interface::MoveGroup &group)
-{
-  std::vector<manipulation_msgs::Grasp> grasps;
-
-  geometry_msgs::PoseStamped p;
-  p.header.frame_id = "base_footprint";
-  p.pose.position.x = 0.585;
-  p.pose.position.y = 0;
-  p.pose.position.z = 0.625;
-  p.pose.orientation.x = 0;
-  p.pose.orientation.y = 0;
-  p.pose.orientation.z = 0;
-  p.pose.orientation.w = 1;
-  manipulation_msgs::Grasp g;
-  g.grasp_pose = p;
-
-  g.approach.direction.vector.x = 1.0;
-  g.approach.direction.header.frame_id = "r_wrist_roll_link";
-  g.approach.min_distance = 0.2;
-  g.approach.desired_distance = 0.4;
-
-  g.retreat.direction.header.frame_id = "base_footprint";
-  g.retreat.direction.vector.z = 1.0;
-  g.retreat.min_distance = 0.1;
-  g.retreat.desired_distance = 0.25;
-
-  g.pre_grasp_posture.name.resize(1, "r_gripper_l_finger_joint");
-  g.pre_grasp_posture.position.resize(1);
-  g.pre_grasp_posture.position[0] = 0.55;
-  g.grasp_posture.name.resize(1, "r_gripper_l_finger_joint");
-  g.grasp_posture.position.resize(1);
-  g.grasp_posture.position[0] = 0;
-
-  grasps.push_back(g);
- // group.setSupportSurfaceName("table");
-  group.pick("part", grasps);
-}
-
-void place(moveit::planning_interface::MoveGroup &group)
-{
-  std::vector<manipulation_msgs::PlaceLocation> loc;
-
-  geometry_msgs::PoseStamped p;
-  p.header.frame_id = "base_footprint";
-  p.pose.position.x = 0.7;
-  p.pose.position.y = 0.0;
-  p.pose.position.z = 0.5;
-  p.pose.orientation.x = 0;
-  p.pose.orientation.y = 0;
-  p.pose.orientation.z = 0;
-  p.pose.orientation.w = 1;
-  manipulation_msgs::PlaceLocation g;
-  g.place_pose = p;
-
-  g.approach.direction.vector.z = -1.0;
-  g.retreat.direction.vector.x = -1.0;
-  g.retreat.direction.header.frame_id = "base_footprint";
-  g.approach.direction.header.frame_id = "r_wrist_roll_link";
-  g.approach.min_distance = 0.1;
-  g.approach.desired_distance = 0.2;
-  g.retreat.min_distance = 0.1;
-  g.retreat.desired_distance = 0.25;
-
-  g.post_place_posture.name.resize(1, "r_gripper_l_finger_joint");
-  g.post_place_posture.position.resize(1);
-  g.post_place_posture.position[0] = 0.548;
-
-  loc.push_back(g);
-  group.setSupportSurfaceName("table");
-
-
-  // add path constraints
-  moveit_msgs::Constraints constr;
-  constr.orientation_constraints.resize(1);
-  moveit_msgs::OrientationConstraint &ocm = constr.orientation_constraints[0];
-  ocm.link_name = "r_wrist_roll_link";
-  ocm.header.frame_id = p.header.frame_id;
-  ocm.orientation.x = 0.0;
-  ocm.orientation.y = 0.0;
-  ocm.orientation.z = 0.0;
-  ocm.orientation.w = 1.0;
-  ocm.absolute_x_axis_tolerance = 0.2;
-  ocm.absolute_y_axis_tolerance = 0.2;
-  ocm.absolute_z_axis_tolerance = M_PI;
-  ocm.weight = 1.0;
-  group.setPathConstraints(constr);
-  group.setPlannerId("RRTConnectkConfigDefault");
-
-  group.place("part", loc);
-}
-
 void putObjects(ros::Publisher pub_co)
 {
   ros::WallDuration(1.0).sleep();
@@ -237,7 +146,16 @@ group.move();*/
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	grasper.pick("box2",Grasping::L_ARM);
+	//~ ROS_INFO_STREAM(Grasping::L_ARM);
+	grasper.pick("box1", Grasping::R_ARM);
+	
+	//~ moveit_msgs::PlanningScene ps;
+	//~ pi.getPlanningScene(ps);
+	//ROS_INFO_STREAM("ps: " << ps);
+	
+	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
+	//ROS_INFO_STREAM("objects " << muh.at(0));
+	grasper.drop("box1");
 
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
