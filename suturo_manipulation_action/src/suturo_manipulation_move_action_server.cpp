@@ -62,7 +62,13 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	move_group_interface::MoveGroup group(arm);
 
 	odomPose.pose.position.z += 0.3;
-
+	
+	odomPose.pose.orientation.x = 0;
+	odomPose.pose.orientation.y = 0;
+	odomPose.pose.orientation.z = 0;
+	odomPose.pose.orientation.w = 1;
+	
+	
 	group.setPoseTarget(odomPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,

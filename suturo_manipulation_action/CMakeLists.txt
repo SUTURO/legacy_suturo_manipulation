@@ -13,6 +13,9 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib 
   actionlib_msgs
   tf
+  suturo_manipulation_grasping
+  suturo_manipulation_planning_scene_interface
+  suturo_manipulation_gripper_controller
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,6 +115,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 # add_executable(suturo_manipulation_action_node src/suturo_manipulation_action_node.cpp)
 
 add_executable(suturo_manipulation_move_action_server src/suturo_manipulation_move_action_server.cpp)
+add_executable(suturo_manipulation_grasping_action_server src/suturo_manipulation_grasping_action_server.cpp)
 add_executable(test_action_client src/test_action_client.cpp)
 add_executable(head_mover src/head_mover.cpp)
 
@@ -120,9 +124,9 @@ add_executable(head_mover src/head_mover.cpp)
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_action_node suturo_manipulation_action_generate_messages_cpp)
 add_dependencies(suturo_manipulation_move_action_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_grasping_action_server suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
-add_dependencies(head_mover suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
-
+add_dependencies(head_mover suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_action_node
@@ -134,12 +138,24 @@ target_link_libraries(
 )
 
 target_link_libraries(
+  suturo_manipulation_grasping_action_server
+  suturo_manipulation_gripper_controller
+  suturo_manipulation_planning_scene_interface
+  suturo_manipulation_grasping
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+target_link_libraries(
   test_action_client
   ${catkin_LIBRARIES}
 )
 
 target_link_libraries(
   head_mover
+  suturo_manipulation_gripper_controller
+  suturo_manipulation_planning_scene_interface
+  suturo_manipulation_grasping
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
