@@ -10,6 +10,9 @@
 
 using namespace std;
 
+const string Grasping::R_ARM = "right_arm";
+const string Grasping::L_ARM = "left_arm";
+
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
 	group_r_arm_ = new move_group_interface::MoveGroup("right_arm");
@@ -195,7 +198,7 @@ int Grasping::l_arm_pick(string objectName, geometry_msgs::PoseStamped &pose, ge
 	return pick(objectName, L_ARM, pose, pre_pose);
 }
 
-int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
+int Grasping::pick(string objectName, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
 {
 	move_group_interface::MoveGroup group(*group_r_arm_);
 	if (arm == L_ARM){
@@ -246,7 +249,11 @@ int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose,
 
 int Grasping::pick(std::string objectName, std::string arm)
 {
-	return 0;
+	if (arm == R_ARM){
+		return r_arm_pick(objectName);
+	} else {
+		return l_arm_pick(objectName);
+	}
 }
 
 int Grasping::drop(string objectName)

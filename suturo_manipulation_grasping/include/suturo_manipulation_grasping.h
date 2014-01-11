@@ -11,8 +11,8 @@
 class Grasping
 {
 private:
-	static const int R_ARM = 0;
-	static const int L_ARM = 1;
+	static const std::string R_ARM ;
+	static const std::string L_ARM ;
 	move_group_interface::MoveGroup* group_r_arm_;
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
@@ -30,7 +30,7 @@ private:
 	int calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);
 	
-	int pick(std::string objectName, int arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
+	int pick(std::string objectName, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 	
 public:
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
