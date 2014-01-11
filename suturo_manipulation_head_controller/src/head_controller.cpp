@@ -1,5 +1,9 @@
 #include "suturo_manipulation_head_controller/head_controller.h"
 #include <pluginlib/class_list_macros.h>
+#include <math.h>       /* acos */
+#include <visualization_msgs/Marker.h>
+
+#define PI 3.14159265
 
 #include "ros/ros.h"
 #include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
@@ -69,8 +73,12 @@ bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
     Kp_.rot(1) = 100.0;  Kd_.rot(1) = 1.0;        // Rotation y
     Kp_.rot(2) = 100.0;  Kd_.rot(2) = 1.0;        // Rotation z
 
+
     sub_ = n.subscribe("/suturo/head_controller_goal_point", 1, &MyCartControllerClass::setGoalCB, this);
     ROS_INFO("Subscribed!");
+
+    vis_pub = n.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
+
 
     return true;
 }
@@ -147,12 +155,135 @@ void MyCartControllerClass::update()
     chain_.setEfforts(tau_);
     */
 
-    KDL::Vector goal_vector(1,1,1);
-    KDL::Frame goal_frame(goal_vector);
+    // Stub for Testing
+    goal_pose_.x(1);
+    goal_pose_.y(0);
+    goal_pose_.z(1);
+    KDL::Frame goal_frame(goal_pose_);
 
-    double norm = goal_frame.p.Norm();
-    ROS_INFO("normed length: %f", norm);
-}
+    // Publish the Marker
+    visualization_msgs::Marker goal_marker;
+    goal_marker.header.frame_id = "torso_lift_link";
+    goal_marker.header.stamp = ros::Time();
+    goal_marker.ns = "suturo_manipulation";
+    goal_marker.id = 0;
+    goal_marker.type = visualization_msgs::Marker::SPHERE;
+    goal_marker.action = visualization_msgs::Marker::ADD;
+    goal_marker.pose.position.x = goal_pose_.x();
+    goal_marker.pose.position.y = goal_pose_.y();
+    goal_marker.pose.position.z = goal_pose_.z();
+    goal_marker.pose.orientation.x = 0.0;
+    goal_marker.pose.orientation.y = 0.0;
+    goal_marker.pose.orientation.z = 0.0;
+    goal_marker.pose.orientation.w = 1.0;
+    goal_marker.scale.x = 0.1;
+    goal_marker.scale.y = 0.1;
+    goal_marker.scale.z = 0.1;
+    goal_marker.color.a = 1.0;
+    goal_marker.color.r = 0.0;
+    goal_marker.color.g = 1.0;
+    goal_marker.color.b = 0.0;
+    vis_pub.publish( goal_marker );
+    ROS_INFO("Marker published");
+
+    // Debugging
+    double norm = goal_pose_.Norm();
+  //  ROS_INFO("Current Pose: x %f, y %f, z %f", x_.p.x(), x_.p.y(), x_.p.z());
+    //ROS_INFO("Desired Pose: x %f, y %f, z %f", goal_pose_.x(), goal_pose_.y(), goal_pose_.z());
+    //ROS_INFO("normed length: %f", norm);
+    // Publish the Marker
+    visualization_msgs::Marker current_marker;
+    current_marker.header.frame_id = "torso_lift_link";
+    current_marker.header.stamp = ros::Time();
+    current_marker.ns = "suturo_manipulation";
+    current_marker.id = 1;
+    current_marker.type = visualization_msgs::Marker::SPHERE;
+    current_marker.action = visualization_msgs::Marker::ADD;
+    current_marker.pose.position.x = x_.p.x();
+    current_marker.pose.position.y = x_.p.y();
+    current_marker.pose.position.z = x_.p.z();
+    current_marker.pose.orientation.x = 0.0;
+    current_marker.pose.orientation.y = 0.0;
+    current_marker.pose.orientation.z = 0.0;
+    current_marker.pose.orientation.w = 1.0;
+    current_marker.scale.x = 0.1;
+    current_marker.scale.y = 0.1;
+    current_marker.scale.z = 0.1;
+    current_marker.color.a = 1.0;
+    current_marker.color.r = 1.0;
+    current_marker.color.g = 0.0;
+    current_marker.color.b = 0.0;
+    vis_pub.publish( current_marker );
+    ROS_INFO("Marker published");
+
+// Publish the Marker
+    visualization_msgs::Marker zero_marker;
+    zero_marker.header.frame_id = "torso_lift_link";
+    zero_marker.header.stamp = ros::Time();
+    zero_marker.ns = "suturo_manipulation";
+    zero_marker.id = 2;
+    zero_marker.type = visualization_msgs::Marker::SPHERE;
+    zero_marker.action = visualization_msgs::Marker::ADD;
+    zero_marker.pose.position.x = 0;
+    zero_marker.pose.position.y = 0;
+    zero_marker.pose.position.z = 0;
+    zero_marker.pose.orientation.x = 0.0;
+    zero_marker.pose.orientation.y = 0.0;
+    zero_marker.pose.orientation.z = 0.0;
+    zero_marker.pose.orientation.w = 1.0;
+    zero_marker.scale.x = 0.1;
+    zero_marker.scale.y = 0.1;
+    zero_marker.scale.z = 0.1;
+    zero_marker.color.a = 1.0;
+    zero_marker.color.r = 0.0;
+    zero_marker.color.g = 0.0;
+    zero_marker.color.b = 1.0;
+    vis_pub.publish( zero_marker );
+    ROS_INFO("Marker published");
+
+    // Calculating the angle on the x-y-plane
+    // Setting the z-value to zero
+    KDL::Vector goal_xy(goal_pose_.x(),goal_pose_.y(),0);
+    KDL::Vector curr_xy(x_.p.x(),x_.p.y(),0);
+
+    // angular error = arccos((goal_xy.curr_xy)/(|goal_xy|*|curr_xy|))*(180/PI)
+    double x_error = acos(dot(goal_xy, curr_xy)/(goal_xy.Norm()*curr_xy.Norm())) * (180.0/PI);
+    
+
+    // Calculating the angle on the x-z-plane
+    // Setting the y-value to zero
+    KDL::Vector goal_xz(goal_pose_.x(),0,goal_pose_.z());
+    KDL::Vector curr_xz(x_.p.x(),0,x_.p.z());
+
+    // angular error = arccos((goal_xz.curr_xz)/(|goal_xz|*|curr_xz|))*(180/PI)
+    double y_error = acos(dot(goal_xz, curr_xz)/(goal_xz.Norm()*curr_xz.Norm())) * (180.0/PI);
+    if((x_.p.z() * goal_pose_.x() - x_.p.x() * goal_pose_.z()) > 0)
+    {
+        y_error = - y_error;
+    }
+    ROS_INFO("x_error: %f, y_error: %f",x_error,y_error);
+
+    // Setting the Force
+    F_(0) = 0;
+    F_(1) = 0;
+    F_(2) = 0;
+    F_(3) = 100 * y_error;
+    F_(4) = 100 * x_error;
+    F_(5) = 0;
+
+    // Convert the force into a set of joint torques.
+    for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
+    {
+        tau_(i) = 0;
+        for (unsigned int j = 0 ; j < 6 ; j++)
+            tau_(i) += J_(j,i) * F_(j);
+        ROS_INFO("Effort: %f " , tau_(i));
+    }
+
+    // And finally send these torques out.
+    chain_.setEfforts(tau_);
+
+    }
 
 
 
