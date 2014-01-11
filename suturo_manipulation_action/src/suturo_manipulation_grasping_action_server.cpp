@@ -15,12 +15,12 @@ void grasp(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConst
 	
 	r.succ.header.stamp = ros::Time();
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
-	
+
 	//0 für fail
 
 	// set Planning Interface and Grasper
-	// Suturo_Manipulation_Planning_Scene_Interface pi(nh);
-	// Grasping grasper(&pi);
+	Suturo_Manipulation_Planning_Scene_Interface pi(nh);
+	Grasping grasper(&pi);
 
 }
 
