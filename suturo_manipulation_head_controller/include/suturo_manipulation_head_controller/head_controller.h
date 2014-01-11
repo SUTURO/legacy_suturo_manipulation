@@ -10,7 +10,9 @@
 #include <kdl/jacobian.hpp>
 #include <kdl/jntarray.hpp>
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
+
+#include <tf/transform_listener.h>
 
 
 namespace my_controller_ns{
@@ -56,6 +58,11 @@ namespace my_controller_ns{
             ros::Time last_time_;         // Time of the last servo cycle
 
             ros::Publisher vis_pub;
+            
+            tf::TransformListener listener;
+            
+            geometry_msgs::PointStamped goalPoint_;
+            geometry_msgs::PointStamped originPoint_;
 
         public:
             bool init(pr2_mechanism_model::RobotState *robot,

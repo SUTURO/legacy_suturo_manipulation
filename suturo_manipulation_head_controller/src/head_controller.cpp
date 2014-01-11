@@ -78,8 +78,9 @@ bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
     ROS_INFO("Subscribed!");
 
     vis_pub = n.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
-
-
+    
+    listener.waitForTransform("torso_lift_link", "head_plate_frame", ros::Time(0), ros::Duration(1.0));
+    
     return true;
 }
 
@@ -184,7 +185,6 @@ void MyCartControllerClass::update()
     goal_marker.color.g = 1.0;
     goal_marker.color.b = 0.0;
     vis_pub.publish( goal_marker );
-    ROS_INFO("Marker published");
 
     // Debugging
     double norm = goal_pose_.Norm();
@@ -214,7 +214,6 @@ void MyCartControllerClass::update()
     current_marker.color.g = 0.0;
     current_marker.color.b = 0.0;
     vis_pub.publish( current_marker );
-    ROS_INFO("Marker published");
 
 // Publish the Marker
     visualization_msgs::Marker zero_marker;
@@ -239,7 +238,19 @@ void MyCartControllerClass::update()
     zero_marker.color.g = 0.0;
     zero_marker.color.b = 1.0;
     vis_pub.publish( zero_marker );
-    ROS_INFO("Marker published");
+    
+    // tf to transform the goal to /head_plate_frame
+    originPoint_.header.frame_id = "/torso_lift_link";
+    originPoint_.header.seq = 0;
+    originPoint_.header.stamp = ros::Time(0);
+    originPoint_.point.x = goal_pose_.x();
+    originPoint_.point.y = goal_pose_.y();
+    originPoint_.point.z = goal_pose_.z();
+    
+    listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
+    
+    ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
+    ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
     // Calculating the angle on the x-y-plane
     // Setting the z-value to zero
