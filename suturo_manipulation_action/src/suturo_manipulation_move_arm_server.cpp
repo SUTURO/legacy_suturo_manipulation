@@ -5,7 +5,6 @@
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
-#include <suturo_manipulation_msgs/suturo_manipulation_homeAction.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <tf/transform_listener.h>
@@ -16,7 +15,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-// Tranfsorm the incoming frame to /odom_combined
+// Tranfsorm the incoming frame to /base_link
 int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
@@ -28,9 +27,9 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.orientation.w = 1;
 	
 	// goal_frame
-    const string odom = "/odom_combined";
+    const string odom = "/base_link";
     try{
-		//transform pose from s to odom_combined and save it in pose again
+		//transform pose from s to base_link and save it in pose again
 		listener->transformPose(odom, goalPose, goalPose);
 	}catch(...){
 		ROS_INFO("ERROR: Transformation failed.");
@@ -107,7 +106,7 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 
 	// create the action server
-	Server_move server(n, "suturo_man_move_arm_serve", boost::bind(&execute, _1, &server), false);
+	Server_move server(n, "suturo_man_move_arm_server", boost::bind(&execute, _1, &server), false);
 	// start the server
 	server.start();
 	

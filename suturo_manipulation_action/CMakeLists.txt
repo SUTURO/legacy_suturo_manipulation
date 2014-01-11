@@ -117,7 +117,9 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 add_executable(suturo_manipulation_move_home_server src/suturo_manipulation_move_home_server.cpp)
 add_executable(suturo_manipulation_move_arm_server src/suturo_manipulation_move_arm_server.cpp)
 add_executable(suturo_manipulation_grasping_action_server src/suturo_manipulation_grasping_action_server.cpp)
-add_executable(test_action_client src/test_action_client.cpp)
+add_executable(test_move_home_client src/test_move_home_client.cpp)
+add_executable(test_grasping_client src/test_grasping_client.cpp)
+add_executable(test_move_arm_client src/test_move_arm_client.cpp)
 add_executable(head_mover src/head_mover.cpp)
 
 
@@ -127,7 +129,9 @@ add_executable(head_mover src/head_mover.cpp)
 add_dependencies(suturo_manipulation_move_home_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(suturo_manipulation_move_arm_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(suturo_manipulation_grasping_action_server suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
-add_dependencies(test_action_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_move_home_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_move_arm_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_grasping_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(head_mover suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -154,7 +158,17 @@ target_link_libraries(
 )
 
 target_link_libraries(
-  test_action_client
+  test_move_home_client
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_move_arm_client
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_grasping_client
   ${catkin_LIBRARIES}
 )
 
