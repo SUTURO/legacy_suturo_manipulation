@@ -29,7 +29,7 @@ int tranform(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.orientation.w = 1;
 	
 	// goal_frame
-    const string goal_frame = "/head_mount_kinect_rgb_optical_frame";
+    const string goal_frame = "/head_plate_frame";
     // const string goal_frame = "/base_link";
 
 	ROS_INFO("Beginn der Transformation");

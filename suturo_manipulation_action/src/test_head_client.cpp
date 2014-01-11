@@ -19,7 +19,11 @@ int main(int argc, char** argv)
 		ROS_INFO("usage: X Y Z frame_id");
 		return 1;
 	}
-
+	
+	// initiliaze the client
+	ros::init(argc, argv, "test_head_client");
+	ros::start();
+	
 	// Dummy PosedStamped Object
 	geometry_msgs::PoseStamped ps;
 
@@ -45,8 +49,7 @@ int main(int argc, char** argv)
 
 	ROS_INFO("HeadGoal done!");
 
-	// initiliaze the client
-	ros::init(argc, argv, "test_head_client");
+
 	Head_client client("suturo_man_move_head_server", true); 
 	// waiting for connection
 	client.waitForServer();

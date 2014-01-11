@@ -24,11 +24,15 @@ void MyCartControllerClass::setGoalCB(geometry_msgs::PoseStamped msg)
     goalPoint_.point.x = msg.pose.position.x;
     goalPoint_.point.y = msg.pose.position.y;
     goalPoint_.point.z = msg.pose.position.z;
+    
+    updated = true;
 }
 /// Controller initialization in non-realtime
 bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
         ros::NodeHandle &n)
 {
+	updated = false;
+	
     /*
     // Get the root and tip link names from parameter server.
     std::string root_name, tip_name;
@@ -108,132 +112,136 @@ void MyCartControllerClass::starting()
 /// Controller update loop in realtime
 void MyCartControllerClass::update()
 {
-    /*
-    double dt;                    // Servo loop time step
+	if (updated){
+		
+		/*
+		double dt;                    // Servo loop time step
 
-    // Calculate the dt between servo cycles.
-    dt = (robot_state_->getTime() - last_time_).toSec();
-    last_time_ = robot_state_->getTime();
-    */
+		// Calculate the dt between servo cycles.
+		dt = (robot_state_->getTime() - last_time_).toSec();
+		last_time_ = robot_state_->getTime();
+		*/
 
-    // Get the current joint positions and velocities.
-    chain_.getPositions(q_);
-    chain_.getVelocities(qdot_);
+		// Get the current joint positions and velocities.
+		chain_.getPositions(q_);
+		chain_.getVelocities(qdot_);
 
-    // Compute the forward kinematics and Jacobian (at this location).
-    jnt_to_pose_solver_->JntToCart(q_, x_);
-    jnt_to_jac_solver_->JntToJac(q_, J_);
+		// Compute the forward kinematics and Jacobian (at this location).
+		jnt_to_pose_solver_->JntToCart(q_, x_);
+		jnt_to_jac_solver_->JntToJac(q_, J_);
 
-    for (unsigned int i = 0 ; i < 6 ; i++)
-    {
-        xdot_(i) = 0;
-        for (unsigned int j = 0 ; j < kdl_chain_.getNrOfJoints() ; j++)
-            xdot_(i) += J_(i,j) * qdot_.qdot(j);
-    }
+		for (unsigned int i = 0 ; i < 6 ; i++)
+		{
+			xdot_(i) = 0;
+			for (unsigned int j = 0 ; j < kdl_chain_.getNrOfJoints() ; j++)
+				xdot_(i) += J_(i,j) * qdot_.qdot(j);
+		}
 
-    /*
-    // Follow a circle of 10cm at 3 rad/sec.
-    circle_phase_ += 3.0 * dt;
-    KDL::Vector  circle(0,0,0);
-    circle(2) = 0.1 * sin(circle_phase_);
-    circle(1) = 0.1 * (cos(circle_phase_) - 1);
+		/*
+		// Follow a circle of 10cm at 3 rad/sec.
+		circle_phase_ += 3.0 * dt;
+		KDL::Vector  circle(0,0,0);
+		circle(2) = 0.1 * sin(circle_phase_);
+		circle(1) = 0.1 * (cos(circle_phase_) - 1);
 
-    xd_ = x0_;
-    xd_.p += circle;
+		xd_ = x0_;
+		xd_.p += circle;
 
-    // Calculate a Cartesian restoring force.
-    xerr_.vel = x_.p - xd_.p;
-    xerr_.rot = 0.5 * (xd_.M.UnitX() * x_.M.UnitX() +
-            xd_.M.UnitY() * x_.M.UnitY() +
-            xd_.M.UnitZ() * x_.M.UnitZ());
+		// Calculate a Cartesian restoring force.
+		xerr_.vel = x_.p - xd_.p;
+		xerr_.rot = 0.5 * (xd_.M.UnitX() * x_.M.UnitX() +
+				xd_.M.UnitY() * x_.M.UnitY() +
+				xd_.M.UnitZ() * x_.M.UnitZ());
 
-    for (unsigned int i = 0 ; i < 6 ; i++)
-        F_(i) = - Kp_(i) * xerr_(i) - Kd_(i) * xdot_(i);
+		for (unsigned int i = 0 ; i < 6 ; i++)
+			F_(i) = - Kp_(i) * xerr_(i) - Kd_(i) * xdot_(i);
 
-    // Convert the force into a set of joint torques.
-    for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
-    {
-        tau_(i) = 0;
-        for (unsigned int j = 0 ; j < 6 ; j++)
-            tau_(i) += J_(j,i) * F_(j);
-    }
+		// Convert the force into a set of joint torques.
+		for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
+		{
+			tau_(i) = 0;
+			for (unsigned int j = 0 ; j < 6 ; j++)
+				tau_(i) += J_(j,i) * F_(j);
+		}
 
-    // And finally send these torques out.
-    chain_.setEfforts(tau_);
-    */
+		// And finally send these torques out.
+		chain_.setEfforts(tau_);
+		*/
 
-    // Publish the Marker
-    visualization_msgs::Marker goal_marker;
-    goal_marker.header.frame_id = "torso_lift_link";
-    goal_marker.header.stamp = ros::Time();
-    goal_marker.ns = "suturo_manipulation";
-    goal_marker.id = 0;
-    goal_marker.type = visualization_msgs::Marker::SPHERE;
-    goal_marker.action = visualization_msgs::Marker::ADD;
-    goal_marker.pose.position.x = goalPoint_.point.x;
-    goal_marker.pose.position.y = goalPoint_.point.y;
-    goal_marker.pose.position.z = goalPoint_.point.z;
-    goal_marker.pose.orientation.x = 0.0;
-    goal_marker.pose.orientation.y = 0.0;
-    goal_marker.pose.orientation.z = 0.0;
-    goal_marker.pose.orientation.w = 1.0;
-    goal_marker.scale.x = 0.1;
-    goal_marker.scale.y = 0.1;
-    goal_marker.scale.z = 0.1;
-    goal_marker.color.a = 1.0;
-    goal_marker.color.r = 0.0;
-    goal_marker.color.g = 1.0;
-    goal_marker.color.b = 0.0;
-    vis_pub.publish( goal_marker );
-    
-    //~ listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
-    //~ 
-    //~ ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
-    ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
+		// Publish the Marker
+		visualization_msgs::Marker goal_marker;
+		goal_marker.header.frame_id = "torso_lift_link";
+		goal_marker.header.stamp = ros::Time();
+		goal_marker.ns = "suturo_manipulation";
+		goal_marker.id = 0;
+		goal_marker.type = visualization_msgs::Marker::SPHERE;
+		goal_marker.action = visualization_msgs::Marker::ADD;
+		goal_marker.pose.position.x = goalPoint_.point.x;
+		goal_marker.pose.position.y = goalPoint_.point.y;
+		goal_marker.pose.position.z = goalPoint_.point.z;
+		goal_marker.pose.orientation.x = 0.0;
+		goal_marker.pose.orientation.y = 0.0;
+		goal_marker.pose.orientation.z = 0.0;
+		goal_marker.pose.orientation.w = 1.0;
+		goal_marker.scale.x = 0.1;
+		goal_marker.scale.y = 0.1;
+		goal_marker.scale.z = 0.1;
+		goal_marker.color.a = 1.0;
+		goal_marker.color.r = 0.0;
+		goal_marker.color.g = 1.0;
+		goal_marker.color.b = 0.0;
+		vis_pub.publish( goal_marker );
+		
+		//~ listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
+		//~ 
+		//~ ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
+		ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
-    // Calculating the angle on the x-y-plane
-    // Setting the z-value to zero
-    KDL::Vector goal_xy(goal_pose_.x(),goal_pose_.y(),0);
-    KDL::Vector curr_xy(x_.p.x(),x_.p.y(),0);
+		//~ // Calculating the angle on the x-y-plane
+		//~ // Setting the z-value to zero
+		//~ KDL::Vector goal_xy(goalPoint.x,goalPoint.y,0);
+		//~ KDL::Vector curr_xy(x_.p.x(),x_.p.y(),0);
+//~ 
+		//~ // angular error = arccos((goal_xy.curr_xy)/(|goal_xy|*|curr_xy|))*(180/PI)
+		//~ double x_error = acos(dot(goal_xy, curr_xy)/(goal_xy.Norm()*curr_xy.Norm())) * (180.0/PI);
+		double x_error = goalPoint_.point.z;
+		
 
-    // angular error = arccos((goal_xy.curr_xy)/(|goal_xy|*|curr_xy|))*(180/PI)
-    double x_error = acos(dot(goal_xy, curr_xy)/(goal_xy.Norm()*curr_xy.Norm())) * (180.0/PI);
-    
+		//~ // Calculating the angle on the x-z-plane
+		//~ // Setting the y-value to zero
+		//~ KDL::Vector goal_xz(goal_pose_.x(),0,goal_pose_.z());
+		//~ KDL::Vector curr_xz(x_.p.x(),0,x_.p.z());
+//~ 
+		//~ // angular error = arccos((goal_xz.curr_xz)/(|goal_xz|*|curr_xz|))*(180/PI)
+		//~ double y_error = acos(dot(goal_xz, curr_xz)/(goal_xz.Norm()*curr_xz.Norm())) * (180.0/PI);
+		//~ if((x_.p.z() * goal_pose_.x() - x_.p.x() * goal_pose_.z()) > 0)
+		//~ {
+			//~ y_error = - y_error;
+		//~ }
+		double y_error = goalPoint_.point.y;
+		ROS_INFO("x_error: %f, y_error: %f",x_error,y_error);
 
-    // Calculating the angle on the x-z-plane
-    // Setting the y-value to zero
-    KDL::Vector goal_xz(goal_pose_.x(),0,goal_pose_.z());
-    KDL::Vector curr_xz(x_.p.x(),0,x_.p.z());
+		// Setting the Force
+		F_(0) = 0;
+		F_(1) = 0;
+		F_(2) = 0;
+		F_(3) = 100 * y_error;
+		F_(4) = 100 * x_error;
+		F_(5) = 0;
 
-    // angular error = arccos((goal_xz.curr_xz)/(|goal_xz|*|curr_xz|))*(180/PI)
-    double y_error = acos(dot(goal_xz, curr_xz)/(goal_xz.Norm()*curr_xz.Norm())) * (180.0/PI);
-    if((x_.p.z() * goal_pose_.x() - x_.p.x() * goal_pose_.z()) > 0)
-    {
-        y_error = - y_error;
-    }
-    ROS_INFO("x_error: %f, y_error: %f",x_error,y_error);
+		// Convert the force into a set of joint torques.
+		for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
+		{
+			tau_(i) = 0;
+			for (unsigned int j = 0 ; j < 6 ; j++)
+				tau_(i) += J_(j,i) * F_(j);
+			ROS_INFO("Effort: %f " , tau_(i));
+		}
 
-    // Setting the Force
-    F_(0) = 0;
-    F_(1) = 0;
-    F_(2) = 0;
-    F_(3) = 100 * y_error;
-    F_(4) = 100 * x_error;
-    F_(5) = 0;
-
-    // Convert the force into a set of joint torques.
-    for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
-    {
-        tau_(i) = 0;
-        for (unsigned int j = 0 ; j < 6 ; j++)
-            tau_(i) += J_(j,i) * F_(j);
-        ROS_INFO("Effort: %f " , tau_(i));
-    }
-
-    // And finally send these torques out.
-    chain_.setEfforts(tau_);
-
-    }
+		// And finally send these torques out.
+		chain_.setEfforts(tau_);
+	}
+}
 
 
 
