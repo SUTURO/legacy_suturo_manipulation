@@ -31,7 +31,7 @@ private:
 				geometry_msgs::PoseStamped &pre_pose);
 	
 	int pick(std::string objectName, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
-	
+
 public:
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
 

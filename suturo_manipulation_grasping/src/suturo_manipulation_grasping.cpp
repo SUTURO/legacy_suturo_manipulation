@@ -256,14 +256,34 @@ int Grasping::pick(std::string objectName, std::string arm)
 	}
 }
 
+
 int Grasping::drop(string objectName)
 {
 	//get object from planningscene
-	
+	moveit_msgs::AttachedCollisionObject aco;
+	if (pi_->getAttachedObject(objectName, aco))
+	{
+		ROS_INFO("Become object");
+	} else {
+		ROS_INFO("No object found!");
+	}
 	//find arm that holds the object
-	
+	bool r_grasp;
+	bool l_grasp;
+
+	r_grasp = aco.link_name == group_r_arm_->getEndEffectorLink();
+	l_grasp = aco.link_name == group_l_arm_->getEndEffectorLink();
+
 	//open gripper
-	
+	if (r_grasp && l_grasp){
+		gripper_->open_r_gripper();
+		gripper_->open_l_gripper();
+	} else if(r_grasp) {
+		gripper_->open_r_gripper();
+	} else {
+		gripper_->open_l_gripper();
+	}	
+
 	//detach object
 	pi_->detachObject(objectName);
 	return 0;

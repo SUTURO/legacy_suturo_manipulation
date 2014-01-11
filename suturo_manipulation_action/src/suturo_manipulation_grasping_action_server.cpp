@@ -60,8 +60,6 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 		as->setAborted(r);
 		}
 	}
-
-
 }
 
 
@@ -73,7 +71,7 @@ int main(int argc, char** argv)
 	Server_grasp server(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &nh, &server), false);
 	server.start();
 	
-	ROS_INFO("Ready to move the head!");
+	ROS_INFO("Ready to grasp!");
 	ros::spin();
 	return 0;
 }
