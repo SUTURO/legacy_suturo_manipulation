@@ -33,7 +33,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.15;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.07;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.2;
-  co.primitive_poses[0].position.x = 0.65;
+  co.primitive_poses[0].position.x = 0.652;
   co.primitive_poses[0].position.y = 0.3;
   co.primitive_poses[0].position.z = 0.621;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
@@ -146,8 +146,7 @@ group.move();*/
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	//~ ROS_INFO_STREAM(Grasping::L_ARM);
-	grasper.pick("box1", Grasping::R_ARM);
+	grasper.pick("box2", Grasping::L_ARM);
 	
 	//~ moveit_msgs::PlanningScene ps;
 	//~ pi.getPlanningScene(ps);
@@ -155,7 +154,7 @@ group.move();*/
 	
 	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
 	//ROS_INFO_STREAM("objects " << muh.at(0));
-	grasper.drop("box1");
+	grasper.drop("box2");
 
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
