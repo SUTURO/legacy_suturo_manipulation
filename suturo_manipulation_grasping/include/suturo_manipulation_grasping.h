@@ -39,6 +39,8 @@ public:
 
 	int calcGraspPosition(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
+	int pick(std::string objectName, std::string arm);
+
 	int r_arm_pick(std::string objectName);
 	int r_arm_pick(std::string objectName, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 

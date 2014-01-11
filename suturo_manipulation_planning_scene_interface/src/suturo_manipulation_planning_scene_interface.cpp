@@ -34,23 +34,19 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	}
 	else
 	{
-		ROS_ERROR("Failed to call service add_two_ints");
+		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene| Failed to call service add_two_ints");
 		return 0;
 	}
 	return 1;
 }
-/*
-int Suturo_Manipulation_Planning_Scene_Interface::setPlanningScene(moveit_msgs::PlanningScene ps)
-{
-	
-}*/
 
 int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objectName, std::string linkName,
 							std::vector<std::string> gripper_links)
 {
 	if (linkName.empty())
     {
-      ROS_ERROR("No link specified to attach the object '%s' to", objectName.c_str());
+      ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::attachObject| No link specified to attach the object '%s' to", 
+					objectName.c_str());
       return false;
     }
     
@@ -73,11 +69,13 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
     
   //subscribe to attach object topic
 	moveit_msgs::AttachedCollisionObject attached_object;
+	moveit_msgs::AttachedCollisionObject detached_object;
 	
 	getObject(objectName, attached_object.object);
-	attached_object.object.operation = attached_object.object.REMOVE;
-	
-	attached_object_publisher_.publish(attached_object); 
+	detached_object.object.operation = attached_object.object.REMOVE;
+	detached_object.object.id = attached_object.object.id;
+	detached_object.link_name = attached_object.link_name;
+	attached_object_publisher_.publish(detached_object); 
 	ros::WallDuration(2.0).sleep();
 	
 	return 1;
@@ -109,12 +107,12 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string objectNa
 		}
 		//Object not found
 		if (co.id != objectName){
-			ROS_ERROR_STREAM("Object: " << objectName << " not found!!");
+			ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getObject| Object: " << objectName << " not found!!");
 		}
 	}
 	else
 	{
-		ROS_ERROR("Failed to call service add_two_ints");
+		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getObject| Failed to call service move_group::GET_PLANNING_SCENE_SERVICE_NAME");
 		return 0;
 	}
 	return 1;
@@ -124,7 +122,7 @@ std::vector<moveit_msgs::AttachedCollisionObject> Suturo_Manipulation_Planning_S
 {
 	moveit_msgs::PlanningScene ps;
 	if (!getPlanningScene(ps)){
-		ROS_ERROR_STREAM("Failed to get planningscene");
+		ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getAttachedObjects| Failed to get planningscene");
 	}
 	return ps.robot_state.attached_collision_objects;
 }
@@ -138,7 +136,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string 
 			return 1;
 		}
 	}
-	ROS_ERROR_STREAM("Didn't found Object: " << objectName);
+	ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject| Didn't found Object: " << objectName);
 	return 0;
 }
 
