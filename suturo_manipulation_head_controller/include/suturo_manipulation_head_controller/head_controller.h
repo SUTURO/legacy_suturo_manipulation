@@ -62,7 +62,6 @@ namespace my_controller_ns{
             tf::TransformListener listener;
             
             geometry_msgs::PointStamped goalPoint_;
-            geometry_msgs::PointStamped originPoint_;
 
         public:
             bool init(pr2_mechanism_model::RobotState *robot,

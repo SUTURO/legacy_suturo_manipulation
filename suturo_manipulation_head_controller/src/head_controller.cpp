@@ -16,8 +16,14 @@ using namespace my_controller_ns;
 
 void MyCartControllerClass::setGoalCB(geometry_msgs::PoseStamped msg)
 {
-  ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
+	ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
         msg.pose.position.y, msg.pose.position.z, msg.header.frame_id.c_str());
+    goalPoint_.header.frame_id = msg.header.frame_id;
+    goalPoint_.header.seq = msg.header.seq;
+    goalPoint_.header.stamp = msg.header.stamp;
+    goalPoint_.point.x = msg.pose.position.x;
+    goalPoint_.point.y = msg.pose.position.y;
+    goalPoint_.point.z = msg.pose.position.z;
 }
 /// Controller initialization in non-realtime
 bool MyCartControllerClass::init(pr2_mechanism_model::RobotState *robot,
@@ -156,12 +162,6 @@ void MyCartControllerClass::update()
     chain_.setEfforts(tau_);
     */
 
-    // Stub for Testing
-    goal_pose_.x(1);
-    goal_pose_.y(0);
-    goal_pose_.z(1);
-    KDL::Frame goal_frame(goal_pose_);
-
     // Publish the Marker
     visualization_msgs::Marker goal_marker;
     goal_marker.header.frame_id = "torso_lift_link";
@@ -170,9 +170,9 @@ void MyCartControllerClass::update()
     goal_marker.id = 0;
     goal_marker.type = visualization_msgs::Marker::SPHERE;
     goal_marker.action = visualization_msgs::Marker::ADD;
-    goal_marker.pose.position.x = goal_pose_.x();
-    goal_marker.pose.position.y = goal_pose_.y();
-    goal_marker.pose.position.z = goal_pose_.z();
+    goal_marker.pose.position.x = goalPoint_.point.x;
+    goal_marker.pose.position.y = goalPoint_.point.y;
+    goal_marker.pose.position.z = goalPoint_.point.z;
     goal_marker.pose.orientation.x = 0.0;
     goal_marker.pose.orientation.y = 0.0;
     goal_marker.pose.orientation.z = 0.0;
@@ -185,71 +185,10 @@ void MyCartControllerClass::update()
     goal_marker.color.g = 1.0;
     goal_marker.color.b = 0.0;
     vis_pub.publish( goal_marker );
-
-    // Debugging
-    double norm = goal_pose_.Norm();
-  //  ROS_INFO("Current Pose: x %f, y %f, z %f", x_.p.x(), x_.p.y(), x_.p.z());
-    //ROS_INFO("Desired Pose: x %f, y %f, z %f", goal_pose_.x(), goal_pose_.y(), goal_pose_.z());
-    //ROS_INFO("normed length: %f", norm);
-    // Publish the Marker
-    visualization_msgs::Marker current_marker;
-    current_marker.header.frame_id = "torso_lift_link";
-    current_marker.header.stamp = ros::Time();
-    current_marker.ns = "suturo_manipulation";
-    current_marker.id = 1;
-    current_marker.type = visualization_msgs::Marker::SPHERE;
-    current_marker.action = visualization_msgs::Marker::ADD;
-    current_marker.pose.position.x = x_.p.x();
-    current_marker.pose.position.y = x_.p.y();
-    current_marker.pose.position.z = x_.p.z();
-    current_marker.pose.orientation.x = 0.0;
-    current_marker.pose.orientation.y = 0.0;
-    current_marker.pose.orientation.z = 0.0;
-    current_marker.pose.orientation.w = 1.0;
-    current_marker.scale.x = 0.1;
-    current_marker.scale.y = 0.1;
-    current_marker.scale.z = 0.1;
-    current_marker.color.a = 1.0;
-    current_marker.color.r = 1.0;
-    current_marker.color.g = 0.0;
-    current_marker.color.b = 0.0;
-    vis_pub.publish( current_marker );
-
-// Publish the Marker
-    visualization_msgs::Marker zero_marker;
-    zero_marker.header.frame_id = "torso_lift_link";
-    zero_marker.header.stamp = ros::Time();
-    zero_marker.ns = "suturo_manipulation";
-    zero_marker.id = 2;
-    zero_marker.type = visualization_msgs::Marker::SPHERE;
-    zero_marker.action = visualization_msgs::Marker::ADD;
-    zero_marker.pose.position.x = 0;
-    zero_marker.pose.position.y = 0;
-    zero_marker.pose.position.z = 0;
-    zero_marker.pose.orientation.x = 0.0;
-    zero_marker.pose.orientation.y = 0.0;
-    zero_marker.pose.orientation.z = 0.0;
-    zero_marker.pose.orientation.w = 1.0;
-    zero_marker.scale.x = 0.1;
-    zero_marker.scale.y = 0.1;
-    zero_marker.scale.z = 0.1;
-    zero_marker.color.a = 1.0;
-    zero_marker.color.r = 0.0;
-    zero_marker.color.g = 0.0;
-    zero_marker.color.b = 1.0;
-    vis_pub.publish( zero_marker );
     
-    // tf to transform the goal to /head_plate_frame
-    originPoint_.header.frame_id = "/torso_lift_link";
-    originPoint_.header.seq = 0;
-    originPoint_.header.stamp = ros::Time(0);
-    originPoint_.point.x = goal_pose_.x();
-    originPoint_.point.y = goal_pose_.y();
-    originPoint_.point.z = goal_pose_.z();
-    
-    listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
-    
-    ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
+    //~ listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
+    //~ 
+    //~ ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
     ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
     // Calculating the angle on the x-y-plane
