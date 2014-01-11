@@ -244,6 +244,11 @@ int Grasping::pick(string objectName, int arm, geometry_msgs::PoseStamped &pose,
 	return 1;
 }
 
+int Grasping::pick(std::string objectName, std::string arm)
+{
+	return 0;
+}
+
 int Grasping::drop(string objectName)
 {
 	//get object from planningscene

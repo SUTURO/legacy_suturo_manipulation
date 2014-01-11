@@ -235,8 +235,8 @@ group.setPoseTarget(p);
 group.move();*/
 
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-	//Grasping grasper(&pi);
-	
+	Grasping grasper(&pi);
+	grasper.pick("asd","asd");
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
 	//p.pose.position.x = 0.65;
