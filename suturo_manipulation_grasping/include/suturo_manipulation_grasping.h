@@ -11,8 +11,7 @@
 class Grasping
 {
 private:
-	static const std::string R_ARM ;
-	static const std::string L_ARM ;
+
 	move_group_interface::MoveGroup* group_r_arm_;
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
@@ -33,6 +32,9 @@ private:
 	int pick(std::string objectName, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
 public:
+	static const std::string R_ARM;
+	static const std::string L_ARM;
+	
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
 
 	~Grasping();

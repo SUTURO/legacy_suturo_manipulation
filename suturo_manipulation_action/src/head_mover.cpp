@@ -235,8 +235,10 @@ group.setPoseTarget(p);
 group.move();*/
 
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-	//Grasping grasper(&pi);
-	//grasper.pick("asd","asd");
+
+	Grasping grasper(&pi);
+	grasper.pick("box2",Grasping::L_ARM);
+
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
 	//p.pose.position.x = 0.65;
@@ -266,15 +268,17 @@ group.move();*/
 	//move_group_interface::MoveGroup group("right_arm");
 	//pick(group);
 	//Gripper g;
-	pi.attachObject("box1", "r_wrist_roll_link", Gripper::get_r_gripper_links());
+	//pi.attachObject("box1", "r_wrist_roll_link", Gripper::get_r_gripper_links());
 	//moveit_msgs::PlanningScene ps;
 	//pi.getPlanningScene(ps);
-	std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
-	ROS_INFO_STREAM("objects " << muh.at(0));
+	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
+	//ROS_INFO_STREAM("objects " << muh.at(0));
 	
-	pi.detachObject("box1");
-	std::vector<moveit_msgs::AttachedCollisionObject> muh2 = pi.getAttachedObjects();
-	ROS_INFO_STREAM("objects " << muh2.at(0));
+
+	//pi.detachObject("box1");
+	//muh = pi.getAttachedObjects();
+	//ROS_INFO_STREAM("objects " << muh.at(0));
+
 	//ROS_INFO_STREAM("ps " << ps.robot_state);
 	//ros::Publisher pub2 = nh.advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
 	//pub2.publish(ps);
