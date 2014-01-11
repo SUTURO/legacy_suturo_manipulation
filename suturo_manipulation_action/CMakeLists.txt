@@ -114,12 +114,16 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_action_node src/suturo_manipulation_action_node.cpp)
 
+
 add_executable(suturo_manipulation_move_home_server src/suturo_manipulation_move_home_server.cpp)
 add_executable(suturo_manipulation_move_arm_server src/suturo_manipulation_move_arm_server.cpp)
 add_executable(suturo_manipulation_grasping_action_server src/suturo_manipulation_grasping_action_server.cpp)
 add_executable(test_move_home_client src/test_move_home_client.cpp)
 add_executable(test_grasping_client src/test_grasping_client.cpp)
 add_executable(test_move_arm_client src/test_move_arm_client.cpp)
+add_executable(suturo_manipulation_move_head_server src/suturo_manipulation_move_head_server.cpp)
+add_executable(test_head_client src/test_head_client.cpp)
+add_executable(test_head_subscriber src/test_head_subscriber.cpp)
 add_executable(head_mover src/head_mover.cpp)
 
 
@@ -133,6 +137,10 @@ add_dependencies(test_move_home_client suturo_manipulation_msgs ${catkin_EXPORTE
 add_dependencies(test_move_arm_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_grasping_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(head_mover suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_move_head_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_head_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_head_subscriber suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_action_node
@@ -171,6 +179,22 @@ target_link_libraries(
   test_grasping_client
   ${catkin_LIBRARIES}
 )
+
+target_link_libraries(
+  suturo_manipulation_move_head_server
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_head_client
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_head_subscriber
+  ${catkin_LIBRARIES}
+)
+
 
 target_link_libraries(
   head_mover

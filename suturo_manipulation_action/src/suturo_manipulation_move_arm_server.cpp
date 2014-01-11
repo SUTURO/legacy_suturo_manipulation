@@ -15,7 +15,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-// Tranfsorm the incoming frame to /base_link
+// Transform the incoming frame to /base_link
 int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
@@ -28,6 +28,7 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 	
 	// goal_frame
     const string odom = "/base_link";
+	ROS_INFO("Beginn der Transformation von %s zu /base_link", s);
     try{
 		//transform pose from s to base_link and save it in pose again
 		listener->transformPose(odom, goalPose, goalPose);
@@ -66,15 +67,20 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		as->setAborted(r);
 		return;
 	}
-	
-	ROS_INFO("transformed to x: %f, y: %f, z: %f", odomPose.pose.position.x,
-		odomPose.pose.position.y, odomPose.pose.position.z);	
+
+	//Orientierung des End-Effektors wieder auf w=1 setzen
+	odomPose.pose.orientation.x = 0;
+	odomPose.pose.orientation.y = 0;
+	odomPose.pose.orientation.z = 0;
+	odomPose.pose.orientation.w = 1;
+	ROS_INFO("transformed to x: %f, y: %f, z: %f in Frame %s", odomPose.pose.position.x,
+		odomPose.pose.position.y, odomPose.pose.position.z, odomPose.header.frame_id.c_str());	
 	
 	// set group to move
 	move_group_interface::MoveGroup group(arm);
 
 	// modifies the z-position, to touch object... dirty hack...
-	odomPose.pose.position.z += 0.3;
+	// odomPose.pose.position.z += 0.3;
 	
 	// set orientation to have a straight gripper
 	odomPose.pose.orientation.x = 0;
@@ -83,10 +89,11 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	odomPose.pose.orientation.w = 1;
 	
 	// set Pose
+
 	group.setPoseTarget(odomPose);
-	ROS_INFO("current Position: x=%f, y=%f, z=%f", group.getCurrentPose().pose.position.x,
+	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
-			group.getCurrentPose().pose.position.z);
+			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
 		
 	//move arm
 	if (group.move()){
