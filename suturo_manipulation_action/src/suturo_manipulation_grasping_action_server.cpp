@@ -9,12 +9,12 @@
 
 using namespace std;
 
-typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_graspingAction> Server_grasp;
+typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_graspingAction> Server;
 
 /**
 * This method grasps or drops a object!
 */
-void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::NodeHandle* nh, Server_grasp* as)
+void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::NodeHandle* nh, Server* server_grasp)
 {	
 	suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
 	
@@ -42,11 +42,11 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 		{
 			ROS_INFO("Object picked...");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-	    as->setSucceeded(r);
+	    server_grasp->setSucceeded(r);
 		} else {
 			ROS_INFO("Picking failed!");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		as->setAborted(r);
+		server_grasp->setAborted(r);
 		}
 	} else {
 		ROS_INFO("Begin to drop object...");
@@ -55,15 +55,16 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 		{
 			ROS_INFO("Object droped...");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-	    as->setSucceeded(r);
+	    server_grasp->setSucceeded(r);
 		} else {
 			ROS_INFO("Droping failed!");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		as->setAborted(r);
+		server_grasp->setAborted(r);
 		}
 	}
 }
 
+// create dummy data in planning scene
 void putObjects(ros::Publisher pub_co)
 {
   ros::WallDuration(1.0).sleep();
@@ -146,25 +147,6 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].orientation.w = 1;
   pub_co.publish(co);
   
-    
-    
-    /*
-    tf::Quaternion q;
-    double roll, pitch, yaw;
-    tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
-    tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
-    ROS_INFO("RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, 0, 0);
-  ROS_INFO_STREAM(co.primitive_poses[0].orientation);
-  tf::quaternionMsgToTF(co.primitive_poses[0].orientation, q);
-tf::Vector3 vector(0, 0, 1);
-tf::Vector3 rotated_vector = tf::quatRotate(q, vector);
-
-	geometry_msgs::Vector3 v3;
-	tf::vector3TFToMsg(rotated_vector, v3);
-
-  ROS_INFO_STREAM("v3 " << v3);*/
-  // wait a bit for ros things to initialize
   ros::WallDuration(2.0).sleep();
 }
 
@@ -178,8 +160,8 @@ int main(int argc, char** argv)
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
 	
-	Server_grasp server(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &nh, &server), false);
-	server.start();
+	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &nh, &server_grasp), false);
+	server_grasp.start();
 	
 
 	ROS_INFO("Ready to grasp!!!");

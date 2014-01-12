@@ -47,7 +47,7 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 * This method starts the transformation to the right frame and 
 * publishes the transformed goal.
 */
-void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::Publisher* publisher, Server* head_server)
+void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::Publisher* publisher, Server* server_head)
 {	
 	ROS_INFO("callback moveHead() begins...");
 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
@@ -63,20 +63,20 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		head_server->setAborted(r);
+		server_head->setAborted(r);
 		return;
 	}
 
 	// Publish goal on topic /suturo/head_controller
 	if( !publisher ) {
   		ROS_WARN("Publisher invalid!");
-  		head_server->setAborted(r);
+  		server_head->setAborted(r);
 	} else {
 		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
 		publisher->publish(transformedPose);
 		ROS_INFO("Goal published!");
-		head_server->setSucceeded(r);
+		server_head->setSucceeded(r);
 	}
 
 }
@@ -92,9 +92,9 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// create the action server
-	Server head_server(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &head_publisher, &head_server), false);
+	Server server_head(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &head_publisher, &server_head), false);
 	// start the server
-	head_server.start();
+	server_head.start();
 
 	ROS_INFO("Ready to move the head!");
 	ros::spin();

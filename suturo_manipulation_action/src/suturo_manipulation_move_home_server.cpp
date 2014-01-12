@@ -12,12 +12,12 @@
 
 using namespace std;
 
-typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server_home;
+typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server;
 
 /**
 * This method moves the given bodypart to the homeposition.
 */
-void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, ros::Publisher* publisher, Server_home* as)
+void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, ros::Publisher* publisher, Server* server_home)
 {	
 	ROS_INFO("callback moveHome() begins...");
 
@@ -44,11 +44,11 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
         // Publish goal on topic /suturo/head_controller
         if( !publisher ) {
            ROS_WARN("Publisher invalid!");
-           as->setAborted(r);
+           server_home->setAborted(r);
         } else {
             publisher->publish(headHome);
             ROS_INFO("Home Goal published!");
-            as->setSucceeded(r);
+            server_home->setSucceeded(r);
         }
 	} else {
 		// set group to move
@@ -60,10 +60,10 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		//move bodypart
 		if (group.move()){
 		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-		    as->setSucceeded(r);
+		    server_home->setSucceeded(r);
 		} else {
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-			as->setAborted(r);
+			server_home->setAborted(r);
 		}
 	}	
 	ROS_INFO("moved: %i", r.succ.type);
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// create the action server
-	Server_home server_home(n, "suturo_man_move_home_server", boost::bind(&moveHome, _1, &head_publisher, &server_home), false);
+	Server server_home(n, "suturo_man_move_home_server", boost::bind(&moveHome, _1, &head_publisher, &server_home), false);
 	// start the server
 	server_home.start();
 	

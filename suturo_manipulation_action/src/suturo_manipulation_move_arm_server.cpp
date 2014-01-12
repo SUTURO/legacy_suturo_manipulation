@@ -11,12 +11,12 @@
 
 using namespace std;
 
-typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server_move;
+typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
 
 tf::TransformListener* listener = NULL;
 
 // Transform the incoming frame to /base_link
-int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
+int transform(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
 	//save goal position in pose
@@ -27,11 +27,12 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.orientation.w = 1;
 	
 	// goal_frame
-    const string odom = "/base_link";
+    const string goalFrame = "/base_link";
+
 	ROS_INFO("Beginn der Transformation von %s zu /base_link", s);
     try{
 		//transform pose from s to base_link and save it in pose again
-		listener->transformPose(odom, goalPose, goalPose);
+		listener->transformPose(goalFrame, goalPose, goalPose);
 	}catch(...){
 		ROS_INFO("ERROR: Transformation failed.");
 		return 0;
@@ -44,7 +45,7 @@ int kinectToOdom(geometry_msgs::PoseStamped &goalPose,
 * This method starts the transformation to the right frame and 
 * calls move() to move the selected arm.
 */
-void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server_move* as)
+void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* server_arm)
 {	
 	// Set arm which should be moved
 	string arm = goal->arm;
@@ -60,37 +61,37 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		goal->ps.pose.position.y, goal->ps.pose.position.z);
 	
 	//tranform pose
-	geometry_msgs::PoseStamped odomPose;
-	if (!kinectToOdom(odomPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
+	geometry_msgs::PoseStamped transformedPose;
+	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		as->setAborted(r);
+		server_arm->setAborted(r);
 		return;
 	}
 
 	//Orientierung des End-Effektors wieder auf w=1 setzen
-	odomPose.pose.orientation.x = 0;
-	odomPose.pose.orientation.y = 0;
-	odomPose.pose.orientation.z = 0;
-	odomPose.pose.orientation.w = 1;
-	ROS_INFO("transformed to x: %f, y: %f, z: %f in Frame %s", odomPose.pose.position.x,
-		odomPose.pose.position.y, odomPose.pose.position.z, odomPose.header.frame_id.c_str());	
+	transformedPose.pose.orientation.x = 0;
+	transformedPose.pose.orientation.y = 0;
+	transformedPose.pose.orientation.z = 0;
+	transformedPose.pose.orientation.w = 1;
+	ROS_INFO("transformed to x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
+		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
 	
 	// set group to move
 	move_group_interface::MoveGroup group(arm);
 
 	// modifies the z-position, to touch object... dirty hack...
-	// odomPose.pose.position.z += 0.3;
+	// transformedPose.pose.position.z += 0.3;
 	
 	// set orientation to have a straight gripper
-	odomPose.pose.orientation.x = 0;
-	odomPose.pose.orientation.y = 0;
-	odomPose.pose.orientation.z = 0;
-	odomPose.pose.orientation.w = 1;
+	transformedPose.pose.orientation.x = 0;
+	transformedPose.pose.orientation.y = 0;
+	transformedPose.pose.orientation.z = 0;
+	transformedPose.pose.orientation.w = 1;
 	
 	// set Pose
 
-	group.setPoseTarget(odomPose);
+	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
 			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
@@ -98,10 +99,10 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	//move arm
 	if (group.move()){
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-	    as->setSucceeded(r);
+	    server_arm->setSucceeded(r);
 	} else {
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		as->setAborted(r);
+		server_arm->setAborted(r);
 	}	
 	ROS_INFO("moved: %i", r.succ.type);
 }
@@ -113,9 +114,9 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 
 	// create the action server
-	Server_move server(n, "suturo_man_move_arm_server", boost::bind(&execute, _1, &server), false);
+	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&execute, _1, &server_arm), false);
 	// start the server
-	server.start();
+	server_arm.start();
 	
 	ROS_INFO("Ready to move the arms!.");
 	ros::spin();
