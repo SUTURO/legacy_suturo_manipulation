@@ -18,12 +18,12 @@ void MyCartControllerClass::setGoalCB(geometry_msgs::PoseStamped msg)
 {
 	ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
         msg.pose.position.y, msg.pose.position.z, msg.header.frame_id.c_str());
-    goalPoint_.header.frame_id = msg.header.frame_id;
-    goalPoint_.header.seq = msg.header.seq;
-    goalPoint_.header.stamp = msg.header.stamp;
-    goalPoint_.point.x = msg.pose.position.x;
-    goalPoint_.point.y = msg.pose.position.y;
-    goalPoint_.point.z = msg.pose.position.z;
+    originPoint_.header.frame_id = msg.header.frame_id;
+    originPoint_.header.seq = msg.header.seq;
+    originPoint_.header.stamp = msg.header.stamp;
+    originPoint_.point.x = msg.pose.position.x;
+    originPoint_.point.y = msg.pose.position.y;
+    originPoint_.point.z = msg.pose.position.z;
     
     updated = true;
 }
@@ -167,10 +167,15 @@ void MyCartControllerClass::update()
 		// And finally send these torques out.
 		chain_.setEfforts(tau_);
 		*/
+		
+			
+		listener.transformPoint("/head_plate_frame", ros::Time(0), originPoint_, "/torso_lift_link", goalPoint_);
+		//~ ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
+		//~ ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
 		// Publish the Marker
 		visualization_msgs::Marker goal_marker;
-		goal_marker.header.frame_id = "torso_lift_link";
+		goal_marker.header.frame_id = "head_plate_frame";
 		goal_marker.header.stamp = ros::Time();
 		goal_marker.ns = "suturo_manipulation";
 		goal_marker.id = 0;
@@ -191,11 +196,6 @@ void MyCartControllerClass::update()
 		goal_marker.color.g = 1.0;
 		goal_marker.color.b = 0.0;
 		vis_pub.publish( goal_marker );
-		
-		//~ listener.transformPoint("/head_plate_frame", originPoint_, goalPoint_);
-		//~ 
-		//~ ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
-		ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
 		//~ // Calculating the angle on the x-y-plane
 		//~ // Setting the z-value to zero
@@ -204,7 +204,7 @@ void MyCartControllerClass::update()
 //~ 
 		//~ // angular error = arccos((goal_xy.curr_xy)/(|goal_xy|*|curr_xy|))*(180/PI)
 		//~ double x_error = acos(dot(goal_xy, curr_xy)/(goal_xy.Norm()*curr_xy.Norm())) * (180.0/PI);
-		double x_error = goalPoint_.point.z;
+		double z_error = goalPoint_.point.z;
 		
 
 		//~ // Calculating the angle on the x-z-plane
@@ -219,24 +219,28 @@ void MyCartControllerClass::update()
 			//~ y_error = - y_error;
 		//~ }
 		double y_error = goalPoint_.point.y;
-		ROS_INFO("x_error: %f, y_error: %f",x_error,y_error);
+		ROS_INFO("z_error: %f, y_error: %f",z_error,y_error);
 
 		// Setting the Force
 		F_(0) = 0;
 		F_(1) = 0;
 		F_(2) = 0;
-		F_(3) = 100 * y_error;
-		F_(4) = 100 * x_error;
-		F_(5) = 0;
+		F_(3) = 0;
+		F_(4) = 50 * -z_error;
+		F_(5) = 50 * -y_error;
 
-		// Convert the force into a set of joint torques.
-		for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
-		{
-			tau_(i) = 0;
-			for (unsigned int j = 0 ; j < 6 ; j++)
-				tau_(i) += J_(j,i) * F_(j);
-			ROS_INFO("Effort: %f " , tau_(i));
-		}
+		//~ // Convert the force into a set of joint torques.
+		//~ for (unsigned int i = 0 ; i < kdl_chain_.getNrOfJoints() ; i++)
+		//~ {
+			//~ tau_(i) = 0;
+			//~ for (unsigned int j = 0 ; j < 6 ; j++)
+				//~ tau_(i) += J_(j,i) * F_(j);
+			//~ ROS_INFO("Effort: %f " , tau_(i));
+		//~ 
+		// tau_(0) > 0 => kopf dreht nach links
+		tau_(0) = y_error;
+		// tau_(1) > 0 => kopf kippt nach unten
+		tau_(1) = -z_error * 5;
 
 		// And finally send these torques out.
 		chain_.setEfforts(tau_);

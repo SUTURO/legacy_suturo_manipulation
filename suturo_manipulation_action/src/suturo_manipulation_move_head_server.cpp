@@ -16,6 +16,7 @@ using namespace std;
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_headAction> Server_head;
 
 tf::TransformListener* listener = NULL;
+geometry_msgs::PoseStamped odomPose;
 
 // Tranfsorm the incoming frame to /head_mount_kinect_rgb_optical_frame for the head move controller
 int tranform(geometry_msgs::PoseStamped &goalPose,
@@ -29,7 +30,7 @@ int tranform(geometry_msgs::PoseStamped &goalPose,
     goalPose.pose.orientation.w = 1;
 	
 	// goal_frame
-    const string goal_frame = "/head_plate_frame";
+    const string goal_frame = "/torso_lift_link";
     // const string goal_frame = "/base_link";
 
 	ROS_INFO("Beginn der Transformation");
@@ -50,6 +51,7 @@ int tranform(geometry_msgs::PoseStamped &goalPose,
 */
 void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::Publisher* publisher, Server_head* head_server)
 {	
+	ROS_INFO("execute() wurde getriggert");
 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
 	
 	// Set header
@@ -58,7 +60,6 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPt
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 	
 	//tranform pose
-	geometry_msgs::PoseStamped odomPose;
 	if (!tranform(odomPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
