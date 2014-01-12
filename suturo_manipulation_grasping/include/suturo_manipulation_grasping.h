@@ -17,6 +17,8 @@ private:
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
+	int updateGraspedObjectPose(moveit_msgs::CollisionObject &co, std::string arm);
+
 	int calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);
 	

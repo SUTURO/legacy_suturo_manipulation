@@ -27,10 +27,7 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 
 Grasping::~Grasping()
 {
-	/*delete group_l_arm_;
-	delete group_r_arm_;
-	delete gripper_;
-	delete pi_;*/
+
 }
 
 int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
@@ -135,6 +132,23 @@ int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::
 	return 1;
 }
 
+int updateGraspedObjectPose(moveit_msgs::CollisionObject &co, std::string arm)
+{
+	geometry_msgs::PoseStamped gripperPose;
+	if (arm == R_ARM){
+		gripperPose = group_r_arm_.getCurrentPose();
+	} else if (arm == L_ARM){
+		gripperPose = group_l_arm_.getCurrentPose();
+	} else {
+		ROS_ERROR("wrong arm parameter.");
+		return 0;
+	}
+	
+	
+	
+	return 1;
+}
+
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
 {
 	string objectName = co.id;
@@ -178,7 +192,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		gripper_->close_l_gripper();
 	}
 	
-	//co.pose.
+	
 	
 	//attach object
 	pi_->attachObject(objectName, group->getEndEffectorLink(), Gripper::get_r_gripper_links());
