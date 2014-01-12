@@ -134,7 +134,7 @@ int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::
 
 int updateGraspedObjectPose(moveit_msgs::CollisionObject &co, std::string arm)
 {
-	geometry_msgs::PoseStamped gripperPose;
+	/*geometry_msgs::PoseStamped gripperPose;
 	if (arm == R_ARM){
 		gripperPose = group_r_arm_.getCurrentPose();
 	} else if (arm == L_ARM){
@@ -142,7 +142,7 @@ int updateGraspedObjectPose(moveit_msgs::CollisionObject &co, std::string arm)
 	} else {
 		ROS_ERROR("wrong arm parameter.");
 		return 0;
-	}
+	}*/
 	
 	
 	
