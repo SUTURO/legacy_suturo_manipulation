@@ -65,8 +65,6 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 		pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, tf::getYaw(box_orientation));
 	}
 	
-	ROS_INFO_STREAM(tf::getYaw(box_orientation));
-	
 	//grab object form the front
 	pose.pose.position.z += Gripper::GRIPPER_DEPTH + z/2;
 	
@@ -132,19 +130,35 @@ int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::
 	return 1;
 }
 
-int updateGraspedObjectPose(moveit_msgs::CollisionObject &co, std::string arm)
+int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm)
 {
-	/*geometry_msgs::PoseStamped gripperPose;
+	geometry_msgs::PoseStamped gripperPose;
 	if (arm == R_ARM){
-		gripperPose = group_r_arm_.getCurrentPose();
+		gripperPose = group_r_arm_->getCurrentPose();
 	} else if (arm == L_ARM){
-		gripperPose = group_l_arm_.getCurrentPose();
+		gripperPose = group_l_arm_->getCurrentPose();
 	} else {
 		ROS_ERROR("wrong arm parameter.");
 		return 0;
-	}*/
+	}
 	
+	double x = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X];
+  double y = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
+  double z = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z];
 	
+	//copy position of object
+	co.primitive_poses[0].position = gripperPose.pose.position;
+	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2;
+	
+	//choose default orientation for hand
+	double gripper_yaw = tf::getYaw(gripperPose.pose.orientation);
+	
+	if (y > Gripper::GRIPPER_MAX_POSITION){
+		//rotate gripper to grap the y side
+		co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, gripper_yaw-M_PI_2);
+	} else {
+		co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, gripper_yaw);
+	}
 	
 	return 1;
 }
@@ -192,12 +206,15 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		gripper_->close_l_gripper();
 	}
 	
-	
+	ROS_INFO_STREAM("update objectposition in planningscene.");
+	updateGraspedBoxPose(co, arm);
 	
 	//attach object
+	ROS_INFO_STREAM("attach object");
 	pi_->attachObject(objectName, group->getEndEffectorLink(), Gripper::get_r_gripper_links());
 	
 	//lift object
+	ROS_INFO_STREAM("lift object");
 	geometry_msgs::PoseStamped pose2 = pose;
 	pose2.pose.position.z += 0.05;
 	group->setPoseTarget(pose2);
@@ -258,5 +275,5 @@ int Grasping::drop(string objectName)
 	
 	//detach object
 	pi_->detachObject(objectName);
-	return 0;
+	return 1;
 }

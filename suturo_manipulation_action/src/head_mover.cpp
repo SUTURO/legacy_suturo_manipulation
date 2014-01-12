@@ -118,7 +118,7 @@ void openhand()
 {
 	
 	Gripper g;
-	g.open_r_gripper();
+	g.open_l_gripper();
 }
 
 int main(int argc, char **argv)
@@ -143,6 +143,20 @@ int main(int argc, char **argv)
 group.setPoseTarget(p);
 group.move();*/
 
+//~ move_group_interface::MoveGroup group("left_gripper");
+//~ 
+//~ std::vector<std::string> bla1 = group.getJoints();
+//~ for (int i = 0; i < bla1.size(); i++) ROS_INFO_STREAM(bla1.at(i));
+//~ 
+//~ std::vector<double> bla = group.getCurrentJointValues();
+//~ 
+//~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
+//~ 
+//~ openhand();
+//~ 
+//~ bla = group.getCurrentJointValues();
+//~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
+
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
@@ -150,11 +164,15 @@ group.move();*/
 	
 	//~ moveit_msgs::PlanningScene ps;
 	//~ pi.getPlanningScene(ps);
-	//ROS_INFO_STREAM("ps: " << ps);
+	//~ ROS_INFO_STREAM("ps: " << ps);
 	
 	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
 	//ROS_INFO_STREAM("objects " << muh.at(0));
-	grasper.drop("box2");
+	if (grasper.drop("box2")){
+		ROS_INFO_STREAM("true");
+	}else{
+		ROS_INFO_STREAM("false");
+	}
 
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
@@ -206,59 +224,3 @@ group.move();*/
 	ros::waitForShutdown();
 	return 0;
 }
-
-/*
- * void spawnMesh(ros::Publisher pub_co)
-{
-  moveit_msgs::CollisionObject co2;
-  co2.header.stamp = ros::Time::now();
-  co2.header.frame_id = "/base_footprint";
-    
-  co2.id = "part2";
-  co2.operation = moveit_msgs::CollisionObject::REMOVE;
-  pub_co.publish(co2);
-  
-  co2.operation = moveit_msgs::CollisionObject::ADD;
-  co2.meshes.resize(1);
-  co2.meshes[0].vertices.resize(4);
-  co2.meshes[0].vertices[0].x = -0.9;
-  co2.meshes[0].vertices[0].y = -0.9;
-  co2.meshes[0].vertices[0].z = -0.9;
-  
-  co2.meshes[0].vertices[1].x = 1.5;
-  co2.meshes[0].vertices[1].y = 1.5;
-  co2.meshes[0].vertices[1].z = 1.5;
-  
-  co2.meshes[0].vertices[2].x = -0.5;
-  co2.meshes[0].vertices[2].y = -0.5;
-  co2.meshes[0].vertices[2].z = -0.5;
-  
-  co2.meshes[0].vertices[3].x = 1.0;
-  co2.meshes[0].vertices[3].y = 1.0;
-  co2.meshes[0].vertices[3].z = 1.0;
-  
-  co2.meshes[0].triangles.resize(4);
-  co2.meshes[0].triangles[0].vertex_indices[0] = 0;
-  co2.meshes[0].triangles[0].vertex_indices[1] = 1;
-  co2.meshes[0].triangles[0].vertex_indices[2] = 2;
-  
-  co2.meshes[0].triangles[1].vertex_indices[0] = 1;
-  co2.meshes[0].triangles[1].vertex_indices[1] = 2;
-  co2.meshes[0].triangles[1].vertex_indices[2] = 3;
-  
-  co2.meshes[0].triangles[2].vertex_indices[0] = 0;
-  co2.meshes[0].triangles[2].vertex_indices[1] = 1;
-  co2.meshes[0].triangles[2].vertex_indices[2] = 3;
-  
-  co2.meshes[0].triangles[3].vertex_indices[0] = 0;
-  co2.meshes[0].triangles[3].vertex_indices[1] = 2;
-  co2.meshes[0].triangles[3].vertex_indices[2] = 3;
-  
-  co2.mesh_poses.resize(1);
-  co2.mesh_poses[0].position.x =0.9;
-  co2.mesh_poses[0].position.y =0;
-  co2.mesh_poses[0].position.z =0.9;
-  co2.mesh_poses[0].orientation.w=1.0;
-  pub_co.publish(co2);	
-}
-*/
