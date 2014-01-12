@@ -1,7 +1,7 @@
 /**
 * This class implements the action server to move a
 * part of the robot (left_arm, right_arm, head)
-* into a definied home position.
+* to a definied home position.
 */
 
 #include <ros/ros.h>
@@ -14,8 +14,13 @@ using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server_home;
 
-void home(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, ros::Publisher* publisher, Server_home* as)
+/**
+* This method moves the given bodypart to the homeposition.
+*/
+void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, ros::Publisher* publisher, Server_home* as)
 {	
+	ROS_INFO("callback moveHome() begins...");
+
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_homeResult r;	
 	// Set part which should be go home
@@ -29,12 +34,12 @@ void home(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& 
 		// Create headHome object
 		geometry_msgs::PoseStamped headHome;
 
-		// Set home Coordinates and frame
-		headHome.pose.position.x = 0;
+		// Set home Coordinates, time and frame
+		headHome.pose.position.x = 1;
 		headHome.pose.position.y = 0;
 		headHome.pose.position.z = 0;
-		headHome.pose.orientation.w = 1;
-		headHome.header.frame_id = "/head_mount_kinect_rgb_optical_frame";
+		headHome.header.stamp = ros::Time::now();
+		headHome.header.frame_id = "/torso_lift_link";
 
         // Publish goal on topic /suturo/head_controller
         if( !publisher ) {
@@ -74,7 +79,7 @@ int main(int argc, char** argv)
     ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// create the action server
-	Server_home server_home(n, "suturo_man_move_home_server", boost::bind(&home, _1, &head_publisher, &server_home), false);
+	Server_home server_home(n, "suturo_man_move_home_server", boost::bind(&moveHome, _1, &head_publisher, &server_home), false);
 	// start the server
 	server_home.start();
 	

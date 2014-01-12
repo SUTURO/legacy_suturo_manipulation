@@ -27,10 +27,7 @@ int main(int argc, char** argv)
 	// Dummy PosedStamped Object
 	geometry_msgs::PoseStamped ps;
 
-	// ps.pose.position.x = -0.378;
-	// ps.pose.position.y = 0.187;
-	// ps.pose.position.z = 0.991;
-	// ps.header.frame_id = "/head_mount_kinect_rgb_optical_frame";
+	// Set PoseStamped Object with input
 	ps.pose.position.x = atof(argv[1]);
 	ps.pose.position.y = atof(argv[2]);
 	ps.pose.position.z = atof(argv[3]);
@@ -42,6 +39,7 @@ int main(int argc, char** argv)
 	// Dummy Goal
 	suturo_manipulation_msgs::suturo_manipulation_headGoal goal;
 
+	// Set goal with PoseStamped Object data
 	goal.ps.pose.position.x = ps.pose.position.x;
 	goal.ps.pose.position.y = ps.pose.position.y;
 	goal.ps.pose.position.z = ps.pose.position.z;
@@ -49,11 +47,11 @@ int main(int argc, char** argv)
 
 	ROS_INFO("HeadGoal done!");
 
-
+	// create client and connect to server
 	Head_client client("suturo_man_move_head_server", true); 
 	// waiting for connection
 	client.waitForServer();
-	ROS_INFO("connected!");
+	ROS_INFO("connected! let's move the head!");
 	// send the goal
 	client.sendGoal(goal);
 	ROS_INFO("goal sended!");
