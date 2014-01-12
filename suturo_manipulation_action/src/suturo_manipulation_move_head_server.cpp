@@ -57,6 +57,8 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 	
+	geometry_msgs::PoseStamped transformedPose;
+
 	//transform pose
 	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted

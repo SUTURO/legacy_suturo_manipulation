@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	goal.goal.header.stamp = ros::Time();
 	goal.goal.header.frame_id = "/base_footprint";
 	goal.goal.objectName = argv[1];
-	goal.goal.grasp = argv[3];
+	//goal.goal.grasp = argv[3];
 	goal.goal.arm = argv[2];
 
 	// send the goal to server
