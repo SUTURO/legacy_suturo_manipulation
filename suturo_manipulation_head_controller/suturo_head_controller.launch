@@ -1,0 +1,4 @@
+<launch>
+<rosparam file="$(find suturo_manipulation_head_controller)/suturo_head_controller.yaml" command="load" />
+   <node pkg="pr2_controller_manager" type="spawner" args="suturo_head_controller" name="suturo_head_controller_spawner" />
+</launch>

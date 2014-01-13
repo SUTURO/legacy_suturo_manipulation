@@ -1,0 +1,2 @@
+suturo_head_controller:
+  type: suturo_manipulation_head_controller/HeadControllerPlugin
