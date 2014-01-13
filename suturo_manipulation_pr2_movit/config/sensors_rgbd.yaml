@@ -1,6 +1,6 @@
 sensors: 
  - sensor_plugin: occupancy_map_monitor/PointCloudOctomapUpdater
-   point_cloud_topic: /suturo_perception_collision_cloud
+   point_cloud_topic: /kinect_head/depth_registered/points
    max_range: 5.0
    point_subsample: 1
    shape_padding: 0.1

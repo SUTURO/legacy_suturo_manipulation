@@ -57,7 +57,7 @@ actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
 {
     pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
     squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
-    squeeze.command.max_effort = 50.0;  // Close gently
+    squeeze.command.max_effort = 13.0;  // Close gently
     
     ROS_INFO("Sending squeeze goal");
     gripper_client_->sendGoal(squeeze);

@@ -30,15 +30,15 @@ void putObjects(ros::Publisher pub_co)
 
   // add table
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.15;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.07;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.145;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.01;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
   co.primitive_poses[0].position.x = 0.652;
-  co.primitive_poses[0].position.y = 0.3;
-  co.primitive_poses[0].position.z = 0.621;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
-  
-  pub_co.publish(co);
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = 0.941;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  //~ ROS_INFO_STREAM(co.primitive_poses[0].position);
+  //~ pub_co.publish(co);
 
   // remove table
   co.id = "table";
@@ -47,12 +47,12 @@ void putObjects(ros::Publisher pub_co)
 
   // add table
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 3;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.75;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 1.8;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.04;
-  co.primitive_poses[0].position.x = 2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.86;
+  co.primitive_poses[0].position.x = 0.75;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.5;
+  co.primitive_poses[0].position.z = 0.43;
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
   pub_co.publish(co);
 
@@ -71,7 +71,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = 0.621;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
 
   co.id = "beer2";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -80,12 +80,12 @@ void putObjects(ros::Publisher pub_co)
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
   co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.2;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.03;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.25;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.0375;
 
   co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.621;
+  co.primitive_poses[0].position.z = 0.9851;
   co.primitive_poses[0].orientation.x = 0;
   co.primitive_poses[0].orientation.y = 0;
   co.primitive_poses[0].orientation.z = 0;
@@ -160,7 +160,7 @@ group.move();*/
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	grasper.pick("box2", Grasping::L_ARM);
+	grasper.pick("beer2", Grasping::L_ARM);
 	
 	//~ moveit_msgs::PlanningScene ps;
 	//~ pi.getPlanningScene(ps);
@@ -168,11 +168,11 @@ group.move();*/
 	
 	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
 	//ROS_INFO_STREAM("objects " << muh.at(0));
-	if (grasper.drop("box2")){
-		ROS_INFO_STREAM("true");
-	}else{
-		ROS_INFO_STREAM("false");
-	}
+	//~ if (grasper.drop("box2")){
+		//~ ROS_INFO_STREAM("true");
+	//~ }else{
+		//~ ROS_INFO_STREAM("false");
+	//~ }
 
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";

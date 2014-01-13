@@ -16,10 +16,10 @@ const string Grasping::L_ARM = "left_arm";
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
 	group_r_arm_ = new move_group_interface::MoveGroup(R_ARM);
-	group_r_arm_->setPlanningTime(20.0);
+	group_r_arm_->setPlanningTime(10.0);
 	
 	group_l_arm_ = new move_group_interface::MoveGroup(L_ARM);
-	group_l_arm_->setPlanningTime(20.0);
+	group_l_arm_->setPlanningTime(10.0);
 	
 	gripper_ = new Gripper();
 	pi_ = pi;
@@ -49,7 +49,7 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 		return 0;
 	}
 	
-	pose.header.frame_id = "/base_footprint";
+	pose.header.frame_id = co.header.frame_id;
 	
 	//copy position of object
 	pose.pose.position = co.primitive_poses[0].position;
@@ -69,7 +69,7 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 	pose.pose.position.z += Gripper::GRIPPER_DEPTH + z/2;
 	
 	
-	pre_pose.header.frame_id = "/base_footprint";
+	pre_pose.header.frame_id = co.header.frame_id;
 	pre_pose = pose;
 	pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH;
 	
@@ -92,7 +92,7 @@ int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co,
 		return 0;
 	}
 	
-	pose.header.frame_id = "/base_footprint";
+	pose.header.frame_id = co.header.frame_id;
 	
 	//copy position of object
 	pose.pose.position = co.primitive_poses[0].position;
@@ -101,9 +101,9 @@ int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co,
 	pose.pose.orientation.w = 1;
 	
 	//grab object form the front
-	pose.pose.position.x -= Gripper::GRIPPER_DEPTH + r;
+	pose.pose.position.x -= Gripper::GRIPPER_DEPTH + r + 0.07;
 	
-	pre_pose.header.frame_id = "/base_footprint";
+	pre_pose.header.frame_id = co.header.frame_id;
 	pre_pose = pose;
 	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
 	
