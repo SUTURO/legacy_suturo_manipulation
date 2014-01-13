@@ -1,4 +1,0 @@
-my_cart_controller_name:
-  type: MyCartControllerPlugin
-  root_name: torso_lift_link
-  tip_name: head_plate_frame

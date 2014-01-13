@@ -1,5 +1,5 @@
-<library path="lib/libmy_controller_lib">
- <class name="MyCartControllerPlugin" 
-         type="my_controller_ns::MyCartControllerClass"           
+<library path="lib/libhead_controller_lib">
+    <class name="suturo_manipulation_head_controller/HeadControllerPlugin" 
+         type="suturo::Head_Controller"           
          base_class_type="pr2_controller_interface::Controller" />
-</library>
+ </library>

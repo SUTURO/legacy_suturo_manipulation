@@ -15,17 +15,13 @@
 #include <tf/transform_listener.h>
 
 
-namespace my_controller_ns{
+namespace suturo{
 
-    class MyCartControllerClass: public pr2_controller_interface::Controller
+    class Head_Controller: public pr2_controller_interface::Controller
     {
         private:
-            // The current robot state (to get the time stamp)
-            pr2_mechanism_model::RobotState* robot_state_;
-
-            // The chain of links and joints
-            pr2_mechanism_model::Chain chain_;
-            KDL::Chain kdl_chain_;
+            /*
+             *This is not used at the moment!
 
             // KDL Solvers performing the actual computations
             boost::scoped_ptr<KDL::ChainFkSolverPos>    jnt_to_pose_solver_;
@@ -35,7 +31,6 @@ namespace my_controller_ns{
             KDL::JntArray  q_;            // Joint positions 
             KDL::JntArray  q0_;           // Joint initial positions
             KDL::JntArrayVel  qdot_;      // Joint velocities
-            KDL::JntArray  tau_;          // Joint torques
 
             KDL::Frame     x_;            // Tip pose    
             KDL::Frame     xd_;           // Tip desired pose  
@@ -56,6 +51,16 @@ namespace my_controller_ns{
             // The trajectory variables
             double    circle_phase_;      // Phase along the circle
             ros::Time last_time_;         // Time of the last servo cycle
+            */
+
+            KDL::JntArray  tau_;          // Joint torques
+
+            // The current robot state (to get the time stamp)
+            // pr2_mechanism_model::RobotState* robot_state_;
+
+            // The chain of links and joints
+            pr2_mechanism_model::Chain chain_;
+            KDL::Chain kdl_chain_;
 
             ros::Publisher vis_pub;
             
@@ -66,6 +71,8 @@ namespace my_controller_ns{
             
             bool updated;
 
+            ros::Subscriber sub_;
+
         public:
             bool init(pr2_mechanism_model::RobotState *robot,
                     ros::NodeHandle &n);
@@ -74,7 +81,5 @@ namespace my_controller_ns{
             void stopping();
         private:
             void setGoalCB(geometry_msgs::PoseStamped msg);
-
-            ros::Subscriber sub_;
     };
 }
