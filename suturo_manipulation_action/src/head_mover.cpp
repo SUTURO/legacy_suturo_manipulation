@@ -31,14 +31,22 @@ void putObjects(ros::Publisher pub_co)
   // add table
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.145;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.01;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
-  co.primitive_poses[0].position.x = 0.652;
-  co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.941;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.01;
+  //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
+  //~ co.primitive_poses[0].position.x = 0.652;
+  //~ co.primitive_poses[0].position.y = 0;
+  //~ co.primitive_poses[0].position.z = 0.941;
+  //~ co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   //~ ROS_INFO_STREAM(co.primitive_poses[0].position);
   //~ pub_co.publish(co);
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.045;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
+  co.primitive_poses[0].position.x = 0.652;
+  co.primitive_poses[0].position.y = 0.3;
+  co.primitive_poses[0].position.z = 0.601;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  
+  pub_co.publish(co);
 
   // remove table
   co.id = "table";
@@ -63,12 +71,12 @@ void putObjects(ros::Publisher pub_co)
 
   // add table
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.07;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.15;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.2;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.045;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.145;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
   co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = -0.3;
-  co.primitive_poses[0].position.z = 0.621;
+  co.primitive_poses[0].position.z = 0.601;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
   
   //~ pub_co.publish(co);

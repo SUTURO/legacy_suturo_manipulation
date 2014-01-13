@@ -155,7 +155,7 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	
 	if (y > Gripper::GRIPPER_MAX_POSITION){
 		//rotate gripper to grap the y side
-		co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, gripper_yaw-M_PI_2);
+		co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, gripper_yaw);
 	} else {
 		co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, gripper_yaw);
 	}
@@ -208,6 +208,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	
 	ROS_INFO_STREAM("update objectposition in planningscene.");
 	updateGraspedBoxPose(co, arm);
+	pi_->addObject(co);
 	
 	//attach object
 	ROS_INFO_STREAM("attach object");

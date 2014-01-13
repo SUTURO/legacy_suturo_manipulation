@@ -4683,7 +4683,7 @@
     </model>
 
     <model name='unit_box_1'>
-      <pose>0.650000 0.300000 0.62100 0.000000 0.000000 -0.7853982</pose>
+      <pose>0.650000 0.300000 0.60100 0.000000 0.000000 -0.7853982</pose>
       <link name='link'>
         <inertial>
           <mass>0.090000</mass>
@@ -4699,7 +4699,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.150000 0.070000 0.200000</size>
+              <size>0.1450000 0.045000 0.160000</size>
             </box>
           </geometry>
           <surface>
@@ -4721,7 +4721,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.150000 0.070000 0.200000</size>
+              <size>0.1450000 0.045000 0.160000</size>
             </box>
           </geometry>
           <material>
@@ -4807,7 +4807,7 @@
     </model>
 
     <model name='unit_box_2'>
-      <pose>0.650000 -0.300000 0.621000 0.000000 0.000000 0.7853982</pose>
+      <pose>0.650000 -0.300000 0.601000 0.000000 0.000000 0.7853982</pose>
       <link name='link'>
         <inertial>
           <mass>0.090000</mass>
@@ -4823,7 +4823,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.150000 0.070000 0.200000</size>
+              <size>0.1450000 0.045000 0.160000</size>
             </box>
           </geometry>
           <surface>
@@ -4845,7 +4845,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.150000 0.070000 0.200000</size>
+              <size>0.1450000 0.045000 0.160000</size>
             </box>
           </geometry>
           <material>
