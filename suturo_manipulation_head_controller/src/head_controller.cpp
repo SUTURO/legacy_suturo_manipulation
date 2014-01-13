@@ -118,6 +118,6 @@ void Head_Controller::stopping()
 {}
 
 /// Register controller to pluginlib
-PLUGINLIB_DECLARE_CLASS(suturo_manipulation_head_controller, HeadControllerPlugin, suturo::Head_Controller,
+PLUGINLIB_EXPORT_CLASS(suturo::Head_Controller,
         pr2_controller_interface::Controller)
 
