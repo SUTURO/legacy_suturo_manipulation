@@ -41,11 +41,8 @@ bool Head_Controller::init(pr2_mechanism_model::RobotState *robot,
         return false;
     }
 
-    // Construct the kdl solvers in non-realtime.
-    chain_.toKDL(kdl_chain_);
-
     // Resize (pre-allocate) the variables in non-realtime.
-    tau_.resize(kdl_chain_.getNrOfJoints());
+    tau_.resize(2);
 
     // Subscribe to the goalpublisher and get ready to publish markers
     sub_ = n.subscribe("/suturo/head_controller_goal_point", 1, &Head_Controller::setGoalCB, this);
@@ -54,6 +51,12 @@ bool Head_Controller::init(pr2_mechanism_model::RobotState *robot,
     
     // Prepare the tf-chain
     listener.waitForTransform("torso_lift_link", "head_plate_frame", ros::Time(0), ros::Duration(1.0));
+
+    if(!pid_controller_.init(ros::NodeHandle(n, "pid_parameters"))){
+        ROS_ERROR("suturo_head_controller could not construct PID controller for head_tilt_joint");
+    }
+
+    robot_ = robot;
     
     return true;
 }
@@ -61,7 +64,8 @@ bool Head_Controller::init(pr2_mechanism_model::RobotState *robot,
 /// Controller startup in realtime 
 void Head_Controller::starting()
 {
-
+    time_of_last_cycle_ = robot_->getTime();
+    pid_controller_.reset();
 }
 
 /// Controller update loop in realtime
@@ -107,9 +111,16 @@ void Head_Controller::update()
 		tau_(0) = y_error;
 		// tau_(1) > 0 => kopf kippt nach unten
 		tau_(1) = -z_error * 5;
+        
+        // PID
+        ros::Duration dt = robot_->getTime() - time_of_last_cycle_;
+        time_of_last_cycle_ = robot_->getTime();
+        pid_error_ = pid_controller_.updatePid(-z_error*5, dt);
+        tau_(1)=pid_error_;
 
 		// And finally send these torques out.
 		chain_.setEfforts(tau_);
+        ROS_INFO("pid_error: %f", pid_error_);
 	}
 }
 

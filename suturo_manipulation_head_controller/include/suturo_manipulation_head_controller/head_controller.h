@@ -1,66 +1,20 @@
 #include <pr2_controller_interface/controller.h>
 #include <pr2_mechanism_model/chain.h>
-#include <pr2_mechanism_model/robot.h>
-
-#include <boost/scoped_ptr.hpp>
-#include <kdl/chain.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
-#include <kdl/chainfksolverpos_recursive.hpp>
-#include <kdl/frames.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl/jntarray.hpp>
-
 #include <geometry_msgs/PointStamped.h>
-
 #include <tf/transform_listener.h>
-
+#include <control_toolbox/pid.h>
 
 namespace suturo{
 
     class Head_Controller: public pr2_controller_interface::Controller
     {
         private:
-            /*
-             *This is not used at the moment!
-
-            // KDL Solvers performing the actual computations
-            boost::scoped_ptr<KDL::ChainFkSolverPos>    jnt_to_pose_solver_;
-            boost::scoped_ptr<KDL::ChainJntToJacSolver> jnt_to_jac_solver_;
-
-            // The variables (which need to be pre-allocated).
-            KDL::JntArray  q_;            // Joint positions 
-            KDL::JntArray  q0_;           // Joint initial positions
-            KDL::JntArrayVel  qdot_;      // Joint velocities
-
-            KDL::Frame     x_;            // Tip pose    
-            KDL::Frame     xd_;           // Tip desired pose  
-            KDL::Frame     x0_;           // Tip initial pose 
-
-            KDL::Twist     xerr_;         // Cart error
-            KDL::Twist     xdot_;         // Cart velocity 
-            KDL::Wrench    F_;            // Cart effort
-            KDL::Jacobian  J_;            // Jacobian
-            
-            KDL::Vector    goal_pose_;    // Goal position
-
-            // Note the gains are incorrectly typed as a twist,
-            // as there is no appropriate type!
-            KDL::Twist     Kp_;           // Proportional gains
-            KDL::Twist     Kd_;           // Derivative gains 
-
-            // The trajectory variables
-            double    circle_phase_;      // Phase along the circle
-            ros::Time last_time_;         // Time of the last servo cycle
-            */
-
-            KDL::JntArray  tau_;          // Joint torques
-
-            // The current robot state (to get the time stamp)
-            // pr2_mechanism_model::RobotState* robot_state_;
+            // Joint torques
+            KDL::JntArray  tau_;          
 
             // The chain of links and joints
             pr2_mechanism_model::Chain chain_;
-            KDL::Chain kdl_chain_;
+            pr2_mechanism_model::RobotState *robot_;           
 
             ros::Publisher vis_pub;
             
@@ -72,6 +26,10 @@ namespace suturo{
             bool updated;
 
             ros::Subscriber sub_;
+
+            control_toolbox::Pid pid_controller_;
+            ros::Time time_of_last_cycle_;
+            double pid_error_;
 
         public:
             bool init(pr2_mechanism_model::RobotState *robot,
