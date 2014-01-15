@@ -9,6 +9,7 @@
 #include <suturo_manipulation_msgs/suturo_manipulation_homeAction.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
+#include <suturo_manipulation_msgs/RobotBodyPart.h>
 
 using namespace std;
 
@@ -30,7 +31,9 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 	
-	if(body_part=="head"){
+	if(body_part==suturo_manipulation_msgs::RobotBodyPart::HEAD){
+		// bodypart = head
+		ROS_INFO("Move head home!");
 		// Create headHome object
 		geometry_msgs::PoseStamped headHome;
 
@@ -43,14 +46,16 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 
         // Publish goal on topic /suturo/head_controller
         if( !publisher ) {
-           ROS_WARN("Publisher invalid!");
-           server_home->setAborted(r);
+        	ROS_INFO("Publisher invalid!");
+          	server_home->setAborted(r);
         } else {
             publisher->publish(headHome);
             ROS_INFO("Home Goal published!");
             server_home->setSucceeded(r);
         }
-	} else {
+	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){
+		// bodypart = left_arm
+		ROS_INFO("Move left_arm home!");
 		// set group to move
 		move_group_interface::MoveGroup group(body_part);
 		
@@ -65,7 +70,31 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
 		}
-	}	
+	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM)){
+		// bodypart = right_arm
+		ROS_INFO("Move right_arm home!");
+		// set group to move
+		move_group_interface::MoveGroup group(body_part);
+		
+		// set group name to go home
+		group.setNamedTarget(body_part+"_home");
+		
+		//move bodypart
+		if (group.move()){
+		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+		    server_home->setSucceeded(r);
+		} else {
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_home->setAborted(r);
+		}
+	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS)){
+		// bodypart = right_arm
+		ROS_INFO("Move both arms home!");
+	} else {
+		ROS_INFO("Unknown bodypart!");
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+		server_home->setAborted(r);	
+	}
 	ROS_INFO("moved: %i", r.succ.type);
 }
 

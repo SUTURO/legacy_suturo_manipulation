@@ -7,6 +7,7 @@
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
+#include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <tf/transform_listener.h>
 
 using namespace std;
@@ -45,10 +46,9 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 * This method starts the transformation to the right frame and 
 * calls move() to move the selected arm.
 */
-void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* server_arm)
+void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* server_arm)
 {	
-	// Set arm which should be moved
-	string arm = goal->arm;
+
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_moveResult r;	
 	
@@ -56,6 +56,14 @@ void execute(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
     r.succ.header.stamp = ros::Time();
     // Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+
+	// Set arm which should be moved
+	string arm = goal->arm;
+	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+		server_arm->setAborted(r);	
+	}
 	
 	ROS_INFO("received arm: %s, x: %f, y: %f, z: %f", arm.c_str(), goal->ps.pose.position.x,
 		goal->ps.pose.position.y, goal->ps.pose.position.z);
@@ -114,7 +122,7 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 
 	// create the action server
-	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&execute, _1, &server_arm), false);
+	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &server_arm), false);
 	// start the server
 	server_arm.start();
 	

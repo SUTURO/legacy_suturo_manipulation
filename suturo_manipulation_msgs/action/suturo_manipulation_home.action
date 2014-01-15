@@ -1,7 +1,8 @@
 #strings
-string RIGHT_ARM="right_arm"
-string LEFT_ARM="left_arm"
-string HEAD="head"
+string RIGHT_ARM=suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM
+string LEFT_ARM=suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM
+string BOTH_ARMS=suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS
+string HEAD=suturo_manipulation_msgs::RobotBodyPart::HEAD
 
 #goal definition
 string bodypart

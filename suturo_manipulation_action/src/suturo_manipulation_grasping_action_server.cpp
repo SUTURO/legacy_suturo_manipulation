@@ -1,7 +1,12 @@
+/**
+* This class implements the action server to grasp/drop a object.
+*/
+
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_graspingAction.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
+#include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_grasping.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <shape_tools/solid_primitive_dims.h>
@@ -30,6 +35,11 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 
 	// Set arm to pick and object name
 	string picking_arm = graspGoal->goal.arm;
+  if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+    ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
+    r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+    server_grasp->setAborted(r);  
+  }
 	ROS_INFO("Arm to pick: %s", picking_arm.c_str());
 	string obj_name = graspGoal->goal.objectName;
 	ROS_INFO("ObjectName to pick: %s", obj_name.c_str());
