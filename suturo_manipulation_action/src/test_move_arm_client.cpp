@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 	ROS_INFO("set z done!");
 	goal.ps.header.frame_id = argv[4];;
 	ROS_INFO("set frame done!");
-	goal.arm = argv[5];
+	goal.bodypart.bodyPart = argv[5];
 	ROS_INFO("set arm done!");
 
 	// send goal

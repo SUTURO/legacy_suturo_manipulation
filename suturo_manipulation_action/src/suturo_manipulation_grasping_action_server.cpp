@@ -34,7 +34,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 	ROS_INFO("Done.");
 
 	// Set arm to pick and object name
-	string picking_arm = graspGoal->goal.arm;
+	string picking_arm = graspGoal->goal.bodypart.bodyPart;
   if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
     ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;

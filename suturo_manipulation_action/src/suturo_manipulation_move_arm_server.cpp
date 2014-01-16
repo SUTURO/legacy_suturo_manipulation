@@ -58,7 +58,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
 	// Set arm which should be moved
-	string arm = goal->arm;
+	string arm = goal->bodypart.bodyPart;
 	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
 		ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;

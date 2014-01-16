@@ -1,6 +1,3 @@
-string RIGHT_ARM="right_arm"
-string LEFT_ARM="left_arm"
-
 # header for time/frame information
 Header header
 
@@ -11,5 +8,5 @@ string objectName
 bool grasp
 
 #arm to be used
-string arm
+suturo_manipulation_msgs/RobotBodyPart bodypart
 

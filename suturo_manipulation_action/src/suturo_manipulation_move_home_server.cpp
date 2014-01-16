@@ -25,7 +25,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_homeResult r;	
 	// Set part which should be go home
-	string body_part = goal->bodypart;
+	string body_part = goal->bodypart.bodyPart;
 	// Set header
 	r.succ.header.stamp = ros::Time();
 	// Set Answer fot planning to undefined

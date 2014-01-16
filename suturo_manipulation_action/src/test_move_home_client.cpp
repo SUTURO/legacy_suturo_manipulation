@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	suturo_manipulation_msgs::suturo_manipulation_homeGoal goal;
 	
 	// Set goal data
-	goal.bodypart = argv[1];
+	goal.bodypart.bodyPart = argv[1];
 	// send goal to server
 	client.sendGoal(goal);
 	

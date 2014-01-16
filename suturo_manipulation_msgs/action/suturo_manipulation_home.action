@@ -1,11 +1,5 @@
-#strings
-string RIGHT_ARM=suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM
-string LEFT_ARM=suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM
-string BOTH_ARMS=suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS
-string HEAD=suturo_manipulation_msgs::RobotBodyPart::HEAD
-
 #goal definition
-string bodypart
+suturo_manipulation_msgs/RobotBodyPart bodypart
 ---
 #result definition
 ActionAnswer succ
