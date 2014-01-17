@@ -34,6 +34,8 @@ Grasping::~Grasping()
 int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose)
 {
+	ROS_INFO_STREAM("calculate graspposition for " << co.id);
+	
 	//test if the object is a box
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
 		ROS_ERROR_STREAM("Wenn der Fehler auftaucht hat Simon Mist gebaut!");
@@ -80,6 +82,7 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose)
 {
+	ROS_INFO_STREAM("calculate graspposition for " << co.id);
 	//test if object is a cylinder
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
 		ROS_ERROR_STREAM("Wenn der Fehler auftaucht hat Simon Mist gebaut!");
@@ -166,7 +169,7 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	return 1;
 }
 
-int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
+int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force)
 {
 	string objectName = co.id;
 	move_group_interface::MoveGroup* group;
@@ -180,7 +183,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	//go into pregraspposition
+	ROS_INFO_STREAM("set pregrasppositiontarget");
 	group->setPoseTarget(pre_pose);
+	ROS_INFO_STREAM("move to pregraspposition");
 	if (!group->move()){
 		ROS_ERROR_STREAM("Failed to move to pregraspposition of " << objectName << " at: " << pose);
 		return 0;		
@@ -194,9 +199,11 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	//set goal to pose
+	ROS_INFO_STREAM("set goalpose");
 	group->setPoseTarget(pose);
 	
 	//move Arm to goalpose
+	ROS_INFO_STREAM("move to goalpose");
 	if (!group->move()){
 		ROS_ERROR_STREAM("Failed to move to " << objectName << " at: " << pose);
 		return 0;
@@ -204,13 +211,13 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	
 	//close grapper
 	if (arm == R_ARM){
-		gripper_->close_r_gripper();
+		gripper_->close_r_gripper(force);
 	}else{
-		gripper_->close_l_gripper();
+		gripper_->close_l_gripper(force);
 	}
 	
 	ROS_INFO_STREAM("update objectposition in planningscene.");
-	//~ updateGraspedBoxPose(co, arm);
+	updateGraspedBoxPose(co, arm);
 	pi_->addObject(co);
 	
 	//attach object
@@ -228,7 +235,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 }
 
 
-int Grasping::pick(std::string objectName, std::string arm)
+int Grasping::pick(std::string objectName, std::string arm, double force)
 {
 	geometry_msgs::PoseStamped pose;
 	geometry_msgs::PoseStamped pre_pose;
@@ -245,7 +252,7 @@ int Grasping::pick(std::string objectName, std::string arm)
 		return 0;
 	}
 	
-	return pick(co, arm, pose, pre_pose);
+	return pick(co, arm, pose, pre_pose, force);
 }
 
 

@@ -28,38 +28,40 @@ Gripper::~Gripper()
 }
 
 //Open the gripper
-actionlib::SimpleClientGoalState open_gripper(GripperClient* gripper_client_)
+actionlib::SimpleClientGoalState Gripper::open_gripper(GripperClient* gripper_client_)
 {
 	pr2_controllers_msgs::Pr2GripperCommandGoal open;
-    open.command.position = Gripper::GRIPPER_MAX_POSITION;
-    open.command.max_effort = -1.0;  // Do not limit effort (negative)
-    
-    ROS_INFO("Sending open goal");
-    gripper_client_->sendGoal(open);
-    gripper_client_->waitForResult();
-    if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-      ROS_INFO("The gripper opened!");
-    else 
-      ROS_ERROR_STREAM("The gripper failed to open! :(");
-    return gripper_client_->getState();
+  open.command.position = Gripper::GRIPPER_MAX_POSITION;
+  open.command.max_effort = n;  // Do not limit effort (negative)
+   
+  ROS_INFO("Sending open goal");
+  gripper_client_->sendGoal(open);
+  gripper_client_->waitForResult();
+  if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+    ROS_INFO("The gripper opened!");
+  else 
+    ROS_ERROR_STREAM("The gripper failed to open! :(");
+	return gripper_client_->getState();
 }
 
-actionlib::SimpleClientGoalState Gripper::open_r_gripper()
+actionlib::SimpleClientGoalState Gripper::open_r_gripper(double force)
 {
+	n = force;
 	return open_gripper(r_gripper_client_);
 }
 
-actionlib::SimpleClientGoalState Gripper::open_l_gripper()
+actionlib::SimpleClientGoalState Gripper::open_l_gripper(double force)
 {
+	n = force;
 	return open_gripper(l_gripper_client_);
 }
 
 //Close the gripper
-actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
+actionlib::SimpleClientGoalState Gripper::close_gripper(GripperClient* gripper_client_)
 {
     pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
     squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
-    squeeze.command.max_effort = 50.0;  // Close gently
+    squeeze.command.max_effort = n;  // Close gently
     
     ROS_INFO("Sending squeeze goal");
     gripper_client_->sendGoal(squeeze);
@@ -72,12 +74,14 @@ actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
 	return gripper_client_->getState();
 }
 
-actionlib::SimpleClientGoalState Gripper::close_r_gripper()
+actionlib::SimpleClientGoalState Gripper::close_r_gripper(double force)
 {
+	n = force;
 	return close_gripper(r_gripper_client_);
 }
 
-actionlib::SimpleClientGoalState Gripper::close_l_gripper()
+actionlib::SimpleClientGoalState Gripper::close_l_gripper(double force)
 {
+	n = force;
 	return close_gripper(l_gripper_client_);
 }

@@ -70,12 +70,12 @@ void putObjects(ros::Publisher pub_co)
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
   pub_co.publish(co);
 
-  // remove table
+  // remove box1
   co.id = "box1";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
-  // add table
+  // add box1
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.045;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.145;
@@ -172,11 +172,11 @@ int main(int argc, char **argv)
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
 //~ 
 
-	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-
-	Grasping grasper(&pi);
-	grasper.pick("beer2", Grasping::R_ARM);
-	grasper.drop("beer2");
+	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+//~ 
+	//~ Grasping grasper(&pi);
+	//~ grasper.pick("box2", Grasping::L_ARM);
+	//~ grasper.drop("box2");
 	
 	
 		//~ moveit_msgs::PlanningScene ps;

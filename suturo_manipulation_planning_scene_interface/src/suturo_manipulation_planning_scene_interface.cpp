@@ -30,6 +30,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	msg.request.components.components = 1023;
 	
 	//get planningscene
+	ROS_INFO_STREAM("call service for planningscene");
 	ros::ServiceClient client = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
 	client.call(msg);
 	if (client.call(msg))
@@ -38,7 +39,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	}
 	else
 	{
-		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene| Failed to call service add_two_ints");
+		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene| Failed to call service.");
 		return 0;
 	}
 	return 1;
@@ -65,6 +66,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	
 	attached_object_publisher_.publish(attached_object); 
 	ros::WallDuration(2.0).sleep();
+	ROS_INFO_STREAM("attached " << objectName << " to " << linkName);
 	return 1;
 }
 
@@ -95,6 +97,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string objectNa
 		//Object not found
 		if (co.id != objectName){
 			ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getObject| Object: " << objectName << " not found!!");
+			return 0;
 		}
 	}
 	else
@@ -102,6 +105,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string objectNa
 		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getObject| Failed to call service move_group::GET_PLANNING_SCENE_SERVICE_NAME");
 		return 0;
 	}
+	ROS_INFO_STREAM("object " << objectName << " found.");
 	return 1;
 }
 
@@ -135,6 +139,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::addObject(moveit_msgs::Collisi
   
 	co.operation = moveit_msgs::CollisionObject::ADD;
   collision_object_publisher_.publish(co);
+  ROS_INFO_STREAM("added object " << co.id << " to planningscene.");
 	return 1;
 }
 
@@ -142,6 +147,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::removeObject(moveit_msgs::Coll
 {
 	co.operation = moveit_msgs::CollisionObject::REMOVE;
   collision_object_publisher_.publish(co);
+  ROS_INFO_STREAM("removed " << co.id << " form planningscene.");
   return 1;
 }
 
@@ -159,7 +165,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	detached_object.link_name = attached_object.link_name;
 	attached_object_publisher_.publish(detached_object); 
 	ros::WallDuration(2.0).sleep();
-	
+	ROS_INFO_STREAM(objectName << " detached.");
 	return 1;
 }
 

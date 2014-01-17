@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Boost REQUIRED COMPONENTS system)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -103,6 +103,7 @@ include_directories(
   include
   hack_for_groovy
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -125,6 +126,7 @@ add_library(suturo_manipulation_gripper_controller
 target_link_libraries(
   suturo_manipulation_gripper_controller
   ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 #target_link_libraries(
 #  suturo_manipulation_gripper_controller 
