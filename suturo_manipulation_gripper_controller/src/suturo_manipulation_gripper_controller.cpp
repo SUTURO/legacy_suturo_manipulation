@@ -12,11 +12,13 @@ Gripper::Gripper()
 	r_gripper_client_ = new GripperClient("r_gripper_controller/gripper_action", true);
 	l_gripper_client_ = new GripperClient("l_gripper_controller/gripper_action", true);
     
-    //wait for the gripper action server to come up 
-    while(!r_gripper_client_->waitForServer(ros::Duration(5.0)) &&
+    //wait for the gripper action server to come up
+    int i = 0; 
+    if (!r_gripper_client_->waitForServer(ros::Duration(5.0)) ||
 				!l_gripper_client_->waitForServer(ros::Duration(5.0))){
-		ROS_INFO("Waiting for the l/r_gripper_controller/gripper_action action server to come up");
-    }
+		//~ ROS_INFO("Waiting for the l/r_gripper_controller/gripper_action action server to come up");
+			ROS_ERROR_STREAM("Failed to connect to l/r_gripper_controller/gripper_action action server.");
+    } 
 }
 
 Gripper::~Gripper()
@@ -57,7 +59,7 @@ actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_)
 {
     pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
     squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
-    squeeze.command.max_effort = 13.0;  // Close gently
+    squeeze.command.max_effort = 50.0;  // Close gently
     
     ROS_INFO("Sending squeeze goal");
     gripper_client_->sendGoal(squeeze);

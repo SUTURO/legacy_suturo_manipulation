@@ -16,11 +16,12 @@ const string Grasping::L_ARM = "left_arm";
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
 	group_r_arm_ = new move_group_interface::MoveGroup(R_ARM);
-	group_r_arm_->setPlanningTime(10.0);
+	group_r_arm_->setPlanningTime(20.0);
 	
 	group_l_arm_ = new move_group_interface::MoveGroup(L_ARM);
-	group_l_arm_->setPlanningTime(10.0);
-	
+	group_l_arm_->setPlanningTime(20.0);
+	//~ ROS_INFO_STREAM(group_l_arm_->getPlanningFrame());
+	//~ group_l_arm_->setWorkspace(1, 1, 1.5, -1, 0, 0);
 	gripper_ = new Gripper();
 	pi_ = pi;
 }
@@ -101,11 +102,13 @@ int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co,
 	pose.pose.orientation.w = 1;
 	
 	//grab object form the front
-	pose.pose.position.x -= Gripper::GRIPPER_DEPTH + r + 0.07;
+	pose.pose.position.x -= Gripper::GRIPPER_DEPTH + r;
 	
 	pre_pose.header.frame_id = co.header.frame_id;
-	pre_pose = pose;
-	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
+	pre_pose.pose.position.x = pose.pose.position.x - Gripper::GRIPPER_DEPTH;
+	pre_pose.pose.position.y = pose.pose.position.y;
+	pre_pose.pose.position.z = pose.pose.position.z;
+	//~ pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH+0.25;
 	
 	return 1;
 }
@@ -207,7 +210,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	ROS_INFO_STREAM("update objectposition in planningscene.");
-	updateGraspedBoxPose(co, arm);
+	//~ updateGraspedBoxPose(co, arm);
 	pi_->addObject(co);
 	
 	//attach object

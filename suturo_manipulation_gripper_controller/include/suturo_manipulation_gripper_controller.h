@@ -25,7 +25,7 @@ public:
   ~Gripper();
 
   //Open the gripper
-  actionlib::SimpleClientGoalState open_r_gripper();
+  actionlib::SimpleClientGoalState open_r_gripper(double n=-1);
   
   actionlib::SimpleClientGoalState open_l_gripper();
 

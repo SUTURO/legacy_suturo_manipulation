@@ -12,6 +12,12 @@ static const std::string ROBOT_DESCRIPTION="robot_description";
 
 void putObjects(ros::Publisher pub_co)
 {
+	//real
+	//~ double tischposiZ = 0.86;
+	//gazebo
+	 //~ roslaunch pr2_teleop_general pr2_teleop_general_keyboard_bodyhead_only.launch
+	double tischposiZ = 0.5;
+	
   ros::WallDuration(1.0).sleep();
 
   moveit_msgs::CollisionObject co;
@@ -28,7 +34,7 @@ void putObjects(ros::Publisher pub_co)
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
-  // add table
+  // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.145;
   //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.01;
@@ -43,7 +49,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
   co.primitive_poses[0].position.x = 0.652;
   co.primitive_poses[0].position.y = 0.3;
-  co.primitive_poses[0].position.z = 0.601;
+  co.primitive_poses[0].position.z = tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
   
   pub_co.publish(co);
@@ -57,10 +63,10 @@ void putObjects(ros::Publisher pub_co)
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.75;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 1.8;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.86;
-  co.primitive_poses[0].position.x = 0.75;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = tischposiZ;
+  co.primitive_poses[0].position.x = 0.85;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.43;
+  co.primitive_poses[0].position.z = tischposiZ/2;
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
   pub_co.publish(co);
 
@@ -76,10 +82,10 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
   co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = -0.3;
-  co.primitive_poses[0].position.z = 0.601;
+  co.primitive_poses[0].position.z = tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
   
-  //~ pub_co.publish(co);
+  pub_co.publish(co);
 
   co.id = "beer2";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -93,7 +99,7 @@ void putObjects(ros::Publisher pub_co)
 
   co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = 0.9851;
+  co.primitive_poses[0].position.z = tischposiZ + 0.125;
   co.primitive_poses[0].orientation.x = 0;
   co.primitive_poses[0].orientation.y = 0;
   co.primitive_poses[0].orientation.z = 0;
@@ -141,15 +147,15 @@ int main(int argc, char **argv)
 	putObjects(pub_co);
 	
 	
-/*move_group_interface::MoveGroup group("right_arm");
-	geometry_msgs::PoseStamped p;
-	p.header.frame_id = "/base_footprint";
-	p.pose.position.x = 0.59;
-	p.pose.position.y = 0;
-	p.pose.position.z = 0.825;
-	p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, M_PI_4, M_PI_4);
-group.setPoseTarget(p);
-group.move();*/
+//~ move_group_interface::MoveGroup group("right_arm");
+	//~ geometry_msgs::PoseStamped p;
+	//~ p.header.frame_id = "/base_footprint";
+	//~ p.pose.position.x = 0.40;
+	//~ p.pose.position.y = 0;
+	//~ p.pose.position.z = 0.625;
+	//~ p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
+//~ group.setPoseTarget(p);
+//~ group.move();
 
 //~ move_group_interface::MoveGroup group("left_gripper");
 //~ 
@@ -164,23 +170,22 @@ group.move();*/
 //~ 
 //~ bla = group.getCurrentJointValues();
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
+//~ 
 
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	grasper.pick("beer2", Grasping::L_ARM);
+	grasper.pick("beer2", Grasping::R_ARM);
+	grasper.drop("beer2");
 	
-	//~ moveit_msgs::PlanningScene ps;
+	
+		//~ moveit_msgs::PlanningScene ps;
 	//~ pi.getPlanningScene(ps);
 	//~ ROS_INFO_STREAM("ps: " << ps);
 	
 	//std::vector<moveit_msgs::AttachedCollisionObject> muh = pi.getAttachedObjects();
 	//ROS_INFO_STREAM("objects " << muh.at(0));
-	//~ if (grasper.drop("box2")){
-		//~ ROS_INFO_STREAM("true");
-	//~ }else{
-		//~ ROS_INFO_STREAM("false");
-	//~ }
+	//~ grasper.drop("box2");
 
 	//geometry_msgs::PoseStamped p;
 	//p.header.frame_id = "/base_footprint";
