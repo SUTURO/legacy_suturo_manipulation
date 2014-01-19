@@ -15,9 +15,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc != 4)
+	if (argc != 5)
 	{
-		ROS_INFO("arguments: box1/box2/beer1 right_arm/left_arm grasp(1)/drop(0)");
+		ROS_INFO("arguments: box1/box2/beer1 newton right_arm/left_arm grasp(1)/drop(0)");
 		return 1;
 	}
 		
@@ -27,14 +27,22 @@ int main(int argc, char** argv)
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to pick");
 	
+	string arm = argv[3];
+
 	// create goal and put data in it
 	suturo_manipulation_msgs::suturo_manipulation_graspingGoal goal;
 	goal.goal.header.seq = 0;
 	goal.goal.header.stamp = ros::Time();
 	goal.goal.header.frame_id = "/base_footprint";
 	goal.goal.objectName = argv[1];
-	goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
-	goal.goal.grasp = atof(argv[3]);
+	if(arm=="left_arm"){
+		goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;		
+	} else {
+		goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
+	}
+	// goal.goal.bodypart.bodyPart = arm;
+	goal.goal.newton = atof(argv[2]);
+	goal.goal.grasp = atof(argv[4]);
 
 	// send the goal to server
 	client.sendGoal(goal);

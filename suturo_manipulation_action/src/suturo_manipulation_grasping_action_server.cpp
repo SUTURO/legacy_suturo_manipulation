@@ -46,22 +46,29 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
   ROS_INFO("LEFT_ARM; %s", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM.c_str());
   ROS_INFO("RIGHT_ARM; %s", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM.c_str());
 
-  if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+  if (picking_arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM ){  
+    picking_arm = "left_arm";
+  } else if (picking_arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM) {
+    picking_arm = "right_arm";
+  } else {
     ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-    server_grasp->setAborted(r);  
-    return;
+    server_grasp->setAborted(r); 
+    return; 
   }
 
 	ROS_INFO("Arm to pick: %s", picking_arm.c_str());
 	string obj_name = graspGoal->goal.objectName;
 	ROS_INFO("ObjectName to pick: %s", obj_name.c_str());
 
+  double newton = graspGoal->goal.newton;
+  ROS_INFO("Newton: %f", newton);
+
 	// Check if we should grasp or drop...
 	if(graspGoal->goal.grasp){
 		ROS_INFO("Begin to pick object...");
 		// Grasp the object
-		if (grasper.pick(obj_name, picking_arm))
+		if (grasper.pick(obj_name, picking_arm, newton))
 		{
 			ROS_INFO("Object picked...");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
