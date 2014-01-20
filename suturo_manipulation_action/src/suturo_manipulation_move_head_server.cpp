@@ -23,16 +23,19 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 { 
 	//save goal position in pose
 	goalPose.header.frame_id = s;
-    goalPose.pose.position.x = goalPoint.x;
-    goalPose.pose.position.y = goalPoint.y;
-    goalPose.pose.position.z = goalPoint.z;
-    goalPose.pose.orientation.w = 1;
+  goalPose.pose.position.x = goalPoint.x;
+  goalPose.pose.position.y = goalPoint.y;
+  goalPose.pose.position.z = goalPoint.z;
+  goalPose.pose.orientation.x = 0;
+  goalPose.pose.orientation.y = 0;
+  goalPose.pose.orientation.z = 0;
+  goalPose.pose.orientation.w = 1;
 	
 	// goal_frame
-    const string goal_frame = "/torso_lift_link";
+  const string goal_frame = "/torso_lift_link";
 
 	ROS_INFO("Begin transformation");
-    try{
+  try{
 		//transform pose from s to -torso_lift_link and save it in pose again
 		listener->transformPose(goal_frame, goalPose, goalPose);
 	}catch(...){
@@ -47,7 +50,8 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 * This method starts the transformation to the right frame and 
 * publishes the transformed goal.
 */
-void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::Publisher* publisher, Server* server_head)
+void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
+			ros::Publisher* publisher, Server* server_head)
 {	
 	ROS_INFO("callback moveHead() begins...");
 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
@@ -68,9 +72,9 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 
 	// Publish goal on topic /suturo/head_controller
 	if( !publisher ) {
-  		ROS_WARN("Publisher invalid!");
-  		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-  		server_head->setAborted(r);
+		ROS_WARN("Publisher invalid!");
+  	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+  	server_head->setAborted(r);
 	} else {
 		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	

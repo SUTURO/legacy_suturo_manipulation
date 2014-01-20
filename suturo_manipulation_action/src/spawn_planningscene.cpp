@@ -37,20 +37,12 @@ void putObjects(ros::Publisher pub_co)
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.145;
-  //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.01;
-  //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
-  //~ co.primitive_poses[0].position.x = 0.652;
-  //~ co.primitive_poses[0].position.y = 0;
-  //~ co.primitive_poses[0].position.z = 0.941;
-  //~ co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-  //~ ROS_INFO_STREAM(co.primitive_poses[0].position);
-  //~ pub_co.publish(co);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.045;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
-  co.primitive_poses[0].position.x = 0.652;
-  co.primitive_poses[0].position.y = 0.3;
-  co.primitive_poses[0].position.z = tischposiZ + 0.08;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.036;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.143;
+  co.primitive_poses[0].position.x = 0.65;
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = tischposiZ + 0.0716;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
   pub_co.publish(co);
 
@@ -98,14 +90,14 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.0375;
 
   co.primitive_poses[0].position.x = 0.65;
-  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.y = 0.3;
   co.primitive_poses[0].position.z = tischposiZ + 0.125;
   co.primitive_poses[0].orientation.x = 0;
   co.primitive_poses[0].orientation.y = 0;
   co.primitive_poses[0].orientation.z = 0;
   co.primitive_poses[0].orientation.w = 1;
   pub_co.publish(co);
-
+  
   ros::WallDuration(2.0).sleep();
 }
 
