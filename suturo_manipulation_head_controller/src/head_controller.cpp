@@ -122,7 +122,7 @@ void Head_Controller::update()
         }
         tau_(0) = y_error;
         // tau_(1) > 0 => kopf kippt nach unten
-        tau_(1) = -z_error * 5;
+        //tau_(1) = -z_error * 5;
 
         // PID
         ros::Duration dt = robot_->getTime() - time_of_last_cycle_;

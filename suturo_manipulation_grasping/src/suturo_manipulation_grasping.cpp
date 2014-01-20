@@ -170,8 +170,8 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	double z = co.primitive_poses[0].position.z;
 	
 	//update object position based on gripperposition
-	co.primitive_poses[0].position = gripperPose.pose.position;
-	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - 0.005;
+	//~ co.primitive_poses[0].position = gripperPose.pose.position;
+	//~ co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - 0.005;
 	
 	//update object size based on gripperstate
 	if (y > Gripper::GRIPPER_MAX_POSITION){

@@ -173,11 +173,11 @@ int main(int argc, char **argv)
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
 //~ 
 
-	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-//~ 
-	//~ Grasping grasper(&pi);
-	//~ grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	//~ grasper.drop("box2");
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+
+	Grasping grasper(&pi);
+	grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.drop("box2");
 	
 	
 		//~ moveit_msgs::PlanningScene ps;
