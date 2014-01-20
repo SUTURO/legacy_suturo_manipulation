@@ -49,12 +49,10 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
         if( !publisher ) {
         	ROS_INFO("Publisher invalid!");
           	server_home->setAborted(r);
-          	return;
         } else {
             publisher->publish(headHome);
             ROS_INFO("Home Goal published!");
             server_home->setSucceeded(r);
-            return;
         }
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){
 		// bodypart = left_arm
@@ -70,11 +68,9 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			ROS_INFO("Moved home!");
 		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		    server_home->setSucceeded(r);
-		    return;
 		} else {
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
-			return;
 		}
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM)){
 		// bodypart = right_arm
@@ -90,11 +86,9 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			ROS_INFO("Moved home!");
 		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		    server_home->setSucceeded(r);
-		    return;
 		} else {
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
-			return;
 		}
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS)){
 		// bodypart = both_arms
@@ -110,20 +104,16 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			ROS_INFO("Moved home!");
 		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		    server_home->setSucceeded(r);
-		    return;
 		} else {
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
-			return;
 		}
 	} else {
 		ROS_INFO("Unknown bodypart!");
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_home->setAborted(r);	
-		return;
 	}
 	ROS_INFO("moved: %i", r.succ.type);
-	return;
 }
 
 

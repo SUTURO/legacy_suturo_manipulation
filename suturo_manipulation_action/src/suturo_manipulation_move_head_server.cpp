@@ -64,7 +64,6 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_head->setAborted(r);
-		return;
 	}
 
 	// Publish goal on topic /suturo/head_controller
@@ -80,7 +79,6 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		server_head->setSucceeded(r);
 	}
-
 }
 
 

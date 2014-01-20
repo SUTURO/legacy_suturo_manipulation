@@ -9,3 +9,4 @@ build/
 bin/
 msg_gen/
 srv_gen/
+suturo_manipulation_head_controller/lib/

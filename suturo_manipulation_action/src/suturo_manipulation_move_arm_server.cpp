@@ -74,7 +74,6 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_arm->setAborted(r);
-		return;
 	}
 
 	//Orientierung des End-Effektors wieder auf w=1 setzen
