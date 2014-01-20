@@ -14,10 +14,10 @@ static const std::string ROBOT_DESCRIPTION="robot_description";
 void putObjects(ros::Publisher pub_co)
 {
 	//real
-	//~ double tischposiZ = 0.86;
+	double tischposiZ = 0.86;
 	//gazebo
 	 //~ roslaunch pr2_teleop_general pr2_teleop_general_keyboard_bodyhead_only.launch
-	double tischposiZ = 0.5;
+	//~ double tischposiZ = 0.5;
 	
   ros::WallDuration(1.0).sleep();
 
@@ -46,12 +46,12 @@ void putObjects(ros::Publisher pub_co)
   //~ co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   //~ ROS_INFO_STREAM(co.primitive_poses[0].position);
   //~ pub_co.publish(co);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.065;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.036;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.143;
   co.primitive_poses[0].position.x = 0.662;
-  co.primitive_poses[0].position.y = 0.3;
+  co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = tischposiZ + 0.08;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
   pub_co.publish(co);
 
@@ -86,7 +86,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
 
   co.id = "beer2";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -105,7 +105,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].orientation.y = 0;
   co.primitive_poses[0].orientation.z = 0;
   co.primitive_poses[0].orientation.w = 1;
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
   
     
     
@@ -173,11 +173,11 @@ int main(int argc, char **argv)
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
 //~ 
 
-	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-
-	Grasping grasper(&pi);
-	grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	grasper.drop("box2");
+	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+//~ 
+	//~ Grasping grasper(&pi);
+	//~ grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	//~ grasper.drop("box2");
 	
 	
 		//~ moveit_msgs::PlanningScene ps;
