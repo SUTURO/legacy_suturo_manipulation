@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 	
 	if (argc != 2)
 	{
-		ROS_INFO("arguments: right_arm/left_arm/head");
+		ROS_INFO("arguments: right_arm/left_arm/head/both_arms");
 		return 1;
 	}
 
