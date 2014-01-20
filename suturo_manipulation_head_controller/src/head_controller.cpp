@@ -71,37 +71,43 @@ void Head_Controller::starting()
 /// Controller update loop in realtime
 void Head_Controller::update()
 {
-	if (updated){
-
+    if (!updated){
+        // get the current state
+        originPoint_.header.frame_id = "head_plate_frame";
+        originPoint_.header.seq = 0;
+        originPoint_.header.stamp = ros::Time::now();
+        originPoint_.point.x = 2;
+        originPoint_.point.y = 0;
+        originPoint_.point.z = 0;
+        listener.transformPoint("/torso_lift_link", ros::Time(0), originPoint_, "/head_plate_frame", originPoint_);
+        updated = true;
+    } else {
         // transform the Point into the targetframe
         listener.transformPoint("/head_plate_frame", ros::Time(0), originPoint_, "/torso_lift_link", goalPoint_);
-		// ROS_INFO("originPoint: %f, %f, %f", originPoint_.point.x, originPoint_.point.y, originPoint_.point.z);
-		// ROS_INFO("goalPoint: %f, %f, %f", goalPoint_.point.x, goalPoint_.point.y, goalPoint_.point.z);
 
-		// Publish the Goalmarker
-		visualization_msgs::Marker goal_marker;
-		goal_marker.header.frame_id = "head_plate_frame";
-		goal_marker.header.stamp = ros::Time();
-		goal_marker.ns = "suturo_manipulation";
-		goal_marker.id = 0;
-		goal_marker.type = visualization_msgs::Marker::SPHERE;
-		goal_marker.action = visualization_msgs::Marker::ADD;
-		goal_marker.pose.position.x = goalPoint_.point.x;
-		goal_marker.pose.position.y = goalPoint_.point.y;
-		goal_marker.pose.position.z = goalPoint_.point.z;
-		goal_marker.pose.orientation.x = 0.0;
-		goal_marker.pose.orientation.y = 0.0;
-		goal_marker.pose.orientation.z = 0.0;
-		goal_marker.pose.orientation.w = 1.0;
-		goal_marker.scale.x = 0.1;
-		goal_marker.scale.y = 0.1;
-		goal_marker.scale.z = 0.1;
-		goal_marker.color.a = 1.0;
-		goal_marker.color.r = 0.0;
-		goal_marker.color.g = 1.0;
-		goal_marker.color.b = 0.0;
-		vis_pub.publish( goal_marker );
-        
+        // Publish the Goalmarker
+        visualization_msgs::Marker goal_marker;
+        goal_marker.header.frame_id = "head_plate_frame";
+        goal_marker.header.stamp = ros::Time();
+        goal_marker.ns = "suturo_manipulation";
+        goal_marker.id = 0;
+        goal_marker.type = visualization_msgs::Marker::SPHERE;
+        goal_marker.action = visualization_msgs::Marker::ADD;
+        goal_marker.pose.position.x = goalPoint_.point.x;
+        goal_marker.pose.position.y = goalPoint_.point.y;
+        goal_marker.pose.position.z = goalPoint_.point.z;
+        goal_marker.pose.orientation.x = 0.0;
+        goal_marker.pose.orientation.y = 0.0;
+        goal_marker.pose.orientation.z = 0.0;
+        goal_marker.pose.orientation.w = 1.0;
+        goal_marker.scale.x = 0.1;
+        goal_marker.scale.y = 0.1;
+        goal_marker.scale.z = 0.1;
+        goal_marker.color.a = 1.0;
+        goal_marker.color.r = 0.0;
+        goal_marker.color.g = 1.0;
+        goal_marker.color.b = 0.0;
+        vis_pub.publish( goal_marker );   
         // Get the errors
         double z_error = goalPoint_.point.z;
         double y_error = goalPoint_.point.y;
@@ -114,10 +120,10 @@ void Head_Controller::update()
         } else if (y_error < -2.65){
             y_error = -2.65;
         }
-		tau_(0) = y_error;
-		// tau_(1) > 0 => kopf kippt nach unten
-		tau_(1) = -z_error * 5;
-         
+        tau_(0) = y_error;
+        // tau_(1) > 0 => kopf kippt nach unten
+        tau_(1) = -z_error * 5;
+
         // PID
         ros::Duration dt = robot_->getTime() - time_of_last_cycle_;
         time_of_last_cycle_ = robot_->getTime();
@@ -132,12 +138,11 @@ void Head_Controller::update()
 
         tau_(1)=pid_error_;
 
-		// And finally send these torques out.
-		chain_.setEfforts(tau_);
+        // And finally send these torques out.
+        chain_.setEfforts(tau_);
         ROS_INFO("pid_error: %f", pid_error_);
-	}
+    }
 }
-
 /// Controller stopping in realtime
 void Head_Controller::stopping()
 {}
