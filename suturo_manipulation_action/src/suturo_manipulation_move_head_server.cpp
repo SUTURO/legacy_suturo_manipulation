@@ -31,7 +31,7 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 	// goal_frame
     const string goal_frame = "/torso_lift_link";
 
-	ROS_INFO("Beginn der Transformation");
+	ROS_INFO("Begin transformation");
     try{
 		//transform pose from s to -torso_lift_link and save it in pose again
 		listener->transformPose(goal_frame, goalPose, goalPose);

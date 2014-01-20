@@ -33,24 +33,9 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 	Grasping grasper(&pi);
 	ROS_INFO("Done.");
 
-  // if(graspGoal->goal.bodypart.bodyPart=="left_arm"){
-  //   ROS_INFO("blabla");
-  //   picking_arm=suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
-  // }
-
-	// Set arm to pick and object name
 	string picking_arm = graspGoal->goal.bodypart.bodyPart;
 
-  ROS_INFO("picking_arm: %s", picking_arm.c_str());
-  ROS_INFO("goal.bodypart.bodyPart: %s", graspGoal->goal.bodypart.bodyPart.c_str());
-  ROS_INFO("LEFT_ARM; %s", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM.c_str());
-  ROS_INFO("RIGHT_ARM; %s", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM.c_str());
-
-  if (picking_arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM ){  
-    picking_arm = "left_arm";
-  } else if (picking_arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM) {
-    picking_arm = "right_arm";
-  } else {
+  if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){  
     ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
     server_grasp->setAborted(r); 

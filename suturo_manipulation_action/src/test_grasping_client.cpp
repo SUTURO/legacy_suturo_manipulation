@@ -26,8 +26,6 @@ int main(int argc, char** argv)
 	Client client("suturo_man_grasping_server", true);
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to pick");
-	
-	string arm = argv[3];
 
 	// create goal and put data in it
 	suturo_manipulation_msgs::suturo_manipulation_graspingGoal goal;
@@ -35,12 +33,12 @@ int main(int argc, char** argv)
 	goal.goal.header.stamp = ros::Time();
 	goal.goal.header.frame_id = "/base_footprint";
 	goal.goal.objectName = argv[1];
-	if(arm=="left_arm"){
-		goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;		
-	} else {
-		goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
-	}
-	// goal.goal.bodypart.bodyPart = arm;
+	// if(arm=="left_arm"){
+	// 	goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;		
+	// } else {
+	// 	goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
+	// }
+	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.newton = atof(argv[2]);
 	goal.goal.grasp = atof(argv[4]);
 

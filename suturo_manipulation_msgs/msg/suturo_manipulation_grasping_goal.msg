@@ -4,7 +4,7 @@ Header header
 # name of the object
 string objectName
 
-# newton value from object
+# force to grasp object
 float64 newton
 
 #true for pick, false for drop
