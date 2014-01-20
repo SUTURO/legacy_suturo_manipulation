@@ -4683,7 +4683,7 @@
     </model>
 
     <model name='unit_box_1'>
-      <pose>0.650000 0.300000 0.58100 0.000000 0.000000 -0.7853982</pose>
+      <pose>0.6500000 0.000000 0.571600 0.000000 0.000000 0.000000</pose>
       <link name='link'>
         <inertial>
           <mass>0.090000</mass>
@@ -4699,7 +4699,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.1450000 0.045000 0.160000</size>
+              <size>0.1450000 0.036000 0.143000</size>
             </box>
           </geometry>
           <surface>
@@ -4721,7 +4721,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.1450000 0.045000 0.160000</size>
+              <size>0.1450000 0.036000 0.1430000</size>
             </box>
           </geometry>
           <material>
@@ -4744,7 +4744,7 @@
 
     <model name='beer_1'>
       <link name='link'>
-        <pose>0.650000 0.000000 0.62600 0.000000 0.000000 0.000000</pose>
+        <pose>0.650000 0.300000 0.62600 0.000000 0.000000 0.000000</pose>
         <inertial>
           <mass>0.090000</mass>
           <inertia>

@@ -15,7 +15,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	//planning_scene_publisher_ = nh_->advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
 	
 	
-	ros::WallDuration(2.0).sleep();
+	ros::WallDuration(1.0).sleep();
 }
 
 Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scene_Interface()
@@ -65,7 +65,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	attached_object.touch_links = gripper_links;
 	
 	attached_object_publisher_.publish(attached_object); 
-	ros::WallDuration(2.0).sleep();
+	ros::WallDuration(1.0).sleep();
 	ROS_INFO_STREAM("attached " << objectName << " to " << linkName);
 	return 1;
 }
@@ -164,7 +164,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	detached_object.object.id = attached_object.object.id;
 	detached_object.link_name = attached_object.link_name;
 	attached_object_publisher_.publish(detached_object); 
-	ros::WallDuration(2.0).sleep();
+	ros::WallDuration(1.0).sleep();
 	ROS_INFO_STREAM(objectName << " detached.");
 	return 1;
 }

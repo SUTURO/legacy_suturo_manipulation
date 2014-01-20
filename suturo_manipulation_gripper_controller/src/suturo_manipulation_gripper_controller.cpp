@@ -3,22 +3,22 @@
 #include <actionlib/client/simple_action_client.h>
 #include "suturo_manipulation_gripper_controller.h"
 
-  //Action client initialization
 Gripper::Gripper()
 {
 
-    //Initialize the client for the Action interface to the gripper controller
-    //and tell the action client that we want to spin a thread by default
+	//Initialize the client for the Action interface to the gripper controller
+	//and tell the action client that we want to spin a thread by default
 	r_gripper_client_ = new GripperClient("r_gripper_controller/gripper_action", true);
 	l_gripper_client_ = new GripperClient("l_gripper_controller/gripper_action", true);
     
     //wait for the gripper action server to come up
-    int i = 0; 
     if (!r_gripper_client_->waitForServer(ros::Duration(5.0)) ||
 				!l_gripper_client_->waitForServer(ros::Duration(5.0))){
-		//~ ROS_INFO("Waiting for the l/r_gripper_controller/gripper_action action server to come up");
 			ROS_ERROR_STREAM("Failed to connect to l/r_gripper_controller/gripper_action action server.");
-    } 
+			connected_to_controller_ = 0;
+    } else {
+			connected_to_controller_ = 1;
+		}
 }
 
 Gripper::~Gripper()
@@ -30,9 +30,10 @@ Gripper::~Gripper()
 //Open the gripper
 actionlib::SimpleClientGoalState Gripper::open_gripper(GripperClient* gripper_client_)
 {
+	//set grippergoal
 	pr2_controllers_msgs::Pr2GripperCommandGoal open;
   open.command.position = Gripper::GRIPPER_MAX_POSITION;
-  open.command.max_effort = n;  // Do not limit effort (negative)
+  open.command.max_effort = n;
    
   ROS_INFO("Sending open goal");
   gripper_client_->sendGoal(open);
@@ -40,7 +41,7 @@ actionlib::SimpleClientGoalState Gripper::open_gripper(GripperClient* gripper_cl
   if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("The gripper opened!");
   else 
-    ROS_ERROR_STREAM("The gripper failed to open! :(");
+    ROS_ERROR_STREAM("The gripper failed to open!");
 	return gripper_client_->getState();
 }
 

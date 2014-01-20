@@ -15,6 +15,7 @@ private:
   GripperClient* r_gripper_client_;  
   GripperClient* l_gripper_client_;  
   double n;
+  int connected_to_controller_;
 
 public:
   static const double GRIPPER_MAX_POSITION = 0.09;
@@ -24,6 +25,11 @@ public:
   Gripper();
 
   ~Gripper();
+ 
+	int is_connected_to_controller()
+	{
+		return connected_to_controller_;
+	}
  
 	actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_);
 

@@ -18,8 +18,6 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 	
 	group_l_arm_ = new move_group_interface::MoveGroup(suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
 	group_l_arm_->setPlanningTime(20.0);
-	//~ ROS_INFO_STREAM(group_l_arm_->getPlanningFrame());
-	//~ group_l_arm_->setWorkspace(1, 1, 1.5, -1, 0, 0);
 	gripper_ = new Gripper();
 	pi_ = pi;
 }
@@ -166,12 +164,12 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 		return 0;
 	}
 	
-	double y = co.primitive_poses[0].position.y;
-	double z = co.primitive_poses[0].position.z;
+	double y = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
+	double z = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z];
 	
 	//update object position based on gripperposition
-	//~ co.primitive_poses[0].position = gripperPose.pose.position;
-	//~ co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - 0.005;
+	co.primitive_poses[0].position = gripperPose.pose.position;
+	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - 0.005;
 	
 	//update object size based on gripperstate
 	if (y > Gripper::GRIPPER_MAX_POSITION){
@@ -253,6 +251,11 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 
 int Grasping::pick(std::string objectName, std::string arm, double force)
 {
+	if (!gripper_->is_connected_to_controller()){
+		ROS_ERROR_STREAM("not connected to grippercontroller");
+		return 0;
+	}
+	
 	geometry_msgs::PoseStamped pose;
 	geometry_msgs::PoseStamped pre_pose;
 	
@@ -274,6 +277,11 @@ int Grasping::pick(std::string objectName, std::string arm, double force)
 
 int Grasping::drop(string objectName)
 {
+	if (!gripper_->is_connected_to_controller()){
+		ROS_ERROR_STREAM("not connected to grippercontroller");
+		return 0;
+	}
+	
 	//get object from planningscene
 	moveit_msgs::AttachedCollisionObject aco;
 	if (pi_->getAttachedObject(objectName, aco))

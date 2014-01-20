@@ -35,13 +35,13 @@ private:
 	
 	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force);
 
+	int calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
+
 public:
 	
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
 
 	~Grasping();
-
-	int calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
 	int pick(std::string objectName, std::string arm, double force=50.0);
 	
