@@ -108,14 +108,28 @@ void Head_Controller::update()
         ROS_INFO("z_error: %f, y_error: %f",z_error,y_error);
 
         // tau_(0) > 0 => kopf dreht nach links
+        // max_torque for head_pan_joint: 2.65
+        if (y_error > 2.65){
+            y_error = 2.65;
+        } else if (y_error < -2.65){
+            y_error = -2.65;
+        }
 		tau_(0) = y_error;
 		// tau_(1) > 0 => kopf kippt nach unten
 		tau_(1) = -z_error * 5;
-        
+         
         // PID
         ros::Duration dt = robot_->getTime() - time_of_last_cycle_;
         time_of_last_cycle_ = robot_->getTime();
-        pid_error_ = pid_controller_.updatePid(-z_error*5, dt);
+        pid_error_ = pid_controller_.updatePid(z_error*5, dt);
+
+        // max_torque for head_tilt_joint: 15.00
+        if (pid_error_ > 15){
+            pid_error_ = 15;
+        } else if (pid_error_ < -15){
+            pid_error_ = -15;
+        }
+
         tau_(1)=pid_error_;
 
 		// And finally send these torques out.
