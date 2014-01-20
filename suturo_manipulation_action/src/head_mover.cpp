@@ -6,6 +6,7 @@
 #include <suturo_manipulation_grasping.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <shape_tools/solid_primitive_dims.h>
+#include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
@@ -45,9 +46,9 @@ void putObjects(ros::Publisher pub_co)
   //~ co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   //~ ROS_INFO_STREAM(co.primitive_poses[0].position);
   //~ pub_co.publish(co);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.045;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.065;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
-  co.primitive_poses[0].position.x = 0.652;
+  co.primitive_poses[0].position.x = 0.662;
   co.primitive_poses[0].position.y = 0.3;
   co.primitive_poses[0].position.z = tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
@@ -172,11 +173,11 @@ int main(int argc, char **argv)
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
 //~ 
 
-	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-//~ 
-	//~ Grasping grasper(&pi);
-	//~ grasper.pick("box2", Grasping::L_ARM);
-	//~ grasper.drop("box2");
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+
+	Grasping grasper(&pi);
+	grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.drop("box2");
 	
 	
 		//~ moveit_msgs::PlanningScene ps;

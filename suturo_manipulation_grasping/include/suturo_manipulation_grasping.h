@@ -36,8 +36,6 @@ private:
 	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force);
 
 public:
-	static const std::string R_ARM;
-	static const std::string L_ARM;
 	
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
 

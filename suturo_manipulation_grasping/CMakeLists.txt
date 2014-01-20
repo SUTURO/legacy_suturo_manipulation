@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   suturo_manipulation_gripper_controller
   suturo_manipulation_planning_scene_interface
+  suturo_manipulation_msgs
 )
 
 #find_package(Eigen REQUIRED)
@@ -124,7 +125,7 @@ add_library(suturo_manipulation_grasping
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_gripper_controller_node suturo_manipulation_gripper_controller_generate_messages_cpp)
 
-add_dependencies(suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_gripper_controller_node

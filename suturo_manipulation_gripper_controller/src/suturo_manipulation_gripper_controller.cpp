@@ -59,18 +59,18 @@ actionlib::SimpleClientGoalState Gripper::open_l_gripper(double force)
 //Close the gripper
 actionlib::SimpleClientGoalState Gripper::close_gripper(GripperClient* gripper_client_)
 {
-    pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
-    squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
-    squeeze.command.max_effort = n;  // Close gently
-    
-    ROS_INFO("Sending squeeze goal");
-    gripper_client_->sendGoal(squeeze);
-    gripper_client_->waitForResult(ros::Duration(5.5));
-    ROS_INFO_STREAM(gripper_client_->getState().toString());
-    if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-			ROS_INFO("The gripper closed!");
-    else
-			ROS_INFO_STREAM("The gripper didn't close completely.");
+	pr2_controllers_msgs::Pr2GripperCommandGoal squeeze;
+	squeeze.command.position = Gripper::GRIPPER_MIN_POSITION;
+	squeeze.command.max_effort = n;  // Close gently
+	
+	ROS_INFO("Sending squeeze goal");
+	gripper_client_->sendGoal(squeeze);
+	gripper_client_->waitForResult(ros::Duration(5.5));
+	ROS_INFO_STREAM(gripper_client_->getState().toString());
+	if(gripper_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+		ROS_INFO("The gripper closed!");
+	else
+		ROS_INFO_STREAM("The gripper didn't close completely.");
 	return gripper_client_->getState();
 }
 
