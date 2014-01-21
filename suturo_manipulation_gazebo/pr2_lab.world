@@ -4630,6 +4630,7 @@
     </model>
     <model name='kitchen_description'>
       <static>1</static>
+      <pose>3.700000 5.600000 0.000000 0.000000 0.000000 0.000000</pose>
       <link name='kitchen_link'>
         <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
         <inertial>
@@ -10703,8 +10704,9 @@
     </model>
     <model name='room_description'>
       <static>1</static>
+      <pose>0.107733 0.029679 0.000000 0.000000 0.000000 0.000000</pose>
       <link name='room_link'>
-        <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+        <pose>3.450000 4.800000 0.000000 0.000000 0.000000 0.000000</pose>
         <inertial>
           <pose>-0.770131 -0.722625 1.040380 0.000000 0.000000 0.000000</pose>
           <mass>40000.000000</mass>
@@ -12115,11 +12117,11 @@
     <state world_name='default'>
       <sim_time>0 0</sim_time>
       <real_time>0 0</real_time>
-      <wall_time>1390257351 636063441</wall_time>
+      <wall_time>1390309841 419205371</wall_time>
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>5.005540 -11.136800 4.978440 -0.000000 0.553623 2.441620</pose>
+        <pose>5.371190 -6.711170 6.514520 -0.000000 0.553623 2.441620</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
