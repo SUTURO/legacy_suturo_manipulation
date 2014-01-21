@@ -4630,7 +4630,7 @@
     </model>
     <model name='kitchen_description'>
       <static>1</static>
-      <pose>3.700000 5.600000 0.000000 0.000000 0.000000 0.000000</pose>
+      <pose>3.200000 5.600000 -0.2500000 0.000000 0.000000 0.000000</pose>
       <link name='kitchen_link'>
         <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
         <inertial>
@@ -10704,7 +10704,7 @@
     </model>
     <model name='room_description'>
       <static>1</static>
-      <pose>0.107733 0.029679 0.000000 0.000000 0.000000 0.000000</pose>
+      <pose>-0.400000 0.029679 0.000000 0.000000 0.000000 0.000000</pose>
       <link name='room_link'>
         <pose>3.450000 4.800000 0.000000 0.000000 0.000000 0.000000</pose>
         <inertial>
