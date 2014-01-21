@@ -10,7 +10,7 @@
     <arg name="gui" value="$(arg gui)" />
     <arg name="throttled" value="$(arg throttled)" />
     <arg name="paused" value="$(arg paused)" />
-    <arg name="world" value="pr2_table_three_beer.world" />
+    <arg name="world" value="pr2_lab.world" />
   </include>
 
   <!-- start pr2 robot -->
