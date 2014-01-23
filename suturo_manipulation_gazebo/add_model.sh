@@ -22,5 +22,6 @@ sed -e "s/!!D!!/$D/g" -i model.sdf
 sed -e "s/!!NAME!!/$NAME/g" -i materials/scripts/template.material
 mv materials/scripts/template.material materials/scripts/$NAME.material
 cp $TEXTURE materials/textures/$NAME.jpg
+convert materials/textures/$NAME.jpg -rotate 90 materials/textures/$NAME.jpg
 echo "object $NAME created"
 
