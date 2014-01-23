@@ -90,7 +90,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES suturo_manipulation_action
-#  CATKIN_DEPENDS message_generation moveit_ros_planning_interface roscpp rospy suturo_manipulation_msgs/ suturo_perception_msgs
+#  CATKIN_DEPENDS message_generation moveit_ros_planning_interface roscpp rospy suturo_manipulation_msgs/
 #  DEPENDS system_lib
 )
 
