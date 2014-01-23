@@ -1,0 +1,15 @@
+material wlancard/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture wlancard.jpg
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}
