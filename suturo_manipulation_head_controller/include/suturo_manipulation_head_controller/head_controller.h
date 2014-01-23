@@ -39,5 +39,6 @@ namespace suturo{
             void stopping();
         private:
             void setGoalCB(geometry_msgs::PoseStamped msg);
+            bool switchControllers(ros::NodeHandle &n);
     };
 }

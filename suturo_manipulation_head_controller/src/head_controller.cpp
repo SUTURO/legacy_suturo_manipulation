@@ -5,34 +5,21 @@
 #include <suturo_manipulation_msgs/suturo_manipulation_headAction.h>
 #include <tf/transform_listener.h>
 #include <ros/callback_queue.h>
+#include <pr2_mechanism_msgs/SwitchController.h>
+#include <pr2_mechanism_msgs/LoadController.h>
 
 using namespace suturo;
-
-/*
- * This method is called when a new goal is set.
- * It updates the goal variables and sets the
- * updated varaible to true.
- */
-void Head_Controller::setGoalCB(geometry_msgs::PoseStamped msg)
-{
-	ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
-        msg.pose.position.y, msg.pose.position.z, msg.header.frame_id.c_str());
-    originPoint_.header.frame_id = msg.header.frame_id;
-    originPoint_.header.seq = msg.header.seq;
-    originPoint_.header.stamp = msg.header.stamp;
-    originPoint_.point.x = msg.pose.position.x;
-    originPoint_.point.y = msg.pose.position.y;
-    originPoint_.point.z = msg.pose.position.z;
-    
-    updated = true;
-}
 
 /// Controller initialization in non-realtime
 bool Head_Controller::init(pr2_mechanism_model::RobotState *robot,
         ros::NodeHandle &n)
 {
-	updated = false;
-	
+    updated = false;
+
+    //ROS_INFO("begin switching");
+    // Load ond switch controllers
+    //switchControllers(n);
+    
     // Construct a chain from the root to the tip and prepare the kinematics.
     // Note the joints must be calibrated.
     if (!chain_.init(robot, "torso_lift_link", "head_plate_frame"))
@@ -147,6 +134,58 @@ void Head_Controller::update()
 void Head_Controller::stopping()
 {}
 
+/*
+ * This method is called when a new goal is set.
+ * It updates the goal variables and sets the
+ * updated varaible to true.
+ */
+void Head_Controller::setGoalCB(geometry_msgs::PoseStamped msg)
+{
+	ROS_INFO("I heard: x: %f, y: %f, z: %f in Frame %s", msg.pose.position.x,
+        msg.pose.position.y, msg.pose.position.z, msg.header.frame_id.c_str());
+    originPoint_.header.frame_id = msg.header.frame_id;
+    originPoint_.header.seq = msg.header.seq;
+    originPoint_.header.stamp = msg.header.stamp;
+    originPoint_.point.x = msg.pose.position.x;
+    originPoint_.point.y = msg.pose.position.y;
+    originPoint_.point.z = msg.pose.position.z;
+    
+    updated = true;
+}
+
+/*
+ * This method sends a servicecall to stop the
+ * head_traj_controller and to start the suturo_head_controller
+ */
+bool Head_Controller::switchControllers(ros::NodeHandle &n){
+    /*
+       ros::ServiceClient load_client = n.serviceClient<pr2_mechanism_msgs::LoadController>("/pr2_controller_manager/load_controller");
+
+       pr2_mechanism_msgs::LoadController service_data;
+       service_data.request.name = "suturo_head_controller";
+       if (load_client.call(service_data)) { 
+       ROS_INFO_STREAM("Loaded suturo_head_controller");  
+       } else { 
+       ROS_INFO_STREAM("Failed to load suturo_head_controller"); 
+       return false;
+       } 
+       */
+    ros::ServiceClient switch_client = n.serviceClient<pr2_mechanism_msgs::SwitchController>("/pr2_controller_manager/switch_controller");
+
+    pr2_mechanism_msgs::SwitchController to_imped;
+    to_imped.request.start_controllers.push_back("suturo_head_controller");
+    to_imped.request.stop_controllers.push_back("head_traj_controller");
+    to_imped.request.strictness = pr2_mechanism_msgs::SwitchController::Request::BEST_EFFORT;
+    ROS_INFO("sending the call from inside of the method");
+    if (switch_client.call(to_imped)) { 
+        ROS_INFO("Switched from head_traj_controller to suturo_head_controller"); 
+        return to_imped.response.ok;
+    } else { 
+        ROS_INFO("Failed to switch from head_traj_controller to suturo_head_controller"); 
+        return false;
+    } 
+
+} 
 /// Register controller to pluginlib
 PLUGINLIB_EXPORT_CLASS(suturo::Head_Controller,
         pr2_controller_interface::Controller)
