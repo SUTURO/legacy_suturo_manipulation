@@ -6,7 +6,6 @@ project(suturo_manipulation_msgs)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   message_generation
-  suturo_perception_msgs
   geometry_msgs
   actionlib_msgs
   genmsg
@@ -69,7 +68,6 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
-  suturo_perception_msgs
   geometry_msgs
   actionlib_msgs
 )

@@ -41,7 +41,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.036;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.143;
   co.primitive_poses[0].position.x = 0.65;
-  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.y = 0.02;
   co.primitive_poses[0].position.z = tischposiZ + 0.0716;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
@@ -88,7 +88,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
   co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.25;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.0375;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.04;
 
   co.primitive_poses[0].position.x = 0.65;
   co.primitive_poses[0].position.y = 0.3;
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
 
 	Grasping grasper(&pi);
 	grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	grasper.drop("box2");
+	//~ grasper.drop("beer2");
 	
 	
 		//~ moveit_msgs::PlanningScene ps;

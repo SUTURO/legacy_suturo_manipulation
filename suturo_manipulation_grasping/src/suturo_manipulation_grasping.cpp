@@ -136,29 +136,78 @@ int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::
 	return 1;
 }
 
-int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm)
+int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm)
 {
-	if (co.primitives[0].type == shape_msgs::SolidPrimitive::CYLINDER){
-		//wir greifen eh nur boxen..
+	
+	double noise = 0.005;
+	
+	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
 		return 1;
 	}
 	
 	geometry_msgs::PoseStamped gripperPose;
-	std::vector<double> rpy;
-	double gripper_open_kack_name;
+	double gripper_open_width;
 	
 	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		//get gripperpose
 		gripperPose = group_r_arm_->getCurrentPose();
-		rpy = group_r_arm_->getCurrentRPY();
 		
+		//determine how far the gripper is open
 		move_group_interface::MoveGroup group("right_gripper");
-		gripper_open_kack_name = group.getCurrentJointValues().at(3);
+		gripper_open_width = group.getCurrentJointValues().at(3);
 	} else if (arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM){
+		//get gripperpose
 		gripperPose = group_l_arm_->getCurrentPose();
-		rpy = group_l_arm_->getCurrentRPY();
 		
+		//determine how far the gripper is open
 		move_group_interface::MoveGroup group("left_gripper");
-		gripper_open_kack_name = group.getCurrentJointValues().at(3);
+		gripper_open_width = group.getCurrentJointValues().at(3);
+	} else {
+		ROS_ERROR("wrong arm parameter.");
+		return 0;
+	}
+	
+	double h = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT];
+	double r = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS];
+	
+	//update object position based on gripperposition
+	co.primitive_poses[0].position = gripperPose.pose.position;
+	co.primitive_poses[0].position.x += Gripper::GRIPPER_DEPTH + r;
+	
+	//update object size based on gripperstate
+	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = gripper_open_width/2 - noise/2;
+	
+	return 1;
+}
+
+int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm)
+{
+	
+	double noise = 0.005;
+	
+	if (co.primitives[0].type == shape_msgs::SolidPrimitive::CYLINDER){
+		return 1;
+	}
+	
+	geometry_msgs::PoseStamped gripperPose;
+	double gripper_open_width;
+	
+	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		//get gripperpose
+		gripperPose = group_r_arm_->getCurrentPose();
+		
+		//determine how far the gripper is open
+		move_group_interface::MoveGroup group("right_gripper");
+		gripper_open_width = group.getCurrentJointValues().at(3);
+		
+	} else if (arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM){
+		//get gripperpose
+		gripperPose = group_l_arm_->getCurrentPose();
+		
+		//determine how far the gripper is open
+		move_group_interface::MoveGroup group("left_gripper");
+		gripper_open_width = group.getCurrentJointValues().at(3);
+		
 	} else {
 		ROS_ERROR("wrong arm parameter.");
 		return 0;
@@ -169,15 +218,15 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	
 	//update object position based on gripperposition
 	co.primitive_poses[0].position = gripperPose.pose.position;
-	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - 0.005;
+	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - noise;
 	
 	//update object size based on gripperstate
 	if (y > Gripper::GRIPPER_MAX_POSITION){
 		//x achse wurde gegriffen
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_open_kack_name-0.005;
+		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_open_width - noise;
 	} else {
 		//y achse wurde gegriffen
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_open_kack_name-0.005;
+		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_open_width - noise;
 	}
 	
 	return 1;
@@ -232,6 +281,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	
 	ROS_INFO_STREAM("update objectposition in planningscene.");
 	updateGraspedBoxPose(co, arm);
+	updateGraspedCylinderPose(co, arm);
 	pi_->addObject(co);
 	
 	//attach object
