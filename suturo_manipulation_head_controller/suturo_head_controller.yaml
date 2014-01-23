@@ -1,7 +1,0 @@
-suturo_head_controller:
-  type: suturo_manipulation_head_controller/HeadControllerPlugin
-  pid_parameters:
-    p: 5.0
-    i: 2.0
-    d: 3.0
-    i_clamp: 0.0
