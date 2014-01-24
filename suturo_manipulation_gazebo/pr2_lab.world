@@ -13,6 +13,19 @@
       </attenuation>
       <direction>-0.500000 0.500000 -1.000000</direction>
     </light>
+    <light name='sun_2' type='point'>
+        <cast_shadows>1</cast_shadows>
+        <pose>0.262421 0.000000 0.8201365 0.000000 0.000000 0.000000</pose>
+        <diffuse>0.800000 0.800000 0.800000 1.000000</diffuse>
+        <specular>0.100000 0.100000 0.100000 1.000000</specular>
+        <attenuation>
+            <range>1000.000000</range>
+            <constant>0.900000</constant>
+            <linear>0.010000</linear>
+            <quadratic>0.001000</quadratic>
+        </attenuation>
+        <direction>-0.500000 0.500000 -1.000000</direction>
+    </light>
     <model name='ground_plane'>
       <static>1</static>
       <link name='link'>
@@ -4630,7 +4643,7 @@
     </model>
     <model name='kitchen_description'>
       <static>1</static>
-      <pose>3.200000 5.600000 -0.2500000 0.000000 0.000000 0.000000</pose>
+      <pose>3.200000 5.600000 -0.250000 0.000000 0.000000 0.000000</pose>
       <link name='kitchen_link'>
         <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
         <inertial>
@@ -12117,11 +12130,11 @@
     <state world_name='default'>
       <sim_time>0 0</sim_time>
       <real_time>0 0</real_time>
-      <wall_time>1390309841 419205371</wall_time>
+      <wall_time>1390580666 480266286</wall_time>
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>5.371190 -6.711170 6.514520 -0.000000 0.553623 2.441620</pose>
+        <pose>0.747171 -1.979750 2.572550 -0.000000 0.721623 1.721620</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
