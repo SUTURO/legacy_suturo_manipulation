@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	putObjects(pub_co);
+	//~ putObjects(pub_co);
 	
 	
 //~ move_group_interface::MoveGroup group("right_arm");
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	grasper.pick("box2", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
 	//~ grasper.drop("beer2");
 	
 	
