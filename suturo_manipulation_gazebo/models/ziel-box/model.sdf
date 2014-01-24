@@ -1,0 +1,34 @@
+<sdf version="1.3">
+<model name="zielbox">
+  <pose>0 0 0.65 1.57 0.00 1.57</pose>
+  <static>false</static>
+    <link name="link">
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>1.0</iyy>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.395 0.08 0.252</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>0.395 0.08 0.252</size>
+          </box>
+        </geometry>
+
+      </visual>
+    </link>
+  </model>
+</sdf>

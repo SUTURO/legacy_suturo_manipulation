@@ -1,0 +1,15 @@
+material !!NAME!!/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture !!NAME!!.jpg
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}
