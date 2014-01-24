@@ -16,7 +16,7 @@ void putObjects(ros::Publisher pub_co)
 	//~ double tischposiZ = 0.86;
 	//gazebo
 	 //~ roslaunch pr2_teleop_general pr2_teleop_general_keyboard_bodyhead_only.launch
-	double tischposiZ = 0.5;
+	double tischposiZ = 0.57;
 	
   ros::WallDuration(1.0).sleep();
 
@@ -30,18 +30,18 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
   co.primitive_poses.resize(1);
 
-  co.id = "box2";
+  co.id = "dlink";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.145;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.036;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.143;
-  co.primitive_poses[0].position.x = 0.65;
-  co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = tischposiZ + 0.0716;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.035 ;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.24;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.169;
+  co.primitive_poses[0].position.x = 0.6;
+  co.primitive_poses[0].position.y = -0.4;
+  co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0845;//tischposiZ + 0.0716;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
   pub_co.publish(co);
@@ -62,40 +62,53 @@ void putObjects(ros::Publisher pub_co)
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
   pub_co.publish(co);
 
+  // remove table
+  co.id = "table2";
+  co.operation = moveit_msgs::CollisionObject::REMOVE;
+  pub_co.publish(co);
+
+  // add table
+  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.95;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 2.45;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.03;
+  co.primitive_poses[0].position.x = 0.85;
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = tischposiZ+0.015;
+	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
+  pub_co.publish(co);
+
   // remove box1
-  co.id = "box1";
+  co.id = "cafetfilter";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
   // add box1
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.045;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.145;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.16;
-  co.primitive_poses[0].position.x = 0.65;
-  co.primitive_poses[0].position.y = -0.3;
-  co.primitive_poses[0].position.z = tischposiZ + 0.08;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_4);
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.037;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.132;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.197;
+  co.primitive_poses[0].position.x = 0.6;
+  co.primitive_poses[0].position.y = 0.4;
+  co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0985;//tischposiZ + 0.08;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
   pub_co.publish(co);
 
-  co.id = "beer2";
+  co.id = "corny";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
   pub_co.publish(co);
 
+  // add box1
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].type = shape_msgs::SolidPrimitive::CYLINDER;
-  co.primitives[0].dimensions.resize(shape_tools::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::CYLINDER>::value);
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] = 0.25;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = 0.0375;
-
-  co.primitive_poses[0].position.x = 0.65;
-  co.primitive_poses[0].position.y = 0.3;
-  co.primitive_poses[0].position.z = tischposiZ + 0.125;
-  co.primitive_poses[0].orientation.x = 0;
-  co.primitive_poses[0].orientation.y = 0;
-  co.primitive_poses[0].orientation.z = 0;
-  co.primitive_poses[0].orientation.w = 1;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.036;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.145;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.143;
+  co.primitive_poses[0].position.x = 0.6;
+  co.primitive_poses[0].position.y = 0;
+  co.primitive_poses[0].position.z = tischposiZ + 0.03 + 0.0715;//tischposiZ + 0.08;
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  
   pub_co.publish(co);
   
   ros::WallDuration(2.0).sleep();
