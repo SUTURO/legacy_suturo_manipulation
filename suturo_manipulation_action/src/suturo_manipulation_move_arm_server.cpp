@@ -87,9 +87,6 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	
 	// set group to move
 	move_group_interface::MoveGroup group(arm);
-
-	// modifies the z-position, to touch object... dirty hack...
-	// transformedPose.pose.position.z += 0.3;
 	
 	// set orientation to have a straight gripper
 	transformedPose.pose.orientation.x = 0;
@@ -98,7 +95,6 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	transformedPose.pose.orientation.w = 1;
 	
 	// set Pose
-
 	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
