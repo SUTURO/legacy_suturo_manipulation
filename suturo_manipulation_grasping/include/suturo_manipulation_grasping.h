@@ -12,14 +12,17 @@ class Grasping
 {
 private:
 
+	const static std::string LEFT_ARM;
+	const static std::string RIGHT_ARM;
+
 	move_group_interface::MoveGroup* group_r_arm_;
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
-	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm);
+	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose);
 	
-	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm);
+	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose);
 
 	int calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);

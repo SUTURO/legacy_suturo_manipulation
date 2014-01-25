@@ -11,14 +11,19 @@
 
 using namespace std;
 
+const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
+const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
+
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
-	group_r_arm_ = new move_group_interface::MoveGroup(suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
 	group_r_arm_->setPlanningTime(20.0);
 	
-	group_l_arm_ = new move_group_interface::MoveGroup(suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
 	group_l_arm_->setPlanningTime(20.0);
 	gripper_ = new Gripper();
+	
+	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
 	pi_ = pi;
 }
 
@@ -34,7 +39,7 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 	
 	//test if the object is a box
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
-		ROS_ERROR_STREAM("Wenn der Fehler auftaucht hat Simon Mist gebaut!");
+		ROS_ERROR_STREAM("Wenn der Fehler auftaucht hat Simon Mist gebaut. :(");
 		return 0;
 	}
 	
@@ -60,12 +65,8 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 	if (y > Gripper::GRIPPER_MAX_POSITION){
 		//rotate gripper to grap the y side
 		pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, tf::getYaw(box_orientation)+M_PI_2);
-		ROS_INFO_STREAM("gripper yaw1 " << tf::getYaw(box_orientation)+M_PI_2);
-		ROS_INFO_STREAM("pose yaw1 " << tf::getYaw(pose.pose.orientation));
 	} else {
 		pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, tf::getYaw(box_orientation));
-		ROS_INFO_STREAM("gripper yaw1 " << tf::getYaw(box_orientation));
-		ROS_INFO_STREAM("pose yaw1 " << tf::getYaw(pose.pose.orientation));
 	}
 	
 	//grab object form the front
@@ -74,7 +75,7 @@ int Grasping::calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geom
 	
 	pre_pose.header.frame_id = co.header.frame_id;
 	pre_pose = pose;
-	pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH;
+	pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH -0.05;
 	
 	return 1;
 }
@@ -116,7 +117,8 @@ int Grasping::calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co,
 	return 1;
 }
 
-int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose)
+int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
+						geometry_msgs::PoseStamped &pre_pose)
 {
 	//choose the right grasppositoncalculationfunction
 	switch (co.primitives[0].type){
@@ -136,7 +138,7 @@ int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::
 	return 1;
 }
 
-int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm)
+int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose)
 {
 	
 	double noise = 0.005;
@@ -148,20 +150,16 @@ int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::s
 	geometry_msgs::PoseStamped gripperPose;
 	double gripper_open_width;
 	
-	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+	if (arm == RIGHT_ARM){
 		//get gripperpose
 		gripperPose = group_r_arm_->getCurrentPose();
 		
 		//determine how far the gripper is open
-		move_group_interface::MoveGroup group("right_gripper");
-		gripper_open_width = group.getCurrentJointValues().at(3);
-	} else if (arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM){
+	} else if (arm == LEFT_ARM){
 		//get gripperpose
 		gripperPose = group_l_arm_->getCurrentPose();
 		
 		//determine how far the gripper is open
-		move_group_interface::MoveGroup group("left_gripper");
-		gripper_open_width = group.getCurrentJointValues().at(3);
 	} else {
 		ROS_ERROR("wrong arm parameter.");
 		return 0;
@@ -175,12 +173,12 @@ int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::s
 	co.primitive_poses[0].position.x += Gripper::GRIPPER_DEPTH + r;
 	
 	//update object size based on gripperstate
-	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = gripper_open_width/2 - noise/2;
+	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = gripper_pose/2 - noise/2;
 	
 	return 1;
 }
 
-int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm)
+int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose)
 {
 	
 	double noise = 0.005;
@@ -192,21 +190,13 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	geometry_msgs::PoseStamped gripperPose;
 	double gripper_open_width;
 	
-	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+	if (arm == RIGHT_ARM){
 		//get gripperpose
 		gripperPose = group_r_arm_->getCurrentPose();
 		
-		//determine how far the gripper is open
-		move_group_interface::MoveGroup group("right_gripper");
-		gripper_open_width = group.getCurrentJointValues().at(3);
-		
-	} else if (arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM){
+	} else if (arm == LEFT_ARM){
 		//get gripperpose
 		gripperPose = group_l_arm_->getCurrentPose();
-		
-		//determine how far the gripper is open
-		move_group_interface::MoveGroup group("left_gripper");
-		gripper_open_width = group.getCurrentJointValues().at(3);
 		
 	} else {
 		ROS_ERROR("wrong arm parameter.");
@@ -223,10 +213,10 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string
 	//update object size based on gripperstate
 	if (y > Gripper::GRIPPER_MAX_POSITION){
 		//x achse wurde gegriffen
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_open_width - noise;
+		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_pose - noise;
 	} else {
 		//y achse wurde gegriffen
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_open_width - noise;
+		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_pose - noise;
 	}
 	
 	return 1;
@@ -236,9 +226,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 {
 	string objectName = co.id;
 	move_group_interface::MoveGroup* group;
-	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+	if (arm == RIGHT_ARM){
 		group = new move_group_interface::MoveGroup(*group_r_arm_);
-	} else if (arm == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM) {
+	} else if (arm == LEFT_ARM) {
 		group = new move_group_interface::MoveGroup(*group_l_arm_);
 	} else {
 		ROS_ERROR_STREAM("Grasping::pick| arm value not valide.");
@@ -255,10 +245,11 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	//open gripper
-	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
-		gripper_->open_r_gripper();
+	double gripper_pose;
+	if (arm == RIGHT_ARM){
+		gripper_pose = gripper_->open_r_gripper();
 	}else{
-		gripper_->open_l_gripper();
+		gripper_pose = gripper_->open_l_gripper();
 	}
 	
 	//set goal to pose
@@ -273,15 +264,15 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	//close grapper
-	if (arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
-		gripper_->close_r_gripper(force);
+	if (arm == RIGHT_ARM){
+		gripper_pose = gripper_->close_r_gripper(force);
 	}else{
-		gripper_->close_l_gripper(force);
+		gripper_pose = gripper_->close_l_gripper(force);
 	}
 	
 	ROS_INFO_STREAM("update objectposition in planningscene.");
-	updateGraspedBoxPose(co, arm);
-	updateGraspedCylinderPose(co, arm);
+	updateGraspedBoxPose(co, arm, gripper_pose);
+	updateGraspedCylinderPose(co, arm, gripper_pose);
 	pi_->addObject(co);
 	
 	//attach object
@@ -290,9 +281,8 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	
 	//lift object
 	ROS_INFO_STREAM("lift object");
-	geometry_msgs::PoseStamped pose2 = pose;
-	pose2.pose.position.z += 0.05;
-	group->setPoseTarget(pose2);
+	pose.pose.position.z += 0.05;
+	group->setPoseTarget(pose);
 	group->move();
 	
 	return 1;

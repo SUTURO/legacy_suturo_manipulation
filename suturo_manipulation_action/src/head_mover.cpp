@@ -126,6 +126,7 @@ void openhand()
 	
 	Gripper g;
 	g.open_l_gripper();
+	g.close_l_gripper();
 }
 
 int main(int argc, char **argv)
@@ -136,7 +137,7 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
-	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	//~ putObjects(pub_co);
 	
 	
@@ -168,9 +169,9 @@ int main(int argc, char **argv)
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
-	grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	//~ grasper.drop("beer2");
-	
+	grasper.pick("cafetfilter", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.drop("cafetfilter");
+	//~ openhand();
 	
 		//~ moveit_msgs::PlanningScene ps;
 	//~ pi.getPlanningScene(ps);

@@ -14,8 +14,8 @@ class Gripper{
 private:
   GripperClient* r_gripper_client_;  
   GripperClient* l_gripper_client_;  
-  double n;
   int connected_to_controller_;
+  double gripper_pose;
 
 public:
   static const double GRIPPER_MAX_POSITION = 0.09;
@@ -31,19 +31,21 @@ public:
 		return connected_to_controller_;
 	}
  
-	actionlib::SimpleClientGoalState close_gripper(GripperClient* gripper_client_);
+  void feedbackCb(const pr2_controllers_msgs::Pr2GripperCommandFeedbackConstPtr& feedback);
+ 
+ 	double close_gripper(GripperClient* gripper_client_, double force);
 
-	actionlib::SimpleClientGoalState open_gripper(GripperClient* gripper_client_);
+	double open_gripper(GripperClient* gripper_client_, double force);
 
   //Open the gripper
-  actionlib::SimpleClientGoalState open_r_gripper(double force=-1);
+  double open_r_gripper(double force=-1);
   
-  actionlib::SimpleClientGoalState open_l_gripper(double force=-1);
+  double open_l_gripper(double force=-1);
 
   //Close the gripper
-  actionlib::SimpleClientGoalState close_r_gripper(double force=50);
+  double close_r_gripper(double force=50);
   
-  actionlib::SimpleClientGoalState close_l_gripper(double force=50);
+  double close_l_gripper(double force=50);
   
   static const std::vector<std::string> get_r_gripper_links() {
     static std::vector<std::string> r2;
