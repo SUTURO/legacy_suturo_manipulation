@@ -50,6 +50,7 @@ add_message_files(
  ActionAnswer.msg
  RobotBodyPart.msg
  suturo_manipulation_grasping_goal.msg
+ torque_values.msg
 )
 
 ## Generate services in the 'srv' folder
