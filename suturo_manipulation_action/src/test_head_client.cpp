@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	
 	// initiliaze the client
 	ros::init(argc, argv, "test_head_client");
-	ros::start();
+	ros::NodeHandle n;
 	
 	// Dummy PosedStamped Object
 	geometry_msgs::PoseStamped ps;
@@ -48,11 +48,30 @@ int main(int argc, char** argv)
 	ROS_INFO("HeadGoal done!");
 
 	// create client and connect to server
-	Head_client client("suturo_man_move_head_server", true); 
+	Head_client client(n, "suturo_man_move_head_server", true); 
+	ros::WallDuration(5.0).sleep();
 	// waiting for connection
 	client.waitForServer();
 	ROS_INFO("connected! let's move the head!");
+
+	ROS_INFO_STREAM("isServerConnected?: " << client.isServerConnected());
+
 	// send the goal
 	client.sendGoal(goal);
-	ROS_INFO("goal sended!");
+	ROS_INFO("sendGoal. Current State: %s", client.getState().toString().c_str());
+	int count = 0;
+	client.waitForResult(ros::Duration(15.0));
+	// while(client.getState() != actionlib::SimpleClientGoalState::SUCCEEDED && client.getState() != actionlib::SimpleClientGoalState::ABORTED){
+	// 	client.waitForResult(ros::Duration(5.0));
+	// 	ROS_INFO("Count: %i", count);
+	// 	count++;
+	// }
+
+	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+		ROS_INFO("goal published!");
+	} else {
+		ROS_INFO("Failed!");
+	}	
+	ROS_INFO("Current State: %s", client.getState().toString().c_str());
+	return 1;
 }

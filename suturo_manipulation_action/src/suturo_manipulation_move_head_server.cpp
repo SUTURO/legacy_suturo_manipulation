@@ -55,7 +55,7 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 {	
 	ROS_INFO("callback moveHead() begins...");
 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
-	
+
 	// Set header
 	r.succ.header.stamp = ros::Time();
 	// Set Answer fot planning to undefined
@@ -70,11 +70,11 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 		server_head->setAborted(r);
 	}
 
-	// Publish goal on topic /suturo/head_controller
+	// Publish goal on topic /suturo/head_controller_goal_point
 	if( !publisher ) {
 		ROS_WARN("Publisher invalid!");
-  	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-  	server_head->setAborted(r);
+	  	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+	  	server_head->setAborted(r);
 	} else {
 		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
