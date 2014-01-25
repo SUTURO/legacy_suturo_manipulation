@@ -60,7 +60,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	// Set arm which should be moved
 	string arm = goal->bodypart.bodyPart;
 	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
-		ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
+		ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!\n");
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_arm->setAborted(r);	
 	}
@@ -71,6 +71,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	//tranform pose
 	geometry_msgs::PoseStamped transformedPose;
 	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
+		ROS_INFO("Transformation failed!\n")
 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_arm->setAborted(r);
@@ -105,13 +106,14 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		
 	//move arm
 	if (group.move()){
+		ROS_INFO("Arm moved!\n")
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 	    server_arm->setSucceeded(r);
 	} else {
+		ROS_INFO("Moving failed!\n")
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_arm->setAborted(r);
 	}	
-	ROS_INFO("moved: %i", r.succ.type);
 }
 
 int main(int argc, char** argv)

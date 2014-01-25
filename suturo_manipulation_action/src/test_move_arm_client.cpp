@@ -25,7 +25,10 @@ int main(int argc, char** argv)
 	suturo_manipulation_msgs::suturo_manipulation_moveGoal goal;
 	
 	ros::init(argc, argv, "test_move_arm_client");
-	Client client("suturo_man_move_arm_server", true); // true -> don't need ros::spin()
+	Client client("suturo_man_move_arm_server", true);
+	// wait for complete client initialisation
+	ros::WallDuration(0.5).sleep();
+	// waiting for connection
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to move arm!");
 			

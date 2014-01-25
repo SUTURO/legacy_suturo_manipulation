@@ -25,6 +25,8 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "test_move_home_client");
 	// create client and connect to server
 	Client client("suturo_man_move_home_server", true); 
+	// wait for complete client initialisation
+	ros::WallDuration(0.5).sleep();
 	// waiting for connection
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to go home!");

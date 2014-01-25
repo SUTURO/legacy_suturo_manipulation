@@ -24,6 +24,15 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "test_head_client");
 	ros::NodeHandle n;
 	
+	ROS_INFO("Begin to create client!");
+	// create client and connect to server
+	Head_client client(n, "suturo_man_move_head_server", true); 
+	// wait for complete client initialisation
+	ros::WallDuration(0.5).sleep();
+	// waiting for connection
+	client.waitForServer();
+	ROS_INFO("connected! let's move the head!");
+
 	// Dummy PosedStamped Object
 	geometry_msgs::PoseStamped ps;
 
@@ -46,13 +55,6 @@ int main(int argc, char** argv)
 	goal.ps.header.frame_id = ps.header.frame_id;
 
 	ROS_INFO("HeadGoal done!");
-
-	// create client and connect to server
-	Head_client client(n, "suturo_man_move_head_server", true); 
-	ros::WallDuration(5.0).sleep();
-	// waiting for connection
-	client.waitForServer();
-	ROS_INFO("connected! let's move the head!");
 
 	ROS_INFO_STREAM("isServerConnected?: " << client.isServerConnected());
 

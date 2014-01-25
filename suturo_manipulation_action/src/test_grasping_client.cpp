@@ -24,6 +24,9 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "test_action_pick_client");
 	// waiting for connection
 	Client client("suturo_man_grasping_server", true);
+	// wait for complete client initialisation
+	ros::WallDuration(0.5).sleep();
+	// waiting for connection
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to pick");
 

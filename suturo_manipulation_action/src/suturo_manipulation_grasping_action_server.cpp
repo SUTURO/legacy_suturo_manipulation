@@ -36,7 +36,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 	string picking_arm = graspGoal->goal.bodypart.bodyPart;
 
   if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){  
-    ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!");
+    ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!\n");
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
     server_grasp->setAborted(r); 
   } else {
@@ -53,11 +53,11 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
       // Grasp the object
       if (grasper.pick(obj_name, picking_arm, newton))
       {
-        ROS_INFO("Object picked...");
+        ROS_INFO("Object picked...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
         server_grasp->setSucceeded(r);
       } else {
-        ROS_INFO("Picking failed!");
+        ROS_INFO("Picking failed!\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
@@ -66,11 +66,11 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
       // Drop the object
       if (grasper.drop(obj_name))
       {
-        ROS_INFO("Object droped...");
+        ROS_INFO("Object droped...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
         server_grasp->setSucceeded(r);
       } else {
-        ROS_INFO("Droping failed!");
+        ROS_INFO("Droping failed!\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
