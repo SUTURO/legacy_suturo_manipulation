@@ -54,7 +54,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	
 	// Set header
     r.succ.header.stamp = ros::Time();
-    // Set Answer fot planning to undefined
+    // Set Answer for planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
 	// Set arm which should be moved

@@ -23,8 +23,10 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 {	
 	suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
 	
-	r.succ.header.stamp = ros::Time();
-	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+  // Set header
+  r.succ.header.stamp = ros::Time();
+  // Set Answer for planning to undefined
+  r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
 	// set Planning Interface and Grasper
 	ROS_INFO("Create Planning Scene Interface...");
