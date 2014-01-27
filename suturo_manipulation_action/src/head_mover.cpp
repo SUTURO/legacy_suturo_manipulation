@@ -170,6 +170,8 @@ int main(int argc, char **argv)
 
 	Grasping grasper(&pi);
 	grasper.pick("cafetfilter", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.pick("cafetfilter", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.drop("cafetfilter");
 	grasper.drop("cafetfilter");
 	//~ openhand();
 	

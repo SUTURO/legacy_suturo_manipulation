@@ -296,6 +296,11 @@ int Grasping::pick(std::string objectName, std::string arm, double force)
 		return 0;
 	}
 	
+	if (pi_->isObjectAttached(objectName)){
+		ROS_INFO_STREAM(objectName << " already attached.");
+		return 1;
+	}
+	
 	geometry_msgs::PoseStamped pose;
 	geometry_msgs::PoseStamped pre_pose;
 	
@@ -328,7 +333,8 @@ int Grasping::drop(string objectName)
 	{
 		ROS_INFO("Get object");
 	} else {
-		return 0;
+		ROS_INFO_STREAM(objectName << " not attached.");
+		return 1;
 	}
 	//find arm that holds the object
 	bool r_grasp;

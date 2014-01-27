@@ -127,7 +127,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string 
 			return 1;
 		}
 	}
-	ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject| Didn't found Object: " << objectName);
+	//~ ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject| Object: " << objectName);
 	return 0;
 }
 
@@ -167,6 +167,12 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	ros::WallDuration(1.0).sleep();
 	ROS_INFO_STREAM(objectName << " detached.");
 	return 1;
+}
+
+bool Suturo_Manipulation_Planning_Scene_Interface::isObjectAttached(std::string objectName)
+{
+	moveit_msgs::AttachedCollisionObject co;
+	return getAttachedObject(objectName, co);
 }
 
 

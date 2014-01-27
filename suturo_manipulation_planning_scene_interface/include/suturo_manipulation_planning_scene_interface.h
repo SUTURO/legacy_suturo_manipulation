@@ -33,6 +33,8 @@ public:
 	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
 	
 	int getAttachedObject(std::string objectName, moveit_msgs::AttachedCollisionObject &co);
+	
+	bool isObjectAttached(std::string objectName);
 };
      
 #endif
