@@ -49,10 +49,7 @@ int main(int argc, char** argv)
 	suturo_manipulation_msgs::suturo_manipulation_headGoal goal;
 
 	// Set goal with PoseStamped Object data
-	goal.ps.pose.position.x = ps.pose.position.x;
-	goal.ps.pose.position.y = ps.pose.position.y;
-	goal.ps.pose.position.z = ps.pose.position.z;
-	goal.ps.header.frame_id = ps.header.frame_id;
+	goal.ps = ps;
 
 	ROS_INFO("HeadGoal done!");
 
@@ -61,13 +58,7 @@ int main(int argc, char** argv)
 	// send the goal
 	client.sendGoal(goal);
 	ROS_INFO("sendGoal. Current State: %s", client.getState().toString().c_str());
-	int count = 0;
 	client.waitForResult(ros::Duration(15.0));
-	// while(client.getState() != actionlib::SimpleClientGoalState::SUCCEEDED && client.getState() != actionlib::SimpleClientGoalState::ABORTED){
-	// 	client.waitForResult(ros::Duration(5.0));
-	// 	ROS_INFO("Count: %i", count);
-	// 	count++;
-	// }
 
 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
 		ROS_INFO("goal published!");

@@ -53,9 +53,9 @@ int main(int argc, char** argv)
 	// Get feedback from server
 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
 		if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
-			ROS_INFO("moved!!!!!!! result: %i", r->succ.type);
+			ROS_INFO("moved arm! result: %i", r->succ.type);
 		} else {
-			ROS_INFO("not moved!!!!!!! result: %i", r->succ.type);
+			ROS_INFO("cant move arm! result: %i", r->succ.type);
 		}
 		
 	}
