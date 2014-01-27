@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	
 	if (argc != 5)
 	{
-		ROS_INFO("arguments: box1/box2/beer1 newton right_arm/left_arm grasp(1)/drop(0)");
+		ROS_INFO("arguments: dlink/corny/cafetfilter newton right_arm/left_arm grasp(1)/drop(0)");
 		return 1;
 	}
 		

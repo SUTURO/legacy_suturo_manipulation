@@ -16,19 +16,21 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-// Transform the incoming frame to /base_link
+/**
+ * Transform the incoming frame to /base_link
+ */
 int transform(geometry_msgs::PoseStamped &goalPose,
 					geometry_msgs::Point goalPoint, const char* s)
 { 
 	//save goal position in pose
 	goalPose.header.frame_id = s;
-    goalPose.pose.position.x = goalPoint.x;
-    goalPose.pose.position.y = goalPoint.y;
-    goalPose.pose.position.z = goalPoint.z;
-    goalPose.pose.orientation.w = 1;
-	
+	goalPose.pose.position.x = goalPoint.x;
+	goalPose.pose.position.y = goalPoint.y;
+	goalPose.pose.position.z = goalPoint.z;
+	goalPose.pose.orientation.w = 1;
+
 	// goal_frame
-    const string goalFrame = "/base_link";
+	const string goalFrame = "/base_link";
 
 	ROS_INFO("Beginn der Transformation von %s zu /base_link", s);
     try{
@@ -53,8 +55,8 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	suturo_manipulation_msgs::suturo_manipulation_moveResult r;	
 	
 	// Set header
-    r.succ.header.stamp = ros::Time();
-    // Set Answer for planning to undefined
+	r.succ.header.stamp = ros::Time();
+	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
 	// Set arm which should be moved

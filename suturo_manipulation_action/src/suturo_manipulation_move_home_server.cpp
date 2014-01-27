@@ -52,7 +52,8 @@ void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 /**
 * This method moves the given bodypart to the homeposition.
 */
-void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, ros::Publisher* publisher, Server* server_home)
+void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstPtr& goal, 
+			ros::Publisher* publisher, Server* server_home)
 {	
 	ROS_INFO("callback moveHome() begins...");
 
@@ -114,15 +115,15 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 	    goal_msg.goal.min_duration = ros::Duration(1.0);
 	    goal_msg.goal.max_velocity = 10;
 
-        // Publish goal on topic /suturo/head_controller
-        if( !publisher ) {
-        	ROS_INFO("Publisher invalid!\n");
-        	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-          	server_home->setAborted(r);
-        } else {
-            publisher->publish(goal_msg);
-            ROS_INFO("Home Goal published!");
-            ros::WallDuration(2.0).sleep();
+			// Publish goal on topic /suturo/head_controller
+			if( !publisher ) {
+				ROS_INFO("Publisher invalid!\n");
+				r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+				server_home->setAborted(r);
+			} else {
+				publisher->publish(goal_msg);
+				ROS_INFO("Home Goal published!");
+				ros::WallDuration(2.0).sleep();
 			if(moved == 1){
 				ROS_INFO("Head moved!\n");
 				r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -130,9 +131,9 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			} else {
 				ROS_INFO("Head doesn't move!\n");
 				r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		  		server_home->setAborted(r);
+		  	server_home->setAborted(r);
 			}
-        }
+		}
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){
 		// bodypart = left_arm
 		ROS_INFO("Move left_arm home!");
@@ -145,8 +146,8 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		//move bodypart
 		if (group.move()){
 			ROS_INFO("Moved home!\n");
-		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-		    server_home->setSucceeded(r);
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+			server_home->setSucceeded(r);
 		} else {
 			ROS_INFO("Moving home failed!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
@@ -164,8 +165,8 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		//move bodypart
 		if (group.move()){
 			ROS_INFO("Moved home!\n");
-		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-		    server_home->setSucceeded(r);
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+			server_home->setSucceeded(r);
 		} else {
 			ROS_INFO("Moving home failed!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
@@ -183,8 +184,8 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		//move bodypart
 		if (group.move()){
 			ROS_INFO("Moved home!\n");
-		    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-		    server_home->setSucceeded(r);
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+			server_home->setSucceeded(r);
 		} else {
 			ROS_INFO("Moving home failed!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
@@ -211,6 +212,7 @@ int main(int argc, char** argv)
 
 	// Publish a topic for the ros intern head controller
 	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+
 
 	// create the action server
 	Server server_home(n, "suturo_man_move_home_server", boost::bind(&moveHome, _1, &head_publisher, &server_home), false);

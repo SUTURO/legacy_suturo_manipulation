@@ -47,8 +47,6 @@ int main(int argc, char** argv)
 	// send goal
 	client.sendGoal(goal);
 
-	//2x da es sonst nicht geht...
-	client.waitForResult(ros::Duration(20.0));
 	client.waitForResult(ros::Duration(20.0));
 	suturo_manipulation_msgs::suturo_manipulation_moveResultConstPtr r = client.getResult();
 	
