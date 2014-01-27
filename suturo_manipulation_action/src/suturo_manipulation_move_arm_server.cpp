@@ -79,22 +79,17 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		server_arm->setAborted(r);
 	}
 
-	//Orientierung des End-Effektors wieder auf w=1 setzen
-	transformedPose.pose.orientation.x = 0;
-	transformedPose.pose.orientation.y = 0;
-	transformedPose.pose.orientation.z = 0;
-	transformedPose.pose.orientation.w = 1;
 	ROS_INFO("transformed to x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
 	
 	// set group to move
 	move_group_interface::MoveGroup group(arm);
 	
-	// set orientation to have a straight gripper
-	transformedPose.pose.orientation.x = 0;
-	transformedPose.pose.orientation.y = 0;
-	transformedPose.pose.orientation.z = 0;
-	transformedPose.pose.orientation.w = 1;
+	// set orientation
+	transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
+	transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
+	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
+	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
 	
 	// set Pose
 	group.setPoseTarget(transformedPose);

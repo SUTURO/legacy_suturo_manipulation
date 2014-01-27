@@ -122,7 +122,7 @@ void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 /**
 * This method publishes a goal to the ros intern head mover
 */
-void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, ros::NodeHandle* n, 
+void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
 			ros::Publisher* publisher, Server* server_head)
 {	
 	ROS_INFO("callback moveHead() begins...");
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 
 	// create the action server
-	Server server_head(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &n, &head_publisher, &server_head), false);
+	Server server_head(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &head_publisher, &server_head), false);
 	// start the server
 	server_head.start();
 
