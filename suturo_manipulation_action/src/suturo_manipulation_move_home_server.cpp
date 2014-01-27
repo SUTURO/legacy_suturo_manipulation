@@ -115,15 +115,15 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 	    goal_msg.goal.min_duration = ros::Duration(1.0);
 	    goal_msg.goal.max_velocity = 10;
 
-			// Publish goal on topic /suturo/head_controller
-			if( !publisher ) {
-				ROS_INFO("Publisher invalid!\n");
-				r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-				server_home->setAborted(r);
-			} else {
-				publisher->publish(goal_msg);
-				ROS_INFO("Home Goal published!");
-				ros::WallDuration(2.0).sleep();
+		// Publish goal on topic /suturo/head_controller
+		if( !publisher ) {
+			ROS_INFO("Publisher invalid!\n");
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_home->setAborted(r);
+		} else {
+			publisher->publish(goal_msg);
+			ROS_INFO("Home Goal published!");
+			ros::WallDuration(2.0).sleep();
 			if(moved == 1){
 				ROS_INFO("Head moved!\n");
 				r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -131,7 +131,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			} else {
 				ROS_INFO("Head doesn't move!\n");
 				r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		  	server_home->setAborted(r);
+		  		server_home->setAborted(r);
 			}
 		}
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){

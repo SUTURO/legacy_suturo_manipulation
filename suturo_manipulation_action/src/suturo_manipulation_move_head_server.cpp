@@ -177,8 +177,7 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 			ROS_INFO("Head doesn't move!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 	  		server_head->setAborted(r);
-		}
-		
+		}		
 	}
 }
 

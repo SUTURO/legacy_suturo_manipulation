@@ -21,24 +21,24 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 */
 void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::NodeHandle* nh, Server* server_grasp)
 {	
-	suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
-	
+  suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
+
   // Set header
   r.succ.header.stamp = ros::Time();
   // Set Answer for planning to undefined
   r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
-	// set Planning Interface and Grasper
-	ROS_INFO("Create Planning Scene Interface...");
-	Suturo_Manipulation_Planning_Scene_Interface pi(nh);
-	ROS_INFO("Done. Create Grasper...")	;
-	Grasping grasper(&pi);
-	ROS_INFO("Done.");
+  // set Planning Interface and Grasper
+  ROS_INFO("Create Planning Scene Interface...");
+  Suturo_Manipulation_Planning_Scene_Interface pi(nh);
+  ROS_INFO("Done. Create Grasper...")	;
+  Grasping grasper(&pi);
+  ROS_INFO("Done.");
 
-	string picking_arm = graspGoal->goal.bodypart.bodyPart;
+  string picking_arm = graspGoal->goal.bodypart.bodyPart;
 
   if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && 
-			picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){  
+  		picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){  
     ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!\n");
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
     server_grasp->setAborted(r); 
@@ -86,9 +86,6 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_grasp_server");
 	ros::NodeHandle nh;
-	
-	// Publishing the planning scene
-	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	
 	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &nh, &server_grasp), false);
 	server_grasp.start();
