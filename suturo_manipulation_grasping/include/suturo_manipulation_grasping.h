@@ -15,29 +15,67 @@ private:
 	const static std::string LEFT_ARM;
 	const static std::string RIGHT_ARM;
 
+
 	move_group_interface::MoveGroup* group_r_arm_;
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
-	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose);
-	
-	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, std::string arm, double gripper_pose);
+	/**
+	 * Updated a Collisionobject with box shape depending on the gripper position.
+	 * @param 	co: 	
+	 * 						the collisionObject to be updated
+	 * 					arm:	
+	 * 						the arm that holds the object
+	 * 					gripper_pose:
+	 * 						the position of the gripper
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */
+	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripperPose, double gripper_pose);
 
+	/**
+	 * Updated a Collisionobject with cylinder shape depending on the gripper position.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
+	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripperPose, double gripper_pose);
+
+
+	/**
+	 * Calculates grasp und pregrasp position for a box.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);
-	
-	int calcBoxGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
-				geometry_msgs::PoseStamped &pre_pose);
 
+	/**
+	 * Calculates grasp und pregrasp position for a cylinder.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int calcCylinderGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose);
-	
-	int calcCylinderGraspPositionGammelig(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
-				geometry_msgs::PoseStamped &pre_pose);
-	
+
+	/**
+	 * Picks an object.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */		
 	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force);
 
+	/**
+	 * Calculates grasp und pregrasp position for a box or cylinder.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose);
 
 public:
@@ -45,9 +83,21 @@ public:
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
 
 	~Grasping();
-
+	
+	/**
+	 * Picks an object.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int pick(std::string objectName, std::string arm, double force=50.0);
 	
+	/**
+	 * drops an object.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int drop(std::string objectName);
 };
      

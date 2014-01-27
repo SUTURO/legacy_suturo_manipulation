@@ -60,7 +60,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = tischposiZ/2;
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
-  //~ pub_co.publish(co);
+  pub_co.publish(co);
 
   // remove table
   co.id = "table2";
@@ -76,7 +76,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = tischposiZ+0.015;
 	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
-  //~ pub_co.publish(co);
+  pub_co.publish(co);
 
   // remove box1
   co.id = "cafetfilter";
