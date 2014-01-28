@@ -138,6 +138,7 @@ public:
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */	
+<<<<<<< HEAD
 	int dropObject(std::string object_name);
 	
 	/**
@@ -148,6 +149,11 @@ public:
 	 */	
 	int drop(std::string arm);
 
+=======
+	int drop(std::string objectName);
+
+	int handoff(std::string objectName, std::string new_arm, double force);
+>>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
 };
      
 #endif
