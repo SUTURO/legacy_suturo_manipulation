@@ -1,5 +1,5 @@
 /**
-* This class implements a dummy client for our grasping server.
+* This clas implements a dummy client for our grasping server.
 * The client sends a goal (object) to the server, which have to grasp this object.
 */
 #include <ros/ros.h>
@@ -36,6 +36,11 @@ int main(int argc, char** argv)
 	goal.goal.header.stamp = ros::Time();
 	goal.goal.header.frame_id = "/base_footprint";
 	goal.goal.objectName = argv[1];
+	// if(arm=="left_arm"){
+	// 	goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;		
+	// } else {
+	// 	goal.goal.bodypart.bodyPart = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
+	// }
 	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.newton = atof(argv[2]);
 	goal.goal.grasp = atof(argv[4]);
@@ -50,9 +55,10 @@ int main(int argc, char** argv)
 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
 		if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
 			ROS_INFO("object grasped! result: %i", r->succ.type);
-		} else {
+		}else{
 			ROS_INFO("object not grasped! result: %i", r->succ.type);
 		}
+		
 	}
 	return 0;
 }
