@@ -111,10 +111,10 @@ std::string time_to_str(T ros_t)
 void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 {
   if(goal_msg.goal_id.id == msg.status.goal_id.id){
-  	ROS_INFO("Get result!");
+  	ROS_INFO("move_head_server: Get result!");
   	moved = 1;
   } else {
-  	ROS_INFO("No result!");
+  	ROS_INFO("move_head_server: No result!");
   	moved = 0;
   }
 }
@@ -168,7 +168,7 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 		goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());	
 		publisher->publish(goal_msg);
 		ROS_INFO("Goal published!");
-		ros::WallDuration(2.0).sleep();
+		ros::WallDuration(5.0).sleep();
 		if(moved == 1){
 			ROS_INFO("Head moved!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;

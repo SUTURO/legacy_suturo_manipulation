@@ -20,6 +20,8 @@ private:
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
+	ros::NodeHandle n_;
+	ros::Publisher head_publisher_;
 
 	/**
 	 * Updated a Collisionobject with box shape depending on the gripper position.
