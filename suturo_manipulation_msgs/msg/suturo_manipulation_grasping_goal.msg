@@ -7,8 +7,8 @@ string objectName
 # force to grasp object
 float64 newton
 
-#true for pick, false for drop
-bool grasp
+#1 for pick, 0 for drop, 2 for handoff
+float64 grasp
 
 #arm to be used
 suturo_manipulation_msgs/RobotBodyPart bodypart

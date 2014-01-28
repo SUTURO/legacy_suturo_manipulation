@@ -10,6 +10,7 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <tf/transform_listener.h>
 
+
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
@@ -59,6 +60,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
+
 	// Set arm which should be moved
 	string arm = goal->bodypart.bodyPart;
 	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
@@ -86,17 +88,25 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	move_group_interface::MoveGroup group(arm);
 	
 	// set orientation
-	transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
-	transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
-	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
-	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	// transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
+	// transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
+	// transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
+	// transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	if(arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+	} else {
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -(M_PI_2));
+	}
 	
+
+
+
 	// set Pose
 	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
-			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
-		
+			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());	
+
 	//move arm
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
@@ -112,11 +122,11 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_move_arm_server");
-	ros::NodeHandle n;
+	ros::NodeHandle nh;
 	listener = new (tf::TransformListener);
 
 	// create the action server
-	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &server_arm), false);
+	Server server_arm(nh, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &server_arm), false);
 	// start the server
 	server_arm.start();
 	

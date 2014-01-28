@@ -51,7 +51,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     ROS_INFO("Newton: %f", newton);
 
     // Check if we should grasp or drop...
-    if(graspGoal->goal.grasp){
+    if(graspGoal->goal.grasp == 1){
       ROS_INFO("Begin to pick object...");
       // Grasp the object
       if (grasper.pick(obj_name, picking_arm, newton))
@@ -64,7 +64,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
-    } else {
+    } else if (graspGoal->goal.grasp==0) {
       ROS_INFO("Begin to drop object...");
       // Drop the object
       if (grasper.drop(obj_name))
@@ -74,6 +74,17 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         server_grasp->setSucceeded(r);
       } else {
         ROS_INFO("Droping failed!\n");
+        r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+        server_grasp->setAborted(r);
+      }
+    } else {
+      if (grasper.handoff(obj_name, picking_arm, newton))
+      {
+        ROS_INFO("Object handoffed...\n");
+        r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+        server_grasp->setSucceeded(r);
+      } else {
+        ROS_INFO("Handoff failed!\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
