@@ -41,10 +41,10 @@ std::string time_to_str(T ros_t)
 void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 {
   if(goal_msg.goal_id.id == msg.status.goal_id.id){
-  	ROS_INFO("move_home_server: Get result!");
+  	ROS_INFO("Get result!");
   	moved = 1;
   } else {
-  	ROS_INFO("move_home_server: No result!");
+  	ROS_INFO("No result!");
   	moved = 0;
   }
 }

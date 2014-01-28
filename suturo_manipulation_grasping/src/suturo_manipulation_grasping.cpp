@@ -8,8 +8,6 @@
 #include <moveit/move_group/capability_names.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
-#include <control_msgs/PointHeadActionGoal.h>
-#include <pr2_controllers_msgs/PointHeadActionResult.h>
 
 using namespace std;
 
@@ -30,10 +28,6 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 	
 	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
 	pi_ = pi;
-	// Nodehandle for publisher init
-	ros::NodeHandle n_;
-	// Publish a topic for the ros intern head controller
-	head_publisher_ = n_.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 }
 
 Grasping::~Grasping()
@@ -207,20 +201,6 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_ms
 	return 1;
 }
 
-template <class T>
-/**
-* This method formats a ros time to a string.
-* Thanks to https://code.ros.org/trac/ros/ticket/2030
-*/
-std::string time_to_str(T ros_t)
-{
-  char buf[1024]      = "";
-  time_t t = ros_t.sec;
-  struct tm *tms = localtime(&t);
-  strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
-  return std::string(buf);
-}
-
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force)
 {
 	string object_name = co.id;
@@ -233,38 +213,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		ROS_ERROR_STREAM("Grasping::pick| arm value not valide.");
 		return 0;
 	}
-
-	// Goal Message to move the head
-	control_msgs::PointHeadActionGoal goal_msg;
-
-	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    // Set Goal to pre grasp position
-    goal_msg.header.frame_id = pre_pose.header.frame_id;
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    // Set position from pre grasp
-    goal_msg.goal.target.point.x = pre_pose.pose.position.x;
-    goal_msg.goal.target.point.y = pre_pose.pose.position.y;
-    goal_msg.goal.target.point.z = pre_pose.pose.position.z;
-    goal_msg.goal.pointing_axis.x = 1;
-    goal_msg.goal.pointing_axis.y = 0;
-    goal_msg.goal.pointing_axis.z = 0;
-    goal_msg.goal.pointing_frame = "head_plate_frame";
-    goal_msg.goal.min_duration = ros::Duration(1.0);
-    goal_msg.goal.max_velocity = 10;
-
-    // Publish goal on topic /suturo/head_controller
-    if( !head_publisher_ ) {
-		ROS_INFO("Publisher invalid!\n");
-	} else {
-		head_publisher_.publish(goal_msg);
-		ROS_INFO("Published pre grasp position!");
-	}
-
-
+	
 	//go into pregraspposition
 	move_group->setPoseTarget(pre_pose);
 	ROS_INFO_STREAM("move to pregraspposition");
@@ -284,7 +233,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	//set goal to pose
 	ROS_INFO_STREAM("set goalpose");
 	move_group->setPoseTarget(pose);
-
+	
 	//move Arm to goalpose
 	ROS_INFO_STREAM("move to goalpose");
 	if (!move_group->move()){
@@ -319,31 +268,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	if (!move_group->move()){
 		ROS_INFO_STREAM("Failed to lift " << object_name);
 		return 0;
-	}
-	
-	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    // Let him look to the gripper
-    if (arm == LEFT_ARM){
-      goal_msg.header.frame_id = "/l_gripper_palm_link";
-    } else {
-      goal_msg.header.frame_id = "/r_gripper_palm_link";
-    }
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    // Set position from gripper
-    goal_msg.goal.target.point.x = pose.pose.position.x;
-    goal_msg.goal.target.point.y = pose.pose.position.y;
-    goal_msg.goal.target.point.z = pose.pose.position.z;
-
-    // Publish goal on topic /suturo/head_controller
-    if( !head_publisher_ ) {
-		ROS_INFO("Publisher invalid!\n");
-	} else {
-		head_publisher_.publish(goal_msg);
-		ROS_INFO("Published position of the grasping gripper to look to him!");
 	}
 	
 	return 1;
