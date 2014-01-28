@@ -14,6 +14,7 @@
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_grasping.h>
 
+
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
@@ -114,11 +115,19 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	move_group_interface::MoveGroup group(arm);
 	
 	// set orientation
-	transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
-	transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
-	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
-	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	// transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
+	// transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
+	// transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
+	// transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	if(arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+	} else {
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -(M_PI_2));
+	}
 	
+
+
+
 	// set Pose
 	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
@@ -163,6 +172,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
 	}
 
+
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -177,7 +187,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_move_arm_server");
-	ros::NodeHandle n;
+	ros::NodeHandle nh;
 	listener = new (tf::TransformListener);
 
 	// Publish a topic for the head controller
@@ -185,7 +195,9 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 	
 	// create the action server
+
 	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
+
 	// start the server
 	server_arm.start();
 	

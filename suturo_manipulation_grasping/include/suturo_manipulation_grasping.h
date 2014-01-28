@@ -99,6 +99,8 @@ public:
 	 * 					0, otherwise
 	 */	
 	int drop(std::string objectName);
+
+	int handoff(std::string objectName, std::string new_arm, double force);
 };
      
 #endif
