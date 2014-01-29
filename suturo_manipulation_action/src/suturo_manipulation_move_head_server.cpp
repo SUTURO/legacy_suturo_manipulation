@@ -56,40 +56,40 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 * This method starts the transformation to the right frame and 
 * publishes the transformed goal.
 */
-// void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
-// 			ros::Publisher* publisher, Server* server_head)
-// {	
-// 	ROS_INFO("callback moveHead() begins...");
-// 	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
+void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
+			ros::Publisher* publisher, Server* server_head)
+{	
+	ROS_INFO("callback moveHead() begins...");
+	suturo_manipulation_msgs::suturo_manipulation_headResult r;	
 
-// 	// Set header
-// 	r.succ.header.stamp = ros::Time();
-// 	// Set Answer fot planning to undefined
-// 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+	// Set header
+	r.succ.header.stamp = ros::Time();
+	// Set Answer fot planning to undefined
+	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 	
-// 	geometry_msgs::PoseStamped transformedPose;
+	geometry_msgs::PoseStamped transformedPose;
 
-// 	//transform pose
-// 	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
-// 		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
-// 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-// 		server_head->setAborted(r);
-// 	}
+	//transform pose
+	if (!transform(transformedPose, goal->ps.pose.position, goal->ps.header.frame_id.c_str())){
+		// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+		server_head->setAborted(r);
+	}
 
-// 	// Publish goal on topic /suturo/head_controller_goal_point
-// 	if( !publisher ) {
-// 		ROS_WARN("Publisher invalid!\n");
-// 	  	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-// 	  	server_head->setAborted(r);
-// 	} else {
-// 		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
-// 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
-// 		publisher->publish(transformedPose);
-// 		ROS_INFO("Goal published!\n");
-// 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-// 		server_head->setSucceeded(r);
-// 	}
-// }
+	// Publish goal on topic /suturo/head_controller_goal_point
+	if( !publisher ) {
+		ROS_WARN("Publisher invalid!\n");
+	  	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+	  	server_head->setAborted(r);
+	} else {
+		ROS_INFO("Published goal: x: %f, y: %f, z: %f in Frame %s", transformedPose.pose.position.x,
+		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
+		publisher->publish(transformedPose);
+		ROS_INFO("Goal published!\n");
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+		server_head->setSucceeded(r);
+	}
+}
 
 template <class T>
 /**
@@ -108,7 +108,7 @@ std::string time_to_str(T ros_t)
 /**
 * This method is a callback method and checks, if the head moved.
 */
-void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
+/*void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 {
   if(goal_msg.goal_id.id == msg.status.goal_id.id){
   	ROS_INFO("Get result!");
@@ -117,12 +117,12 @@ void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
   	ROS_INFO("No result!");
   	moved = 0;
   }
-}
+}*/
 
 /**
 * This method publishes a goal to the ros intern head mover
 */
-void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
+/*void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstPtr& goal, 
 			ros::Publisher* publisher, Server* server_head)
 {	
 	ROS_INFO("callback moveHead() begins...");
@@ -179,7 +179,7 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 	  		server_head->setAborted(r);
 		}		
 	}
-}
+}*/
 
 
 int main(int argc, char** argv)
@@ -189,13 +189,13 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 	
 	// Publish a topic for the head controller
-	// ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
+	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
 
 	// Subscribe the topic, call moveHeadResult if data is published
-	ros::Subscriber sub = n.subscribe("/head_traj_controller/point_head_action/result", 1000, moveHeadResult);
+	// ros::Subscriber sub = n.subscribe("/head_traj_controller/point_head_action/result", 1000, moveHeadResult);
 
 	// Publish a topic for the ros intern head controller
-	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+	// ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 
 	// create the action server
 	Server server_head(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &head_publisher, &server_head), false);
