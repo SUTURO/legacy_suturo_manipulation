@@ -31,9 +31,9 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
 	pi_ = pi;
 	// Nodehandle for publisher init
-	ros::NodeHandle n_;
-	// Publish a topic for the ros intern head controller
-	head_publisher_ = n_.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+	// ros::NodeHandle n_;
+	// // Publish a topic for the ros intern head controller
+	// head_publisher = n_.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 }
 
 Grasping::~Grasping()
@@ -221,7 +221,7 @@ std::string time_to_str(T ros_t)
   return std::string(buf);
 }
 
-int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force)
+int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force, ros::Publisher* head_publisher)
 {
 	string object_name = co.id;
 	move_group_interface::MoveGroup* move_group;
@@ -257,11 +257,11 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
     goal_msg.goal.max_velocity = 10;
 
     // Publish goal on topic /suturo/head_controller
-    if( !head_publisher_ ) {
+    if( !head_publisher ) {
 		ROS_INFO("Publisher invalid!\n");
 	} else {
-		head_publisher_.publish(goal_msg);
-		ROS_INFO("Published pre grasp position!");
+		head_publisher->publish(goal_msg);
+		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
 	}
 
 
@@ -321,36 +321,36 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		return 0;
 	}
 	
-	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    // Let him look to the gripper
-    if (arm == LEFT_ARM){
-      goal_msg.header.frame_id = "/l_gripper_palm_link";
-    } else {
-      goal_msg.header.frame_id = "/r_gripper_palm_link";
-    }
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    // Set position from gripper
-    goal_msg.goal.target.point.x = pose.pose.position.x;
-    goal_msg.goal.target.point.y = pose.pose.position.y;
-    goal_msg.goal.target.point.z = pose.pose.position.z;
+	// goal_msg.header.seq = 1;
+ //    goal_msg.header.stamp = ros::Time::now();
+ //    // Let him look to the gripper
+ //    if (arm == LEFT_ARM){
+ //      goal_msg.header.frame_id = "/l_gripper_palm_link";
+ //    } else {
+ //      goal_msg.header.frame_id = "/r_gripper_palm_link";
+ //    }
+ //    goal_msg.goal_id.stamp = goal_msg.header.stamp;
+ //    // set unique id with timestamp
+ //    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+ //    goal_msg.goal.target.header = goal_msg.header;
+ //    // Set position from gripper
+ //    goal_msg.goal.target.point.x = pose.pose.position.x;
+ //    goal_msg.goal.target.point.y = pose.pose.position.y;
+ //    goal_msg.goal.target.point.z = pose.pose.position.z;
 
-    // Publish goal on topic /suturo/head_controller
-    if( !head_publisher_ ) {
-		ROS_INFO("Publisher invalid!\n");
-	} else {
-		head_publisher_.publish(goal_msg);
-		ROS_INFO("Published position of the grasping gripper to look to him!");
-	}
+ //    // Publish goal on topic /suturo/head_controller
+ //    if( !head_publisher ) {
+	// 	ROS_INFO("Publisher invalid!\n");
+	// } else {
+	// 	head_publisher.publish(goal_msg);
+	// 	ROS_INFO("Published position of the grasping gripper to look to him!");
+	// }
 	
 	return 1;
 }
 
 
-int Grasping::pick(std::string objectName, std::string arm, double force)
+int Grasping::pick(std::string objectName, std::string arm, double force, ros::Publisher* head_publisher)
 {
 	if (!gripper_->is_connected_to_controller()){
 		ROS_ERROR_STREAM("not connected to grippercontroller");
@@ -373,7 +373,7 @@ int Grasping::pick(std::string objectName, std::string arm, double force)
 	if (!calcGraspPosition(co, pose, pre_pose))
 		return 0;
 	
-	return pick(co, arm, pose, pre_pose, force);
+	return pick(co, arm, pose, pre_pose, force, head_publisher);
 }
 
 

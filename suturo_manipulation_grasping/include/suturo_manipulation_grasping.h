@@ -20,8 +20,6 @@ private:
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
-	ros::NodeHandle n_;
-	ros::Publisher head_publisher_;
 
 	/**
 	 * Updated a Collisionobject with box shape depending on the gripper position.
@@ -70,7 +68,7 @@ private:
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */		
-	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force);
+	int pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force, ros::Publisher* head_publisher);
 
 	/**
 	 * Calculates grasp und pregrasp position for a box or cylinder.
@@ -92,7 +90,7 @@ public:
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */	
-	int pick(std::string objectName, std::string arm, double force=50.0);
+	int pick(std::string objectName, std::string arm, double force=50.0, ros::Publisher* head_publisher = NULL);
 	
 	/**
 	 * drops an object.
