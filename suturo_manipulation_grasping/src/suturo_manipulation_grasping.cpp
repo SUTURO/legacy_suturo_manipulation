@@ -16,6 +16,9 @@ using namespace std;
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
+bool left_arm_grasping;
+bool right_arm_grasping;
+
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
 	//initialize private variables
@@ -27,18 +30,37 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 	
 	
 	gripper_ = new Gripper();
+
+	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
+	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
 	
 	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
 	pi_ = pi;
-	// Nodehandle for publisher init
-	// ros::NodeHandle n_;
-	// // Publish a topic for the ros intern head controller
-	// head_publisher = n_.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 }
 
 Grasping::~Grasping()
 {
 
+}
+
+bool Grasping::isLeftArmGrasping()
+{
+	return left_arm_grasping;
+}
+
+bool Grasping::isRightArmGrasping()
+{
+	return right_arm_grasping;
+}
+
+void Grasping::setLeftArmGrasping(bool value)
+{
+	left_arm_grasping = value;
+}
+
+void Grasping::setRightArmGrasping(bool value)
+{
+	right_arm_grasping = value;
 }
 
 int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
@@ -223,6 +245,9 @@ std::string time_to_str(T ros_t)
 
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force, ros::Publisher* head_publisher)
 {
+	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
+	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
+
 	string object_name = co.id;
 	move_group_interface::MoveGroup* move_group;
 	if (arm == RIGHT_ARM){
@@ -321,6 +346,12 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		return 0;
 	}
 	
+	if (arm == RIGHT_ARM){
+		setLeftArmGrasping(true);
+	} else {
+		setRightArmGrasping(true);
+	}
+
 	// goal_msg.header.seq = 1;
  //    goal_msg.header.stamp = ros::Time::now();
  //    // Let him look to the gripper
@@ -345,6 +376,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	// 	head_publisher.publish(goal_msg);
 	// 	ROS_INFO("Published position of the grasping gripper to look to him!");
 	// }
+
+	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
+	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
 	
 	return 1;
 }
@@ -383,6 +417,9 @@ int Grasping::drop(string objectName)
 		ROS_ERROR_STREAM("not connected to grippercontroller");
 		return 0;
 	}
+
+	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
+	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
 	
 	//get object from planningscene
 	moveit_msgs::AttachedCollisionObject aco;
@@ -396,19 +433,27 @@ int Grasping::drop(string objectName)
 	//find arm that holds the object
 	bool r_grasp = aco.link_name == group_r_arm_->getEndEffectorLink();
 	bool l_grasp = aco.link_name == group_l_arm_->getEndEffectorLink();
-	
+
 	//open gripper
 	if (r_grasp && l_grasp){
 		gripper_->open_r_gripper();
+		setRightArmGrasping(false);
 		gripper_->open_l_gripper();
+		setLeftArmGrasping(false);
 	} else if(r_grasp) {
 		gripper_->open_r_gripper();
+		setRightArmGrasping(false);
 	} else if (l_grasp){
 		gripper_->open_l_gripper();
+		setLeftArmGrasping(false);
 	}
 	
 	//detach object
 	pi_->detachObject(objectName);
 	ROS_INFO_STREAM("droped " << objectName << " successfully.");
+
+	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
+	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
+	
 	return 1;
 }

@@ -96,7 +96,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
 			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
-		
+
 	//move arm
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");

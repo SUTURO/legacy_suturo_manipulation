@@ -99,6 +99,11 @@ public:
 	 * 					0, otherwise
 	 */	
 	int drop(std::string objectName);
+
+	void setRightArmGrasping(bool value);
+	void setLeftArmGrasping(bool value);
+	bool isRightArmGrasping();
+	bool isLeftArmGrasping();
 };
      
 #endif
