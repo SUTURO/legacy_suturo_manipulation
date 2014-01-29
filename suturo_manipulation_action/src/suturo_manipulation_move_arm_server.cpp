@@ -9,12 +9,18 @@
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <tf/transform_listener.h>
+#include <control_msgs/PointHeadActionGoal.h>
+#include <pr2_controllers_msgs/PointHeadActionResult.h>
+#include <suturo_manipulation_planning_scene_interface.h>
+#include <suturo_manipulation_grasping.h>
 
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
 
 tf::TransformListener* listener = NULL;
+
+control_msgs::PointHeadActionGoal goal_msg;
 
 /**
  * Transform the incoming frame to /base_link
@@ -44,11 +50,25 @@ int transform(geometry_msgs::PoseStamped &goalPose,
     return 1;
 }
 
+template <class T>
+/**
+* This method formats a ros time to a string.
+* Thanks to https://code.ros.org/trac/ros/ticket/2030
+*/
+std::string time_to_str(T ros_t)
+{
+  char buf[1024]      = "";
+  time_t t = ros_t.sec;
+  struct tm *tms = localtime(&t);
+  strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
+  return std::string(buf);
+}
+
 /**
 * This method starts the transformation to the right frame and 
 * calls move() to move the selected arm.
 */
-void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, Server* server_arm)
+void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPtr& goal, ros::NodeHandle* nh, ros::Publisher* publisher, Server* server_arm)
 {	
 
 	// create a move result message
@@ -58,6 +78,14 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	r.succ.header.stamp = ros::Time();
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
+
+	// set Planning Interface and Grasper
+	ROS_INFO("Create Planning Scene Interface...");
+	Suturo_Manipulation_Planning_Scene_Interface pi(nh);
+	ROS_INFO("Done. Create Grasper...")	;
+	Grasping grasper(&pi);
+	ROS_INFO("Done.");
+
 
 	// Set arm which should be moved
 	string arm = goal->bodypart.bodyPart;
@@ -91,13 +119,47 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
 	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
 	
+	if(arm==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM){
+		ROS_INFO_STREAM("Left arm should be moved, is he grasping?: " << grasper.isLeftArmGrasping());
+	} else {
+		ROS_INFO_STREAM("Right arm should be moved, is he grasping?: " << grasper.isRightArmGrasping());
+	}
 	// set Pose
 	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
 			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
 
-	//move arm
+	// // Publish goal on topic /suturo/head_controller
+	// if( !publisher ) {
+	// 	ROS_INFO("Publisher invalid!\n");
+	// 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+	//  	server_home->setAborted(r);
+	// } else {
+	//    publisher->publish(transformedPose);
+	//    ROS_INFO("Home Goal published!\n");
+	//    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+	//    server_home->setSucceeded(r);
+	// }
+
+	// Set home Coordinates, time and frame
+	goal_msg.header.seq = 1;
+    goal_msg.header.stamp = ros::Time::now();
+    goal_msg.header.frame_id = goal->ps.header.frame_id;
+    goal_msg.goal_id.stamp = goal_msg.header.stamp;
+    // set unique id with timestamp
+    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+    goal_msg.goal.target.header = goal_msg.header;
+    goal_msg.goal.target.point.x = transformedPose.pose.position.x;
+    goal_msg.goal.target.point.y = transformedPose.pose.position.y;
+    goal_msg.goal.target.point.z = transformedPose.pose.position.z;
+    goal_msg.goal.pointing_axis.x = 1;
+    goal_msg.goal.pointing_axis.y = 0;
+    goal_msg.goal.pointing_axis.z = 0;
+    goal_msg.goal.pointing_frame = "head_plate_frame";
+    goal_msg.goal.min_duration = ros::Duration(1.0);
+    goal_msg.goal.max_velocity = 10;
+
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -115,8 +177,11 @@ int main(int argc, char** argv)
 	ros::NodeHandle n;
 	listener = new (tf::TransformListener);
 
+	// Publish a topic for the head controller
+	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
+
 	// create the action server
-	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &server_arm), false);
+	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
 	// start the server
 	server_arm.start();
 	

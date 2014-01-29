@@ -347,9 +347,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	if (arm == RIGHT_ARM){
-		setLeftArmGrasping(true);
-	} else {
 		setRightArmGrasping(true);
+	} else {
+		setLeftArmGrasping(true);
 	}
 
 	// goal_msg.header.seq = 1;
