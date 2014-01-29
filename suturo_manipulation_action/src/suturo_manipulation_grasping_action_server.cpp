@@ -67,7 +67,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     } else if (graspGoal->goal.grasp==0) {
       ROS_INFO("Begin to drop object...");
       // Drop the object
-      if (grasper.drop(obj_name))
+      if (grasper.dropObject(obj_name))
       {
         ROS_INFO("Object droped...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -78,7 +78,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         server_grasp->setAborted(r);
       }
     } else {
-      if (grasper.handoff(obj_name, picking_arm, newton))
+      if (grasper.drop(picking_arm))
       {
         ROS_INFO("Object handoffed...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
