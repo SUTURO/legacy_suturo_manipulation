@@ -6,7 +6,6 @@ project(suturo_manipulation_msgs)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   message_generation
-  suturo_perception_msgs
   geometry_msgs
   actionlib_msgs
   genmsg
@@ -49,6 +48,9 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
  FILES
  ActionAnswer.msg
+ RobotBodyPart.msg
+ suturo_manipulation_grasping_goal.msg
+ torque_values.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -60,15 +62,13 @@ add_message_files(
 ## Generate actions in the 'action' folder
  add_action_files(
    DIRECTORY action
-   FILES suturo_manipulation_move.action suturo_manipulation_home.action
-
+   FILES suturo_manipulation_move.action suturo_manipulation_home.action suturo_manipulation_grasping.action suturo_manipulation_head.action
  )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
-  suturo_perception_msgs
   geometry_msgs
   actionlib_msgs
 )

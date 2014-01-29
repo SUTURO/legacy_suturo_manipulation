@@ -3,7 +3,7 @@
   <arg name="load_robot_description" default="false"/>
 
   <!-- Load universal robotic description format (URDF) -->
-  <param if="$(arg load_robot_description)" name="robot_description" textfile="/home/ichumuh/pr2.urdf"/>
+  <param if="$(arg load_robot_description)" name="robot_description" textfile="$(find suturo_manipulation_pr2_movit)/config/pr2.urdf"/>
 
   <!-- The semantic description that corresponds to the URDF -->
   <param name="robot_description_semantic" textfile="$(find suturo_manipulation_pr2_movit)/config/pr2.srdf" />

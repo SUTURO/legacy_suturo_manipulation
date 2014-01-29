@@ -1,0 +1,8 @@
+<launch>
+ <include file="$(find suturo_manipulation_pr2_movit)/launch/move_group.launch">
+  <arg name="publish_monitored_planning_scene" value="true" />
+ </include>
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_home_server" type="suturo_manipulation_move_home_server" respawn="true" output="screen"/>
+
+</launch>

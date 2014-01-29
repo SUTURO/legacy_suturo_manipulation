@@ -1,6 +1,6 @@
 #goal definition
-suturo_perception_msgs/PerceivedObject p
-string arm
+geometry_msgs/PoseStamped ps
+suturo_manipulation_msgs/RobotBodyPart bodypart
 ---
 #result definition
 ActionAnswer succ

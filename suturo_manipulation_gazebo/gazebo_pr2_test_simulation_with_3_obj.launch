@@ -1,0 +1,20 @@
+<launch>
+
+  <!-- start up empty world -->
+  <arg name="gui" default="true"/>
+  <arg name="throttled" default="false"/>
+  <arg name="paused" default="true"/>
+  <arg name="world"/>
+
+  <include file="$(find suturo_manipulation_gazebo)/empty_world_paused.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="throttled" value="$(arg throttled)" />
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="world" value="man_test_world.world" />
+  </include>
+
+  <!-- start pr2 robot -->
+  <include file="$(find suturo_manipulation_gazebo)/pr2.launch"/>
+
+</launch>
+

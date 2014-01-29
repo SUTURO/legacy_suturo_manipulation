@@ -1,5 +1,5 @@
 #goal definition
-string arm
+suturo_manipulation_msgs/RobotBodyPart bodypart
 ---
 #result definition
 ActionAnswer succ

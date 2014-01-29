@@ -1,0 +1,15 @@
+material Baguette/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture baguette.jpg
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}
