@@ -1,4 +1,4 @@
-material Zielbox/Diffuse
+material Stuffbox/Diffuse
 {
   technique
   {
@@ -6,7 +6,7 @@ material Zielbox/Diffuse
     {
       texture_unit
       {
-        texture zielbox.jpg
+        texture stuffbox.jpg
         filtering anistropic
         max_anisotropy 16
       }

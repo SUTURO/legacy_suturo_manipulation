@@ -1,0 +1,15 @@
+material Essbarbox/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture essbarbox.jpg
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}

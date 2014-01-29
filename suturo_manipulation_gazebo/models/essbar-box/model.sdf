@@ -1,5 +1,5 @@
 <sdf version="1.3">
-<model name="zielbox">
+<model name="essbarbox">
   <pose>0 0 0.65 1.57 0.00 1.57</pose>
   <static>false</static>
     <link name="link">
@@ -17,17 +17,23 @@
       <collision name="collision">
         <geometry>
           <box>
-            <size>0.395 0.08 0.252</size>
+            <size>0.252 0.08 0.395</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <box>
-            <size>0.395 0.08 0.252</size>
+            <size>0.252 0.08 0.395</size>
           </box>
         </geometry>
-
+        <material>
+          <script>
+            <uri>model://essbar-box/materials/scripts</uri>
+            <uri>model://essbar-box/materials/textures</uri>
+            <name>Essbarbox/Diffuse</name>
+          </script>
+        </material>
       </visual>
     </link>
   </model>
