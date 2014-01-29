@@ -74,7 +74,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		// Set home Coordinates, time and frame
 		goal_msg.header.seq = 1;
 	    goal_msg.header.stamp = ros::Time::now();
-	    goal_msg.header.frame_id = "/torso_lift_link";
+	    goal_msg.header.frame_id = "/base_link";
 	    goal_msg.goal_id.stamp = goal_msg.header.stamp;
 	    // set unique id with timestamp
 	    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);

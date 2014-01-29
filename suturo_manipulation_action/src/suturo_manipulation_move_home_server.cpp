@@ -12,6 +12,7 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <control_msgs/PointHeadActionGoal.h>
 #include <pr2_controllers_msgs/PointHeadActionResult.h>
+#include <tf/transform_listener.h>
 
 using namespace std;
 
@@ -20,6 +21,38 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 control_msgs::PointHeadActionGoal goal_msg;
 
 bool moved = 0;
+
+// TF Listener...
+tf::TransformListener* listener = NULL;
+
+// Transform the incoming frame to /torso_lift_link for the head move controller
+int transform(geometry_msgs::PoseStamped &goalPose,
+					geometry_msgs::Point goalPoint, const char* s)
+{ 
+	//save goal position in pose
+	goalPose.header.frame_id = s;
+	goalPose.pose.position.x = goalPoint.x;
+	goalPose.pose.position.y = goalPoint.y;
+	goalPose.pose.position.z = goalPoint.z;
+	goalPose.pose.orientation.x = 0;
+	goalPose.pose.orientation.y = 0;
+	goalPose.pose.orientation.z = 0;
+	goalPose.pose.orientation.w = 1;
+	
+	// goal_frame
+  const string goal_frame = "/torso_lift_link";
+
+	ROS_INFO("Begin transformation");
+  try{
+		//transform pose from s to -torso_lift_link and save it in pose again
+		listener->transformPose(goal_frame, goalPose, goalPose);
+	}catch(...){
+		ROS_INFO("ERROR: Transformation failed.");
+		return 0;
+	}
+
+    return 1;
+}
 
 template <class T>
 /**
@@ -78,7 +111,16 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		headHome.pose.position.y = 0;
 		headHome.pose.position.z = 0;
 		headHome.header.stamp = ros::Time::now();
-		headHome.header.frame_id = "/torso_lift_link";
+		headHome.header.frame_id = "/base_link";
+
+		geometry_msgs::PoseStamped transformedPose;
+
+		//transform pose
+		if (!transform(transformedPose, headHome.pose.position, headHome.header.frame_id.c_str())){
+			// If tranfsormation fails, update the answer for planning to "FAIL" and set the server aborted
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_home->setAborted(r);
+		}
 
         // Publish goal on topic /suturo/head_controller
         if( !publisher ) {
@@ -86,7 +128,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
         	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
           	server_home->setAborted(r);
         } else {
-            publisher->publish(headHome);
+            publisher->publish(transformedPose);
             ROS_INFO("Home Goal published!\n");
             r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
             server_home->setSucceeded(r);
@@ -160,6 +202,7 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_move_home_server");
 	ros::NodeHandle n;
+	listener = new (tf::TransformListener);
 
 	// Publish a topic for the head controller
     ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
