@@ -10,17 +10,11 @@
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
-#include <control_msgs/PointHeadActionGoal.h>
-#include <pr2_controllers_msgs/PointHeadActionResult.h>
 #include <tf/transform_listener.h>
 
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server;
-
-control_msgs::PointHeadActionGoal goal_msg;
-
-bool moved = 0;
 
 // TF Listener...
 tf::TransformListener* listener = NULL;
@@ -52,34 +46,6 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 	}
 
     return 1;
-}
-
-template <class T>
-/**
-* This method formats a ros time to a string.
-* Thanks to https://code.ros.org/trac/ros/ticket/2030
-*/
-std::string time_to_str(T ros_t)
-{
-  char buf[1024]      = "";
-  time_t t = ros_t.sec;
-  struct tm *tms = localtime(&t);
-  strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
-  return std::string(buf);
-}
-
-/**
-* This method is a callback method and checks, if the head moved.
-*/
-void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
-{
-  if(goal_msg.goal_id.id == msg.status.goal_id.id){
-  	ROS_INFO("Get result!");
-  	moved = 1;
-  } else {
-  	ROS_INFO("No result!");
-  	moved = 0;
-  }
 }
 
 /**

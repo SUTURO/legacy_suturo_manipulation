@@ -9,8 +9,6 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_grasping.h>
 #include <suturo_manipulation_planning_scene_interface.h>
-#include <shape_tools/solid_primitive_dims.h>
-
 
 using namespace std;
 
