@@ -9,6 +9,10 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_grasping.h>
 #include <suturo_manipulation_planning_scene_interface.h>
+#include <shape_tools/solid_primitive_dims.h>
+#include <control_msgs/PointHeadActionGoal.h>
+#include <pr2_controllers_msgs/PointHeadActionResult.h>
+
 
 using namespace std;
 
@@ -17,7 +21,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 /**
 * This method grasps or drops a object!
 */
-void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::NodeHandle* nh, Server* server_grasp)
+void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::Publisher* publisher, ros::NodeHandle* nh, Server* server_grasp)
 {	
   suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
 
@@ -52,7 +56,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     if(graspGoal->goal.grasp){
       ROS_INFO("Begin to pick object...");
       // Grasp the object
-      if (grasper.pick(obj_name, picking_arm, newton))
+      if (grasper.pick(obj_name, picking_arm, newton, publisher))
       {
         ROS_INFO("Object picked...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -85,7 +89,10 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "suturo_manipulation_grasp_server");
 	ros::NodeHandle nh;
 	
-	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &nh, &server_grasp), false);
+  // Publish a topic for the ros intern head controller
+  ros::Publisher head_publisher = nh.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+
+	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &head_publisher, &nh, &server_grasp), false);
 	server_grasp.start();
 	
 

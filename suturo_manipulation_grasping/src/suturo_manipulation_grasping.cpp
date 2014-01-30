@@ -8,6 +8,8 @@
 #include <moveit/move_group/capability_names.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
+#include <control_msgs/PointHeadActionGoal.h>
+#include <pr2_controllers_msgs/PointHeadActionResult.h>
 
 using namespace std;
 
@@ -34,6 +36,7 @@ Grasping::~Grasping()
 {
 
 }
+
 
 int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
 				geometry_msgs::PoseStamped &pre_pose)
@@ -201,7 +204,21 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_ms
 	return 1;
 }
 
-int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force)
+template <class T>
+/**
+* This method formats a ros time to a string.
+* Thanks to https://code.ros.org/trac/ros/ticket/2030
+*/
+std::string time_to_str(T ros_t)
+{
+  char buf[1024]      = "";
+  time_t t = ros_t.sec;
+  struct tm *tms = localtime(&t);
+  strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
+  return std::string(buf);
+}
+
+int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force, ros::Publisher* head_publisher)
 {
 	string object_name = co.id;
 	move_group_interface::MoveGroup* move_group;
@@ -213,7 +230,37 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		ROS_ERROR_STREAM("Grasping::pick| arm value not valide.");
 		return 0;
 	}
-	
+
+	// Goal Message to move the head
+	control_msgs::PointHeadActionGoal goal_msg;
+
+	goal_msg.header.seq = 1;
+    goal_msg.header.stamp = ros::Time::now();
+    // Set Goal to pre grasp position
+    goal_msg.header.frame_id = pre_pose.header.frame_id;
+    goal_msg.goal_id.stamp = goal_msg.header.stamp;
+    // set unique id with timestamp
+    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+    goal_msg.goal.target.header = goal_msg.header;
+    // Set position from pre grasp
+    goal_msg.goal.target.point.x = pre_pose.pose.position.x;
+    goal_msg.goal.target.point.y = pre_pose.pose.position.y;
+    goal_msg.goal.target.point.z = pre_pose.pose.position.z;
+    goal_msg.goal.pointing_axis.x = 1;
+    goal_msg.goal.pointing_axis.y = 0;
+    goal_msg.goal.pointing_axis.z = 0;
+    goal_msg.goal.pointing_frame = "head_plate_frame";
+    goal_msg.goal.min_duration = ros::Duration(1.0);
+    goal_msg.goal.max_velocity = 10;
+
+    // Publish goal on topic /suturo/head_controller
+    if( !head_publisher ) {
+		ROS_INFO("Publisher invalid!\n");
+	} else {
+		head_publisher->publish(goal_msg);
+		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
+	}
+
 	//go into pregraspposition
 	move_group->setPoseTarget(pre_pose);
 	ROS_INFO_STREAM("move to pregraspposition");
@@ -274,7 +321,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 }
 
 
-int Grasping::pick(std::string objectName, std::string arm, double force)
+int Grasping::pick(std::string objectName, std::string arm, double force, ros::Publisher* head_publisher)
 {
 	if (!gripper_->is_connected_to_controller()){
 		ROS_ERROR_STREAM("not connected to grippercontroller");
@@ -297,7 +344,7 @@ int Grasping::pick(std::string objectName, std::string arm, double force)
 	if (!calcGraspPosition(co, pose, pre_pose))
 		return 0;
 	
-	return pick(co, arm, pose, pre_pose, force);
+	return pick(co, arm, pose, pre_pose, force, head_publisher);
 }
 
 
@@ -320,7 +367,7 @@ int Grasping::drop(string objectName)
 	//find arm that holds the object
 	bool r_grasp = aco.link_name == group_r_arm_->getEndEffectorLink();
 	bool l_grasp = aco.link_name == group_l_arm_->getEndEffectorLink();
-	
+
 	//open gripper
 	if (r_grasp && l_grasp){
 		gripper_->open_r_gripper();
@@ -334,5 +381,7 @@ int Grasping::drop(string objectName)
 	//detach object
 	pi_->detachObject(objectName);
 	ROS_INFO_STREAM("droped " << objectName << " successfully.");
+
+	
 	return 1;
 }
