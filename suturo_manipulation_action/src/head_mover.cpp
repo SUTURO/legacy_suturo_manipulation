@@ -169,28 +169,37 @@ int main(int argc, char **argv)
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
 	Grasping grasper(&pi);
+	//~ grasper.drop(suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.pick("dlink", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ ROS_INFO("done.");
+	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+		//~ ROS_INFO("done.");
+
+	//~ move_group_interface::MoveGroup group("left_arm");
+	//~ geometry_msgs::PoseStamped p;
+	//~ p.header.frame_id = "/base_footprint";
+	//~ p.pose.position.x = 0.5;
+	//~ p.pose.position.y = 0.2;
+	//~ p.pose.position.z = 1;
+	//~ p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI, 0, -M_PI_2);
+	//~ group.setPoseTarget(p);
+	
+	//~ tf::Quaternion q;
+  //~ double roll, pitch, yaw;
+  //~ tf::quaternionMsgToTF(p.pose.orientation, q);
+  //~ ROS_INFO_STREAM(p.pose.orientation);
+  //~ tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
+  //~ ROS_INFO("RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
+  
+	//~ if (!group.move()) return 0;
+	//~ ROS_INFO("done.");
+
 	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
 	//~ ROS_INFO("done.");
-	grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-		ROS_INFO("done.");
-
-	move_group_interface::MoveGroup group("left_arm");
-	geometry_msgs::PoseStamped p;
-	p.header.frame_id = "/base_footprint";
-	p.pose.position.x = 0.5;
-	p.pose.position.y = 0.2;
-	p.pose.position.z = 1;
-	p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_2);
-	group.setPoseTarget(p);
-	if (!group.move()) return 0;
-	ROS_INFO("done.");
-
-	grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
-	ROS_INFO("done.");
 
 	//~ ROS_INFO("done.");
 	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	grasper.drop(suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
+	grasper.drop(suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
 	//~ grasper.drop("corny");
 	//~ openhand();
 	
