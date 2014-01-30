@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	// send the goal
 	client.sendGoal(goal);
 	ROS_INFO("sendGoal. Current State: %s", client.getState().toString().c_str());
-	client.waitForResult(ros::Duration(15.0));
+	client.waitForResult(ros::Duration(20.0));
 
 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
 		ROS_INFO("goal published!");
