@@ -1,0 +1,20 @@
+<launch>
+
+  <include file="$(find suturo_manipulation_pr2_movit)/launch/move_group.launch">
+   	<arg name="publish_monitored_planning_scene" value="true" />
+  </include>
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_home_server" type="suturo_manipulation_move_home_server" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_head_server" type="suturo_manipulation_move_head_server" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_arm_server" type="suturo_manipulation_move_arm_server" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_grasping_action_server" type="suturo_manipulation_grasping_action_server" respawn="true" output="screen"/>
+
+  <include file="$(find suturo_manipulation_pr2_movit)/launch/moveit_rviz.launch"/>
+
+</launch>
