@@ -160,6 +160,14 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
     goal_msg.goal.min_duration = ros::Duration(1.0);
     goal_msg.goal.max_velocity = 10;
 
+    // Publish goal on topic /suturo/head_controller
+    if( !publisher ) {
+		ROS_INFO("Publisher invalid!\n");
+	} else {
+		publisher->publish(goal_msg);
+		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
+	}
+
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -178,8 +186,9 @@ int main(int argc, char** argv)
 	listener = new (tf::TransformListener);
 
 	// Publish a topic for the head controller
-	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
-
+	// ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
+	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+	
 	// create the action server
 	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
 	// start the server

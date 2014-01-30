@@ -352,31 +352,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 		setLeftArmGrasping(true);
 	}
 
-	// goal_msg.header.seq = 1;
- //    goal_msg.header.stamp = ros::Time::now();
- //    // Let him look to the gripper
- //    if (arm == LEFT_ARM){
- //      goal_msg.header.frame_id = "/l_gripper_palm_link";
- //    } else {
- //      goal_msg.header.frame_id = "/r_gripper_palm_link";
- //    }
- //    goal_msg.goal_id.stamp = goal_msg.header.stamp;
- //    // set unique id with timestamp
- //    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
- //    goal_msg.goal.target.header = goal_msg.header;
- //    // Set position from gripper
- //    goal_msg.goal.target.point.x = pose.pose.position.x;
- //    goal_msg.goal.target.point.y = pose.pose.position.y;
- //    goal_msg.goal.target.point.z = pose.pose.position.z;
-
- //    // Publish goal on topic /suturo/head_controller
- //    if( !head_publisher ) {
-	// 	ROS_INFO("Publisher invalid!\n");
-	// } else {
-	// 	head_publisher.publish(goal_msg);
-	// 	ROS_INFO("Published position of the grasping gripper to look to him!");
-	// }
-
 	ROS_INFO_STREAM("isLeftArmGrasping: " << isLeftArmGrasping());
 	ROS_INFO_STREAM("isRightArmGrasping: " << isRightArmGrasping());
 	
