@@ -1,6 +1,3 @@
-#include <ros/ros.h>
-#include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
-#include <actionlib/client/simple_action_client.h>
 #include "suturo_manipulation_gripper_controller.h"
 
 Gripper::Gripper()

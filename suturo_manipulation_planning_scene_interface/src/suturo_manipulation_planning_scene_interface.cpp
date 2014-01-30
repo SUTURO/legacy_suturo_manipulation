@@ -1,10 +1,3 @@
-#include <ros/ros.h>
-#include <moveit_msgs/GetPlanningScene.h>
-#include <moveit/move_group/capability_names.h>
-#include <string>
-
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include "suturo_manipulation_planning_scene_interface.h"
 
 Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle)
@@ -14,7 +7,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);	
 	
 	//wait because ros
-	ros::WallDuration(1.0).sleep();
+	ros::WallDuration(0.5).sleep();
 }
 
 Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scene_Interface()
@@ -29,7 +22,6 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	msg.request.components.components = 1023;
 	
 	//get planningscene
-	ROS_INFO_STREAM("call service for planningscene");
 	ros::ServiceClient client = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
 	client.call(msg);
 	if (client.call(msg))
@@ -38,7 +30,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	}
 	else
 	{
-		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene| Failed to call service.");
+		ROS_ERROR("Failed to call service to get planningscene.");
 		return 0;
 	}
 	return 1;
@@ -50,9 +42,25 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	//check if the link name is valid
 	if (link_name.empty())
 	{
-		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::attachObject| No link specified to attach the object '%s' to", 
+		ROS_ERROR("No link specified to attach the object '%s' to", 
 				object_name.c_str());
 		return false;
+	}
+  
+  //check if another object is attached to this link
+  std::vector<moveit_msgs::AttachedCollisionObject> acos = getAttachedObjects();
+	
+	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
+		if (it->object.id == object_name){
+			ROS_WARN_STREAM(object_name << " already attached to " << it->link_name << ".");
+			if (it->link_name == link_name){
+				ROS_WARN_STREAM(object_name << " already attached to this link.");
+				return 1;
+			} else {
+				ROS_INFO_STREAM("Detaching object from old link.");
+				detachObject(object_name);
+			}
+		}
 	}
   
   //get object from the planningscene
@@ -69,7 +77,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	
 	//wait because ros
 	ros::WallDuration(1.0).sleep();
-	ROS_INFO_STREAM("attached " << object_name << " to " << link_name);
+	ROS_DEBUG_STREAM("Attached " << object_name << " to " << link_name << ".");
 	return 1;
 }
 
@@ -96,7 +104,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string object_n
 		}
 		//Object not found
 		if (co.id != object_name){
-			ROS_ERROR_STREAM("Suturo_Manipulation_Planning_Scene_Interface::getObject| Object: " << object_name << " not found!!");
+			ROS_WARN_STREAM(" Object: " << object_name << " not found!!");
 			return 0;
 		}
 	}
@@ -105,7 +113,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string object_n
 		ROS_ERROR("Suturo_Manipulation_Planning_Scene_Interface::getObject| Failed to call service move_group::GET_PLANNING_SCENE_SERVICE_NAME");
 		return 0;
 	}
-	ROS_INFO_STREAM("object " << object_name << " found.");
+	ROS_DEBUG_STREAM("Object " << object_name << " found.");
 	return 1;
 }
 
@@ -159,7 +167,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	
 	//get the attached object
 	if (!getAttachedObject(object_name, attached_object)){
-		ROS_INFO_STREAM(object_name << " wasn't attached");
+		ROS_INFO_STREAM(object_name << " wasn't attached.");
 		return 1;
 	}
 	detached_object.object.operation = attached_object.object.REMOVE;
@@ -174,10 +182,18 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	return 1;
 }
 
-bool Suturo_Manipulation_Planning_Scene_Interface::isObjectAttached(std::string object_name)
+int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::string link_name)
 {
-	moveit_msgs::AttachedCollisionObject co;
-	return getAttachedObject(object_name, co);
+	
+	std::vector<moveit_msgs::AttachedCollisionObject> acos = getAttachedObjects();
+	
+	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
+		if (it->link_name == link_name){
+			return 1;
+		} 
+	}
+	
+	return 0;
 }
 
 

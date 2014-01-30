@@ -5,7 +5,6 @@
 #include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
 #include <actionlib/client/simple_action_client.h>
 
-
 // Our Action interface type, provided as a typedef for convenience
 typedef actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction> GripperClient;
 

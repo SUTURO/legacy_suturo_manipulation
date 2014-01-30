@@ -18,6 +18,11 @@ private:
 
 	const static std::string LEFT_ARM;
 	const static std::string RIGHT_ARM;
+	
+	
+	const static int x_side_graspable = 2;
+	const static int y_side_graspable = 3;
+	const static int z_side_graspable = 5;
 
 
 	move_group_interface::MoveGroup* group_r_arm_;
@@ -29,12 +34,7 @@ private:
 
 	/**
 	 * Updated a Collisionobject with box shape depending on the gripper position.
-	 * @param 	co: 	
-	 * 						the collisionObject to be updated
-	 * 					arm:	
-	 * 						the arm that holds the object
-	 * 					gripper_pose:
-	 * 						the position of the gripper
+	 * Uses graspable_sides and pos_id to identify which side has been grasped.
 	 * 
 	 * @return 1, if succesfull
 	 * 					0, otherwise
@@ -53,7 +53,10 @@ private:
 	/**
 	 * Calculates grasp und pregrasp position for a box.
 	 * 
-	 * @return 1, if succesfull
+	 * @return >1, if succesfull
+	 * 					@return % 2 == 0, if the object can be grasped on the x side
+	 * 					@return % 3 == 0, if the object can be grasped on the y side
+	 * 					@return % 5 == 0, if the object can be grasped on the z side
 	 * 					0, otherwise
 	 */	
 	int calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
@@ -87,14 +90,26 @@ private:
 	int calcGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 
+	/**
+	 * Publishes/updates a tf frame inside the collisionobject
+	 */
 	void publishTfFrame(moveit_msgs::CollisionObject co);
 	
+	/**
+	 * Adds Grasppositions possible from above and below, to the vactors.
+	 */
 	void addBoxGraspPositionsZ(double z, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 				
+	/**
+	 * Adds Grasppositions possible from the left and right, to the vactors.
+	 */				
 	void addBoxGraspPositionsY(double y, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
-				
+
+	/**
+	 * Adds Grasppositions possible from the front and behind, to the vactors.
+	 */
 	void addBoxGraspPositionsX(double x, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 	
@@ -113,13 +128,19 @@ public:
 	int pick(std::string objectName, std::string arm, double force=50.0, ros::Publisher* head_publisher = NULL);
 	
 	/**
-	 * drops an object.
+	 * Drops an object.
 	 * 
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */	
 	int dropObject(std::string object_name);
 	
+	/**
+	 * Detaches, whatever is attached to the arm and opens the gripper.
+	 * 
+	 * @return 1, if succesfull
+	 * 					0, otherwise
+	 */	
 	int drop(std::string arm);
 
 };
