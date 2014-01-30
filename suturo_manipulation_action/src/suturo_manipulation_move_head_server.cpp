@@ -11,6 +11,7 @@
 #include <tf/transform_listener.h>
 #include <control_msgs/PointHeadActionGoal.h>
 #include <pr2_controllers_msgs/PointHeadActionResult.h>
+#include <suturo_manipulation_msgs/torque_values.h>
 
 using namespace std;
 
@@ -22,6 +23,8 @@ tf::TransformListener* listener = NULL;
 control_msgs::PointHeadActionGoal goal_msg;
 
 bool moved = 0;
+double yaw_error, pitch_error;
+int duration = 0;
 
 // Transform the incoming frame to /torso_lift_link for the head move controller
 int transform(geometry_msgs::PoseStamped &goalPose,
@@ -86,8 +89,28 @@ void moveHead(const suturo_manipulation_msgs::suturo_manipulation_headGoalConstP
 		transformedPose.pose.position.y, transformedPose.pose.position.z, transformedPose.header.frame_id.c_str());	
 		publisher->publish(transformedPose);
 		ROS_INFO("Goal published!\n");
-		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-		server_head->setSucceeded(r);
+
+		// Checking of the goal is reached
+		int counter = 0;
+		while (duration < 3 && counter < 15){
+			if (yaw_error < 5 && pitch_error < 1){
+				duration++;
+				ROS_INFO_STREAM("Duration: " <<  duration);
+			} else {
+				duration = 0;
+				ROS_INFO("Over Treshold");
+			}
+			ros::Duration(1).sleep();
+			counter++;
+		}
+		if(counter >= 15){
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_head->setAborted(r);
+		} else {
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+			server_head->setSucceeded(r);			
+		}
+
 	}
 }
 
@@ -105,6 +128,11 @@ std::string time_to_str(T ros_t)
   return std::string(buf);
 }
 
+void subCallback(const suturo_manipulation_msgs::torque_valuesConstPtr& msg){
+	yaw_error = msg->yaw_error;
+	pitch_error = msg->pitch_error;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -114,6 +142,9 @@ int main(int argc, char** argv)
 	
 	// Publish a topic for the head controller
 	ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
+
+	// Subscribe to the controller_errors
+	ros::Subscriber sub = n.subscribe("/suturo/head_controller/torque_values", 1000, subCallback);
 
 	// create the action server
 	Server server_head(n, "suturo_man_move_head_server", boost::bind(&moveHead, _1, &head_publisher, &server_head), false);
