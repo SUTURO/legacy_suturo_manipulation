@@ -12,10 +12,10 @@
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
 	//real
-	double tischposiZ = 0.86;
+	//~ double tischposiZ = 0.86;
 	//gazebo
 	 //~ roslaunch pr2_teleop_general pr2_teleop_general_keyboard_bodyhead_only.launch
-	//~ double tischposiZ = 0.57;
+	double tischposiZ = 0.57;
 
 void putObjects(ros::Publisher pub_co)
 {
@@ -39,22 +39,15 @@ void putObjects(ros::Publisher pub_co)
 
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.035 ;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.035 ;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.24;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.169;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.169;
   co.primitive_poses[0].position.x = 0.6;
   co.primitive_poses[0].position.y = -0.4;
   co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0845;//tischposiZ + 0.0716;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, M_PI_2, M_PI_2);
   
-  //~ pub_co.publish(co);
-  
-  
-  
-
-  
-  
-  
+  pub_co.publish(co);
   
 
   // remove table
@@ -96,15 +89,15 @@ void putObjects(ros::Publisher pub_co)
 
   // add box1
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.057;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.132;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.057;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.132;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.197;
   co.primitive_poses[0].position.x = 0.6;
   co.primitive_poses[0].position.y = 0.4;
   co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0985;//tischposiZ + 0.08;
-  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0.5);
+  co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
   
-  //~ pub_co.publish(co);
+  pub_co.publish(co);
 
   co.id = "corny";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -135,20 +128,6 @@ int main(int argc, char **argv)
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
-	
-	tf::TransformBroadcaster br;
-  tf::Transform transform;
-	ros::WallDuration(1.0).sleep();
-  //~ ros::Rate rate(10.0);
-  //~ int i = 2;
-  //~ while ( i > 0){
-    transform.setOrigin( tf::Vector3(0.6, -0.4, tischposiZ + 0.03+ 0.0845) );
-    transform.setRotation( tf::Quaternion(0, 0, 0.5) );
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom_combined", "dlink"));
-    //~ rate.sleep();
-    //~ ros::WallDuration(2.0).sleep();
-    //~ i--;
-  //~ }
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();

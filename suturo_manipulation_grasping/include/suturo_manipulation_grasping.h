@@ -2,11 +2,15 @@
 #define SUTURO_MANIPULATION_GRASPING
 
 #include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
-#include <tf/transform_listener.h>
+
+#include <tf/transform_broadcaster.h>
+
 #include <moveit/move_group_interface/move_group.h>
+
 #include <suturo_manipulation_gripper_controller.h>
 #include <suturo_manipulation_planning_scene_interface.h>
+#include <suturo_manipulation_msgs/RobotBodyPart.h>
+
 
 class Grasping
 {
@@ -20,6 +24,8 @@ private:
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
+	tf::TransformBroadcaster br_;
+  tf::Transform transform_;
 
 	/**
 	 * Updated a Collisionobject with box shape depending on the gripper position.
@@ -33,7 +39,7 @@ private:
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */
-	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripperPose, double gripper_pose);
+	int updateGraspedBoxPose(moveit_msgs::CollisionObject &co, int graspable_sides, int pos_id, double gripper_pose);
 
 	/**
 	 * Updated a Collisionobject with cylinder shape depending on the gripper position.
@@ -69,7 +75,8 @@ private:
 	 * 					0, otherwise
 	 */		
 	int pick(moveit_msgs::CollisionObject co, std::string arm, 
-				std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses, double force);
+				std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses, 
+				double force, int graspable_sides);
 
 	/**
 	 * Calculates grasp und pregrasp position for a box or cylinder.
@@ -81,6 +88,15 @@ private:
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 
 	void publishTfFrame(moveit_msgs::CollisionObject co);
+	
+	void addBoxGraspPositionsZ(double z, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses);
+				
+	void addBoxGraspPositionsY(double y, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses);
+				
+	void addBoxGraspPositionsX(double x, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 	
 public:
 	
@@ -106,7 +122,6 @@ public:
 	
 	int drop(std::string arm);
 
-	int handoff(std::string objectName, std::string new_arm, double force);
 };
      
 #endif
