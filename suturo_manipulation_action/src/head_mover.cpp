@@ -166,11 +166,13 @@ int main(int argc, char **argv)
 //~ for (int i = 0; i < bla.size(); i++) ROS_INFO_STREAM(bla.at(i));
 //~ 
 
-	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 
-	Grasping grasper(&pi);
+	//~ Grasping grasper(&pi);
 	//~ grasper.drop(suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	grasper.pick("dlink", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ grasper.pick("dlink", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ grasper.pick("dlink", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
 	//~ ROS_INFO("done.");
 	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
 		//~ ROS_INFO("done.");
@@ -199,7 +201,8 @@ int main(int argc, char **argv)
 
 	//~ ROS_INFO("done.");
 	//~ grasper.pick("corny", suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM);
-	grasper.drop(suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ grasper.drop(suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
+	//~ grasper.drop(suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM);
 	//~ grasper.drop("corny");
 	//~ openhand();
 	
@@ -257,6 +260,7 @@ int main(int argc, char **argv)
 
 	//ROS_INFO_STREAM("dsads  " << ps);
 	
+	ROS_DEBUG_STREAM("finish");
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();
 	return 0;
