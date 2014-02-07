@@ -5,6 +5,8 @@
 #include <boost/thread/thread.hpp> 
 #include <shape_tools/solid_primitive_dims.h>
 #include <suturo_manipulation_planning_scene_interface.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -46,6 +48,8 @@ int main(int argc, char **argv)
 				//create object
 				co.header.stamp = ros::Time::now();
 				co.header.frame_id = clusterSrv.response.perceivedObjs[i].frame_id;
+				//~ std::string  a = itoa(i);
+				co.id = "obj";
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = cubi.length1;
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = cubi.length2;
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = cubi.length3;
