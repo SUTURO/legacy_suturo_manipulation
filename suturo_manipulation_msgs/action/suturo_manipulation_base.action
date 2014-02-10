@@ -1,0 +1,8 @@
+#goal definition
+geometry_msgs/PoseStamped ps
+---
+#result definition
+ActionAnswer succ
+---
+#feedback
+int32[] sequence
