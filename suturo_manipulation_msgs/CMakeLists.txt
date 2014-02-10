@@ -51,6 +51,7 @@ add_message_files(
  RobotBodyPart.msg
  suturo_manipulation_grasping_goal.msg
  torque_values.msg
+ GraspingAndDrop.msg
 )
 
 ## Generate services in the 'srv' folder
