@@ -63,7 +63,7 @@ add_message_files(
 ## Generate actions in the 'action' folder
  add_action_files(
    DIRECTORY action
-   FILES suturo_manipulation_move.action suturo_manipulation_home.action suturo_manipulation_grasping.action suturo_manipulation_head.action
+   FILES suturo_manipulation_base.action suturo_manipulation_move.action suturo_manipulation_home.action suturo_manipulation_grasping.action suturo_manipulation_head.action
  )
 
 ## Generate added messages and services with any dependencies listed here
