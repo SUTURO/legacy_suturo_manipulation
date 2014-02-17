@@ -48,8 +48,10 @@ int main(int argc, char **argv)
 				//create object
 				co.header.stamp = ros::Time::now();
 				co.header.frame_id = clusterSrv.response.perceivedObjs[i].frame_id;
-				//~ std::string  a = itoa(i);
-				co.id = "obj";
+	
+				std::ostringstream os;
+				os << i;
+				co.id = "obj" + os.str();
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = cubi.length1;
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = cubi.length2;
 				co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = cubi.length3;
