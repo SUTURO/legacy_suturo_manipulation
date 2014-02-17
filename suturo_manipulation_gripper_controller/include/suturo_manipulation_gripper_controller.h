@@ -5,7 +5,6 @@
 #include <pr2_controllers_msgs/Pr2GripperCommandAction.h>
 #include <actionlib/client/simple_action_client.h>
 
-
 // Our Action interface type, provided as a typedef for convenience
 typedef actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction> GripperClient;
 
@@ -27,7 +26,7 @@ private:
 public:
   static const double GRIPPER_MAX_POSITION = 0.09;
   static const double GRIPPER_MIN_POSITION = 0.0;
-  static const double GRIPPER_DEPTH = 0.14;
+  static const double GRIPPER_DEPTH = 0.16;
 
   Gripper();
 

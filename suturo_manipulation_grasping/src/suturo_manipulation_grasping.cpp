@@ -1,35 +1,27 @@
 #include "suturo_manipulation_grasping.h"
-#include <ros/ros.h>
-#include <actionlib/client/simple_action_client.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group.h>
-#include <suturo_manipulation_gripper_controller.h>
-#include <moveit_msgs/GetPlanningScene.h>
-#include <moveit/move_group/capability_names.h>
-#include <suturo_manipulation_planning_scene_interface.h>
-#include <suturo_manipulation_msgs/RobotBodyPart.h>
-#include <control_msgs/PointHeadActionGoal.h>
-#include <pr2_controllers_msgs/PointHeadActionResult.h>
 
 using namespace std;
 
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
-Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
+Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher)
 {
 	//initialize private variables
 	group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
-	group_r_arm_->setPlanningTime(20.0);
+	group_r_arm_->setPlanningTime(5.0);
 	
 	group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
-	group_l_arm_->setPlanningTime(20.0);
+	group_l_arm_->setPlanningTime(5.0);
 	
-	
+	head_publisher_ = head_publisher;
 	gripper_ = new Gripper();
 	
 	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
 	pi_ = pi;
+	
+	//wait because ros
+	ros::WallDuration(0.5).sleep();
 }
 
 Grasping::~Grasping()
@@ -37,9 +29,121 @@ Grasping::~Grasping()
 
 }
 
+void Grasping::publishTfFrame(moveit_msgs::CollisionObject co)
+{
 
-int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
-				geometry_msgs::PoseStamped &pre_pose)
+  ROS_DEBUG_STREAM("publish object frame " << co.id);
+  
+  transform_.setOrigin( tf::Vector3(co.primitive_poses[0].position.x, 
+				co.primitive_poses[0].position.y, co.primitive_poses[0].position.z) );
+				
+  transform_.setRotation( tf::Quaternion(co.primitive_poses[0].orientation.x,
+				co.primitive_poses[0].orientation.y,
+				co.primitive_poses[0].orientation.z,
+				co.primitive_poses[0].orientation.w) );
+					
+  br_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "odom_combined", co.id));
+}
+
+
+void Grasping::addBoxGraspPositionsZ(double z, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
+{
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	
+	pose.header.frame_id = frame_id;
+	pre_pose.header.frame_id = frame_id;
+	
+	//grasp from above
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, rotation);
+
+	pose.pose.position.x = 0;
+	pose.pose.position.y = 0;
+	pose.pose.position.z = Gripper::GRIPPER_DEPTH + z/2;
+	pre_pose = pose;
+	pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
+
+	//grasp from below
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, -M_PI_2, rotation);
+		
+	pose.pose.position.z = 0 - Gripper::GRIPPER_DEPTH - z/2;
+	pre_pose = pose;
+	pre_pose.pose.position.z -= Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);	
+}				
+
+void Grasping::addBoxGraspPositionsY(double y, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
+{
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	
+	pose.header.frame_id = frame_id;
+	pre_pose.header.frame_id = frame_id;
+	
+	//Griff from the left
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, -M_PI_2);
+	
+	pose.pose.position.x = 0;
+	pose.pose.position.y = Gripper::GRIPPER_DEPTH + y/2;
+	pose.pose.position.z = 0;
+	pre_pose = pose;
+	pre_pose.pose.position.y += Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
+	//Griff from the right	
+	
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI_2);	
+	pose.pose.position.y = 0 - Gripper::GRIPPER_DEPTH - y/2;
+	pre_pose = pose;
+	pre_pose.pose.position.y -= Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+}				
+
+void Grasping::addBoxGraspPositionsX(double x, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
+{
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	
+	pose.header.frame_id = frame_id;
+	pre_pose.header.frame_id = frame_id;
+	
+	//Griff from the front
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI);
+	
+	pose.pose.position.x = Gripper::GRIPPER_DEPTH + x/2;
+	pose.pose.position.y = 0;
+	pose.pose.position.z = 0;
+	pre_pose = pose;
+	pre_pose.pose.position.x += Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
+	//Griff from behind
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, 0);	
+	pose.pose.position.x = 0 - Gripper::GRIPPER_DEPTH - x/2;
+	pre_pose = pose;
+	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH -0.05;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+}				
+
+int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
 {
 	ROS_INFO_STREAM("calculate graspposition for " << co.id);
 	
@@ -53,47 +157,52 @@ int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, geometry_msg
 	double x = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X];
   double y = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
   double z = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z];
-  
+
   //check if the object can be grasped
 	if (x > Gripper::GRIPPER_MAX_POSITION &&
-			y > Gripper::GRIPPER_MAX_POSITION){
+			y > Gripper::GRIPPER_MAX_POSITION &&
+			z > Gripper::GRIPPER_MAX_POSITION){
 		ROS_ERROR_STREAM("Object is to big!");
 		return 0;
 	}
 	
-	pose.header.frame_id = co.header.frame_id;
+	//publish a new tf frame inside the collisionobject, for easy 
+	//graspposition calculation
+	publishTfFrame(co);
 	
-	//copy position of object
-	pose.pose.position = co.primitive_poses[0].position;
+	int result = 1;
+	if (x < Gripper::GRIPPER_MAX_POSITION){
+		//object can be grasped from above, below, left and right
+		addBoxGraspPositionsZ(z, M_PI_2, co.id, poses, pre_poses);
 	
-	//get orientation of the box
-	geometry_msgs::Quaternion box_orientation = co.primitive_poses[0].orientation;
-	
-	//set the gripper orientation:
-	//Pitch of M_PI_2 for pointing down
-	//Yaw depending on the orientation of the box
-	if (y > Gripper::GRIPPER_MAX_POSITION){
-		//rotate gripper by a yaw of 90° to grap the y side
-		pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, tf::getYaw(box_orientation)+M_PI_2);
-	} else {
-		pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, tf::getYaw(box_orientation));
+		addBoxGraspPositionsY(y, 0, co.id, poses, pre_poses);
+		result *= x_side_graspable;
+	} 
+	if (y < Gripper::GRIPPER_MAX_POSITION) {
+		//object can be grasped from above, below, front and behind
+		addBoxGraspPositionsZ(z, 0, co.id, poses, pre_poses);
+		
+		addBoxGraspPositionsX(x, 0, co.id, poses, pre_poses);
+		result *= y_side_graspable;
 	}
-	
-	//grap the object from above
-	pose.pose.position.z += Gripper::GRIPPER_DEPTH + z/2;
-	
-	//set pregrasppostion
-	pre_pose.header.frame_id = co.header.frame_id;
-	pre_pose = pose;
-	pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH -0.05;
-	
-	return 1;
+	if (z < Gripper::GRIPPER_MAX_POSITION) {
+		//object can be grasped from the left, right, front and behind
+		addBoxGraspPositionsX(x, M_PI_2, co.id, poses, pre_poses);
+		
+		addBoxGraspPositionsY(y, M_PI_2, co.id, poses, pre_poses);
+		result *= z_side_graspable;
+	}
+
+	return result;
 }
 
-int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
-				geometry_msgs::PoseStamped &pre_pose)
+int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
 {
 	ROS_INFO_STREAM("calculate graspposition for " << co.id);
+	
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
 	
 	//test if object is a cylinder
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
@@ -127,20 +236,23 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, geometr
 	pre_pose.pose.position.y = pose.pose.position.y;
 	pre_pose.pose.position.z = pose.pose.position.z;
 	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
 	return 1;
 }
 
-int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, geometry_msgs::PoseStamped &pose, 
-						geometry_msgs::PoseStamped &pre_pose)
+int Grasping::calcGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
+						std::vector<geometry_msgs::PoseStamped> &pre_poses)
 {
 	//choose the right grasppositoncalculationfunction
 	switch (co.primitives[0].type){
 		case shape_msgs::SolidPrimitive::CYLINDER:
-			return calcCylinderGraspPosition(co, pose, pre_pose);
+			return calcCylinderGraspPosition(co, poses, pre_poses);
 			break;
 		
 		case shape_msgs::SolidPrimitive::BOX:
-			return calcBoxGraspPosition(co, pose, pre_pose);
+			return calcBoxGraspPosition(co, poses, pre_poses);
 			break;
 		
 		default: 
@@ -176,7 +288,7 @@ int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, geomet
 	return 1;
 }
 
-int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripper_pose, double gripper_state)
+int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, int graspable_sides, int pos_id, double gripper_state)
 {
 	
 	double noise = 0.005;
@@ -184,21 +296,23 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, geometry_ms
 	if (co.primitives[0].type == shape_msgs::SolidPrimitive::CYLINDER){
 		return 1;
 	}
-	
-	double y = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
-	double z = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z];
-	
-	//update object position based on gripperstate
-	co.primitive_poses[0].position = gripper_pose.pose.position;
-	co.primitive_poses[0].position.z -= Gripper::GRIPPER_DEPTH + z/2 - noise;
-	
+  
 	//update object size based on gripperstate
-	if (y > Gripper::GRIPPER_MAX_POSITION){
-		//object was grasped on the x axis
+	//ultra ugly shit:
+	//if the x side can be grasped and the first 4 id's are positions for this side, etc
+	
+	if (graspable_sides % x_side_graspable == 0 && pos_id <= 3){
+		//x axis has been grasped
+		ROS_DEBUG_STREAM("x axis has been grasped");
 		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_state - noise;
-	} else {
-		//object was grasped on the y axis
+	} else if (graspable_sides % y_side_graspable == 0 && (pos_id <= 3 || graspable_sides % 2 == 0 && (pos_id >= 4	&& pos_id <= 7))){
+		//y axis has been grasped
+		ROS_DEBUG_STREAM("y axis has been grasped");
 		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_state - noise;
+	} else {
+		//z axis has been grasped
+		ROS_DEBUG_STREAM("z axis has been grasped");
+		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = gripper_state - noise;
 	}
 	
 	return 1;
@@ -218,55 +332,69 @@ std::string time_to_str(T ros_t)
   return std::string(buf);
 }
 
-int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &pre_pose, double force, ros::Publisher* head_publisher)
+int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, 
+		std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses, 
+		double force, int graspable_sides)
 {
 	string object_name = co.id;
+	
+	//select movegroup depending on arm
 	move_group_interface::MoveGroup* move_group;
 	if (arm == RIGHT_ARM){
 		move_group = new move_group_interface::MoveGroup(*group_r_arm_);
 	} else if (arm == LEFT_ARM) {
 		move_group = new move_group_interface::MoveGroup(*group_l_arm_);
 	} else {
-		ROS_ERROR_STREAM("Grasping::pick| arm value not valide.");
+		ROS_ERROR_STREAM("Arm value not valide.");
 		return 0;
 	}
+
+	//search for valid pregraspposition and move there
+	int pos_id = 0;
+	while (pos_id < pre_poses.size()){
+		move_group->setPoseTarget(pre_poses.at(pos_id));
+		ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
+		if (move_group->move()){
+			break;	
+		} 
+		pos_id++;
+	}	
+	
+	if (pos_id == pre_poses.size()){
+		ROS_ERROR_STREAM("No pregraspposition reachable for " << object_name);
+		return 0;	
+	}
+
 
 	// Goal Message to move the head
 	control_msgs::PointHeadActionGoal goal_msg;
 
 	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    // Set Goal to pre grasp position
-    goal_msg.header.frame_id = pre_pose.header.frame_id;
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    // Set position from pre grasp
-    goal_msg.goal.target.point.x = pre_pose.pose.position.x;
-    goal_msg.goal.target.point.y = pre_pose.pose.position.y;
-    goal_msg.goal.target.point.z = pre_pose.pose.position.z;
-    goal_msg.goal.pointing_axis.x = 1;
-    goal_msg.goal.pointing_axis.y = 0;
-    goal_msg.goal.pointing_axis.z = 0;
-    goal_msg.goal.pointing_frame = "head_plate_frame";
-    goal_msg.goal.min_duration = ros::Duration(1.0);
-    goal_msg.goal.max_velocity = 10;
+	goal_msg.header.stamp = ros::Time::now();
+	// Set Goal to pre grasp position
+	goal_msg.header.frame_id = pre_poses.at(pos_id).header.frame_id;
+	goal_msg.goal_id.stamp = goal_msg.header.stamp;
+	// set unique id with timestamp
+	goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+	goal_msg.goal.target.header = goal_msg.header;
+	// Set position from pre grasp
+	goal_msg.goal.target.point = pre_poses.at(pos_id).pose.position;
+	goal_msg.goal.pointing_axis.x = 1;
+	goal_msg.goal.pointing_axis.y = 0;
+	goal_msg.goal.pointing_axis.z = 0;
+	goal_msg.goal.pointing_frame = "head_plate_frame";
+	goal_msg.goal.min_duration = ros::Duration(1.0);
+	goal_msg.goal.max_velocity = 10;
 
-    // Publish goal on topic /suturo/head_controller
-    if( !head_publisher ) {
+	// Publish goal on topic /suturo/head_controller
+	if( !head_publisher_ ) {
 		ROS_INFO("Publisher invalid!\n");
 	} else {
-		head_publisher->publish(goal_msg);
-		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
-	}
-
-	//go into pregraspposition
-	move_group->setPoseTarget(pre_pose);
-	ROS_INFO_STREAM("move to pregraspposition");
-	if (!move_group->move()){
-		ROS_ERROR_STREAM("Failed to move to pregraspposition of " << object_name << " at: " << pose);
-		return 0;		
+		head_publisher_->publish(goal_msg);
+		ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x << 
+			", y=" << goal_msg.goal.target.point.y << 
+			", z=" << goal_msg.goal.target.point.z << 
+			" in Frame " << goal_msg.goal.pointing_frame.c_str());
 	}
 	
 	//open gripper
@@ -278,25 +406,26 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	}
 	
 	//set goal to pose
-	ROS_INFO_STREAM("set goalpose");
-	move_group->setPoseTarget(pose);
+	ROS_DEBUG_STREAM("set goalpose");
+	move_group->setPoseTarget(poses.at(pos_id));
 	
 	//move Arm to goalpose
 	ROS_INFO_STREAM("move to goalpose");
 	if (!move_group->move()){
-		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << pose);
+		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
 		return 0;
 	}
 	
-	//close grapper
+	//close gripper
 	if (arm == RIGHT_ARM){
 		gripper_state = gripper_->close_r_gripper(force);
 	}else{
 		gripper_state = gripper_->close_l_gripper(force);
 	}
 	
-	ROS_INFO_STREAM("update objectposition in planningscene.");
-	updateGraspedBoxPose(co, move_group->getCurrentPose(), gripper_state);
+	//update object sizes to avoid selfkollisions
+	ROS_DEBUG_STREAM("update objectposition in planningscene.");
+	updateGraspedBoxPose(co, graspable_sides, pos_id, gripper_state);
 	updateGraspedCylinderPose(co, move_group->getCurrentPose(), gripper_state);
 	
 	//update collisionobject in planningscene
@@ -307,81 +436,104 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, geometry_ms
 	ROS_INFO_STREAM("attach object");
 	if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_r_gripper_links())) 
 		return 0;
-	
-	//lift object by 5 cm
-	ROS_INFO_STREAM("lift object");
-	pose.pose.position.z += 0.05;
-	move_group->setPoseTarget(pose);
-	if (!move_group->move()){
-		ROS_INFO_STREAM("Failed to lift " << object_name);
-		return 0;
-	}
-	
+		
+	ROS_INFO_STREAM("\n\n Picking finished \n");
 	return 1;
 }
 
-
-int Grasping::pick(std::string objectName, std::string arm, double force, ros::Publisher* head_publisher)
+int Grasping::pick(std::string object_name, std::string arm, double force)
 {
 	if (!gripper_->is_connected_to_controller()){
 		ROS_ERROR_STREAM("not connected to grippercontroller");
 		return 0;
 	}
 	
-	if (pi_->isObjectAttached(objectName)){
-		ROS_INFO_STREAM(objectName << " already attached.");
+	moveit_msgs::AttachedCollisionObject aco;
+	moveit_msgs::CollisionObject co;
+	
+	//check if there is an object attached to this arm.
+	if (arm == LEFT_ARM && pi_->isAnObjectAttachedToArm(group_l_arm_->getEndEffectorLink())
+			|| arm == RIGHT_ARM && pi_->isAnObjectAttachedToArm(group_r_arm_->getEndEffectorLink()))
+	{
+		ROS_WARN_STREAM(co.id << " already attached to this arm.");
 		return 1;
+	} else if (pi_->getAttachedObject(object_name, aco)){
+		co = aco.object;
+	} else if (!pi_->getObject(object_name, co)){		
+		//object not found
+		return 0;
 	}
 	
-	geometry_msgs::PoseStamped pose;
-	geometry_msgs::PoseStamped pre_pose;
+	std::vector<geometry_msgs::PoseStamped> poses(0);
+	std::vector<geometry_msgs::PoseStamped> pre_poses(0);
 	
-	//get object from planningscene
-	moveit_msgs::CollisionObject co;
-	if (!pi_->getObject(objectName, co))
+	//calculate graspposition(s)
+	int graspable_sides = calcGraspPosition(co, poses, pre_poses);
+	if (graspable_sides == 0)
 		return 0;
-	
-	if (!calcGraspPosition(co, pose, pre_pose))
-		return 0;
-	
-	return pick(co, arm, pose, pre_pose, force, head_publisher);
+
+	return pick(co, arm, poses, pre_poses, force, graspable_sides);
 }
 
 
-int Grasping::drop(string objectName)
+int Grasping::dropObject(string object_name)
 {
 	if (!gripper_->is_connected_to_controller()){
-		ROS_ERROR_STREAM("not connected to grippercontroller");
+		ROS_ERROR_STREAM("Not connected to grippercontroller.");
 		return 0;
 	}
 	
 	//get object from planningscene
 	moveit_msgs::AttachedCollisionObject aco;
-	if (pi_->getAttachedObject(objectName, aco))
+	if (!pi_->getAttachedObject(object_name, aco))
 	{
-		ROS_INFO("Get object");
-	} else {
-		ROS_INFO_STREAM(objectName << " not attached.");
+		ROS_INFO_STREAM(object_name << " not attached.");
 		return 1;
 	}
-	//find arm that holds the object
-	bool r_grasp = aco.link_name == group_r_arm_->getEndEffectorLink();
-	bool l_grasp = aco.link_name == group_l_arm_->getEndEffectorLink();
 
-	//open gripper
-	if (r_grasp && l_grasp){
+	if(aco.link_name == group_r_arm_->getEndEffectorLink()) {
 		gripper_->open_r_gripper();
-		gripper_->open_l_gripper();
-	} else if(r_grasp) {
-		gripper_->open_r_gripper();
-	} else if (l_grasp){
+	} else if (aco.link_name == group_l_arm_->getEndEffectorLink()){
 		gripper_->open_l_gripper();
 	}
 	
 	//detach object
-	pi_->detachObject(objectName);
-	ROS_INFO_STREAM("droped " << objectName << " successfully.");
+	pi_->detachObject(object_name);
+	ROS_INFO_STREAM("\n\n Droped " << object_name << " successfully.\n");
+	return 1;
+}
 
+int Grasping::drop(string arm)
+{
+	if (!gripper_->is_connected_to_controller()){
+		ROS_ERROR_STREAM("Not connected to grippercontroller.");
+		return 0;
+	}
 	
+	//choose endeffector depending on arm
+	move_group_interface::MoveGroup* move_group;
+	std::string eof;
+	if (arm == RIGHT_ARM){
+		eof = group_r_arm_->getEndEffectorLink();
+		gripper_->open_r_gripper();
+
+	} else if (arm == LEFT_ARM) {
+		eof = group_l_arm_->getEndEffectorLink();
+		gripper_->open_l_gripper();
+
+	} else {
+		ROS_ERROR_STREAM("Arm value not valide.");
+		return 0;
+	}
+	
+	//detach any attached objects
+	std::vector<moveit_msgs::AttachedCollisionObject> acos = pi_->getAttachedObjects();
+	
+	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
+		if (it->link_name == eof){
+			pi_->detachObject(it->object.id);
+		}
+	}
+
 	return 1;
 }

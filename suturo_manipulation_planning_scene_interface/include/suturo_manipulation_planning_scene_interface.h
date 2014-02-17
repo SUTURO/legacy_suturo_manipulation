@@ -4,6 +4,9 @@
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <moveit_msgs/GetPlanningScene.h>
+#include <moveit/move_group/capability_names.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 
 class Suturo_Manipulation_Planning_Scene_Interface{
@@ -84,10 +87,10 @@ public:
 	/**
 	 * Check if the object is attached to the robot.
 	 * 
-	 * @return true, if the object is attached
-	 * 					false, otherwise
+	 * @return 1, if the object is attached
+	 * 					0, otherwise
 	 */	
-	bool isObjectAttached(std::string object_name);
+	int isAnObjectAttachedToArm(std::string link_name);
 };
      
 #endif

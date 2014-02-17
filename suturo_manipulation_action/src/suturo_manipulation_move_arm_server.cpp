@@ -14,6 +14,7 @@
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_grasping.h>
 
+
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_moveAction> Server;
@@ -86,7 +87,6 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	Grasping grasper(&pi);
 	ROS_INFO("Done.");
 
-
 	// Set arm which should be moved
 	string arm = goal->bodypart.bodyPart;
 	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
@@ -114,16 +114,25 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	move_group_interface::MoveGroup group(arm);
 	
 	// set orientation
-	transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
-	transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
-	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
-	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	// transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
+	// transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
+	// transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
+	// transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
+	if(arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+	} else {
+		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -(M_PI_2));
+	}
 	
+
+
+
 	// set Pose
 	group.setPoseTarget(transformedPose);
-	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
-			group.getCurrentPose().pose.position.y,
-			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
+	ROS_INFO_STREAM("current Position: x=" << group.getCurrentPose().pose.position.x << 
+			", y=" << group.getCurrentPose().pose.position.y << 
+			", z=" << group.getCurrentPose().pose.position.z << 
+			" in Frame " << group.getCurrentPose().header.frame_id.c_str());
 
 	// // Publish goal on topic /suturo/head_controller
 	// if( !publisher ) {
@@ -139,30 +148,33 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 
 	// Set home Coordinates, time and frame
 	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    goal_msg.header.frame_id = goal->ps.header.frame_id;
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    goal_msg.goal.target.point.x = transformedPose.pose.position.x;
-    goal_msg.goal.target.point.y = transformedPose.pose.position.y;
-    goal_msg.goal.target.point.z = transformedPose.pose.position.z;
-    goal_msg.goal.pointing_axis.x = 1;
-    goal_msg.goal.pointing_axis.y = 0;
-    goal_msg.goal.pointing_axis.z = 0;
-    goal_msg.goal.pointing_frame = "head_plate_frame";
-    goal_msg.goal.min_duration = ros::Duration(1.0);
-    goal_msg.goal.max_velocity = 10;
+	goal_msg.header.stamp = ros::Time::now();
+	goal_msg.header.frame_id = goal->ps.header.frame_id;
+	goal_msg.goal_id.stamp = goal_msg.header.stamp;
+	// set unique id with timestamp
+	goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+	goal_msg.goal.target.header = goal_msg.header;
+	goal_msg.goal.target.point.x = transformedPose.pose.position.x;
+	goal_msg.goal.target.point.y = transformedPose.pose.position.y;
+	goal_msg.goal.target.point.z = transformedPose.pose.position.z;
+	goal_msg.goal.pointing_axis.x = 1;
+	goal_msg.goal.pointing_axis.y = 0;
+	goal_msg.goal.pointing_axis.z = 0;
+	goal_msg.goal.pointing_frame = "head_plate_frame";
+	goal_msg.goal.min_duration = ros::Duration(1.0);
+	goal_msg.goal.max_velocity = 10;
 
-    // Publish goal on topic /suturo/head_controller
-    if( !publisher ) {
+	// Publish goal on topic /suturo/head_controller
+	if( !publisher ) {
 		ROS_INFO("Publisher invalid!\n");
 	} else {
 		publisher->publish(goal_msg);
-		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
+		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", 
+		goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, 
+		goal_msg.goal.pointing_frame.c_str());
 	}
 
+	//move arm
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -186,6 +198,7 @@ int main(int argc, char** argv)
 	
 	// create the action server
 	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
+
 	// start the server
 	server_arm.start();
 	
