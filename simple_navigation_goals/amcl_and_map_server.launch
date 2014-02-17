@@ -1,0 +1,11 @@
+<launch>
+  <master auto="start"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find simple_navigation_goals)/maps/map.yaml" />
+
+
+  <!--- Run AMCL -->
+  <include file="$(find simple_navigation_goals)/amcl_omni.launch" />
+
+</launch>
