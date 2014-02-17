@@ -80,7 +80,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+   INCLUDE_DIRS include
 #  LIBRARIES suturo_manipulation_move_robot
 #  CATKIN_DEPENDS geometry_msgs roscpp
 #  DEPENDS system_lib
@@ -94,7 +94,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -104,13 +106,12 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_move_robot_node src/suturo_manipulation_move_robot_node.cpp)
-add_executable(suturo_manipulation_drive_base src/drive_base.cpp)
-add_executable(move_test src/move_test.cpp)
+add_library(suturo_manipulation_drive_base src/drive_base.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_move_robot_node suturo_manipulation_move_robot_generate_messages_cpp)
-add_dependencies(suturo_manipulation_drive_base roscpp geometry_msgs)
+add_dependencies(suturo_manipulation_drive_base roscpp geometry_msgs ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against
@@ -120,11 +121,6 @@ add_dependencies(suturo_manipulation_drive_base roscpp geometry_msgs)
 
 target_link_libraries(
   suturo_manipulation_drive_base
-  ${catkin_LIBRARIES}
-)
-
-target_link_libraries(
-  move_test
   ${catkin_LIBRARIES}
 )
 
