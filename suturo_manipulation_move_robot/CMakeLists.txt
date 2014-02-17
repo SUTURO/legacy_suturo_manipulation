@@ -105,11 +105,13 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_move_robot_node src/suturo_manipulation_move_robot_node.cpp)
 add_executable(suturo_manipulation_drive_base src/drive_base.cpp)
+add_executable(move_test src/move_test.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_move_robot_node suturo_manipulation_move_robot_generate_messages_cpp)
 add_dependencies(suturo_manipulation_drive_base roscpp geometry_msgs)
+
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_move_robot_node
@@ -118,6 +120,11 @@ add_dependencies(suturo_manipulation_drive_base roscpp geometry_msgs)
 
 target_link_libraries(
   suturo_manipulation_drive_base
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  move_test
   ${catkin_LIBRARIES}
 )
 

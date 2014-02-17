@@ -90,7 +90,7 @@ void Grasping::addBoxGraspPositionsY(double y, double rotation, std::string fram
 	pose.header.frame_id = frame_id;
 	pre_pose.header.frame_id = frame_id;
 	
-	//Griff from the left
+	//grasp from the left
 	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, -M_PI_2);
 	
 	pose.pose.position.x = 0;
@@ -102,7 +102,7 @@ void Grasping::addBoxGraspPositionsY(double y, double rotation, std::string fram
 	poses.push_back(pose);
 	pre_poses.push_back(pre_pose);
 	
-	//Griff from the right	
+	//grasp from the right	
 	
 	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI_2);	
 	pose.pose.position.y = 0 - Gripper::GRIPPER_DEPTH - y/2;
@@ -122,7 +122,7 @@ void Grasping::addBoxGraspPositionsX(double x, double rotation, std::string fram
 	pose.header.frame_id = frame_id;
 	pre_pose.header.frame_id = frame_id;
 	
-	//Griff from the front
+	//grasp from the front
 	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI);
 	
 	pose.pose.position.x = Gripper::GRIPPER_DEPTH + x/2;
@@ -134,7 +134,7 @@ void Grasping::addBoxGraspPositionsX(double x, double rotation, std::string fram
 	poses.push_back(pose);
 	pre_poses.push_back(pre_pose);
 	
-	//Griff from behind
+	//grasp from behind
 	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, 0);	
 	pose.pose.position.x = 0 - Gripper::GRIPPER_DEPTH - x/2;
 	pre_pose = pose;

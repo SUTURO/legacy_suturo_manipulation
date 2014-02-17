@@ -174,7 +174,7 @@ public:
 int main(int argc, char** argv)
 {
   //init the ROS node
-  ros::init(argc, argv, "robot_driver");
+  ros::init(argc, argv, "robot_driver1");
   ros::NodeHandle nh;
 
   RobotDriver driver(nh);
