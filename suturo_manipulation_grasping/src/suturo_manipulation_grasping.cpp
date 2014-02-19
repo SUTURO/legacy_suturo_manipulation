@@ -286,9 +286,10 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 	
 	//number of height points where we can grasp
 	int grasp_pose_count = (h / cylinder_safty_dist) -1;
-	for (int i = 1; i <= grasp_pose_count; i++){
-		 addCylinderGraspPositionsX((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
-		 addCylinderGraspPositionsY((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
+	
+	for (int i = 1; i = grasp_pose_count; i++){
+		 addCylinderGraspPositionsX((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
+		 addCylinderGraspPositionsY((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
 	}
 	
 	return 1;
