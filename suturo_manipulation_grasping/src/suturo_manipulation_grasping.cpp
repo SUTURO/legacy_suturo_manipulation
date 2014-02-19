@@ -196,13 +196,73 @@ int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<
 	return result;
 }
 
-int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
+
+void Grasping::addCylinderGraspPositionsX(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses)
-{
-	ROS_INFO_STREAM("calculate graspposition for " << co.id);
-	
+{				
 	geometry_msgs::PoseStamped pose;
 	geometry_msgs::PoseStamped pre_pose;
+	pose.header.frame_id = frame_id;
+	pre_pose.header.frame_id = frame_id;
+	
+	//grasp from the front
+	pose.pose.position.x = 0 - Gripper::GRIPPER_DEPTH + r;
+	pose.pose.position.y = 0;
+	pose.pose.position.z = h;
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+	
+	pre_pose = pose;
+	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
+	//grasp from behind
+	pose.pose.position.x = Gripper::GRIPPER_DEPTH + r;
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+	
+	pre_pose = pose;
+	pre_pose.pose.position.x += Gripper::GRIPPER_DEPTH;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);	
+}
+
+void Grasping::addCylinderGraspPositionsY(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
+{				
+	geometry_msgs::PoseStamped pose;
+	geometry_msgs::PoseStamped pre_pose;
+	pose.header.frame_id = frame_id;
+	pre_pose.header.frame_id = frame_id;
+	
+	//grasp from the left
+	pose.pose.position.x = 0;
+	pose.pose.position.y = Gripper::GRIPPER_DEPTH + r;
+	pose.pose.position.z = h;
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_2);
+	
+	pre_pose = pose;
+	pre_pose.pose.position.y += Gripper::GRIPPER_DEPTH;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);
+	
+	//grasp from right
+	pose.pose.position.y = 0 - Gripper::GRIPPER_DEPTH + r;
+	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+	
+	pre_pose = pose;
+	pre_pose.pose.position.y -= Gripper::GRIPPER_DEPTH;
+	
+	poses.push_back(pose);
+	pre_poses.push_back(pre_pose);	
+}
+
+int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses)
+{	
+	ROS_INFO_STREAM("calculate graspposition for " << co.id);
 	
 	//test if object is a cylinder
 	if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
@@ -212,6 +272,7 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 	
 	//get objectsize
 	double r = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS];
+	double h = co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT];
 	
 	//check if the object is too big
 	if (r*2 > Gripper::GRIPPER_MAX_POSITION){
@@ -219,25 +280,15 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 		return 0;
 	}
 	
-	pose.header.frame_id = co.header.frame_id;
+	publishTfFrame(co);
 	
-	//copy position of object
-	pose.pose.position = co.primitive_poses[0].position;
+	//number of height points where we can grasp
+	int grasp_pose_count = (h / cylinder_safty_dist) -1;
 	
-	//set grasp orientation for hand
-	pose.pose.orientation.w = 1;
-	
-	//grab object form the front
-	pose.pose.position.x -= Gripper::GRIPPER_DEPTH + r;
-	
-	//set pregraspposition
-	pre_pose.header.frame_id = co.header.frame_id;
-	pre_pose.pose.position.x = pose.pose.position.x - Gripper::GRIPPER_DEPTH;
-	pre_pose.pose.position.y = pose.pose.position.y;
-	pre_pose.pose.position.z = pose.pose.position.z;
-	
-	poses.push_back(pose);
-	pre_poses.push_back(pre_pose);
+	for (int i = 1; i = grasp_pose_count; i++){
+		 addCylinderGraspPositionsX((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
+		 addCylinderGraspPositionsY((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
+	}
 	
 	return 1;
 }
