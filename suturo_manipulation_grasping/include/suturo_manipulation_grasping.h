@@ -19,6 +19,7 @@ private:
 	const static std::string LEFT_ARM;
 	const static std::string RIGHT_ARM;
 	
+	const static double cylinder_safty_dist = 0.08;//m
 	
 	const static int x_side_graspable = 2;
 	const static int y_side_graspable = 3;
@@ -111,6 +112,13 @@ private:
 	 * Adds Grasppositions possible from the front and behind, to the vactors.
 	 */
 	void addBoxGraspPositionsX(double x, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses);
+				
+	void addCylinderGraspPositionsX(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+				std::vector<geometry_msgs::PoseStamped> &pre_poses);
+	
+	
+	void addCylinderGraspPositionsY(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 	
 public:
