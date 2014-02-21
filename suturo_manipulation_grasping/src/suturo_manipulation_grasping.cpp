@@ -286,10 +286,9 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 	
 	//number of height points where we can grasp
 	int grasp_pose_count = (h / cylinder_safty_dist) -1;
-	
-	for (int i = 1; i = grasp_pose_count; i++){
-		 addCylinderGraspPositionsX((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
-		 addCylinderGraspPositionsY((cylinder_safty_dist*i)-(h/2), r, co.id, poses, pre_poses);
+	for (int i = 1; i <= grasp_pose_count; i++){
+		 addCylinderGraspPositionsX((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
+		 addCylinderGraspPositionsY((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
 	}
 	
 	return 1;
@@ -403,6 +402,24 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		return 0;
 	}
 
+	//search for valid pregraspposition and move there
+	int pos_id = 0;
+	while (pos_id < pre_poses.size()){
+		publishTfFrame(co);
+		move_group->setPoseTarget(pre_poses.at(pos_id));
+		pi_->publishMarker(pre_poses.at(pos_id));
+		ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
+		if (move_group->move()){
+			break;	
+		} 
+		pos_id++;
+	}	
+	
+	if (pos_id == pre_poses.size()){
+		ROS_ERROR_STREAM("No pregraspposition reachable for " << object_name);
+		return 0;	
+	}
+
 
 	// Goal Message to move the head
 	control_msgs::PointHeadActionGoal goal_msg;
@@ -430,8 +447,34 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
     if( !head_publisher ) {
 		ROS_INFO("Publisher invalid!\n");
 	} else {
-		head_publisher->publish(goal_msg);
-		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
+
+		head_publisher_->publish(goal_msg);
+		ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x << 
+			", y=" << goal_msg.goal.target.point.y << 
+			", z=" << goal_msg.goal.target.point.z << 
+			" in Frame " << goal_msg.goal.pointing_frame.c_str());
+	}
+	
+	//open gripper
+	double gripper_state;
+	if (arm == RIGHT_ARM){
+		gripper_state = gripper_->open_r_gripper();
+	}else{
+		gripper_state = gripper_->open_l_gripper();
+	}
+	
+	//set goal to pose
+	ROS_DEBUG_STREAM("set goalpose");
+	publishTfFrame(co);
+	move_group->setPoseTarget(poses.at(pos_id));
+	
+	//move Arm to goalpose
+	ROS_INFO_STREAM("move to goalpose");
+	
+	pi_->publishMarker(poses.at(pos_id));
+	if (!move_group->move()){
+		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
+		return 0;
 	}
 
 	//go into pregraspposition
