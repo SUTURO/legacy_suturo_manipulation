@@ -11,6 +11,8 @@
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 
+#include <visualization_msgs/Marker.h>
+
 
 class Grasping
 {
@@ -49,7 +51,6 @@ private:
 	 * 					0, otherwise
 	 */	
 	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripperPose, double gripper_pose);
-
 
 	/**
 	 * Calculates grasp und pregrasp position for a box.
