@@ -52,7 +52,8 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 
     double newton = graspGoal->goal.newton;
     ROS_INFO("Newton: %f", newton);
-
+		ROS_INFO_STREAM(suturo_manipulation_msgs::GraspingAndDrop::GRASP);
+		ROS_INFO_STREAM(action);
     // Check if we should grasp or drop...
     if(action == suturo_manipulation_msgs::GraspingAndDrop::GRASP){
       ROS_INFO("Begin to pick object...");
@@ -92,7 +93,8 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         server_grasp->setAborted(r);
       }
     } else {
-	ROS_INFO("Unknown message!");
+			ROS_INFO("Unknown action!");
+			server_grasp->setAborted(r);
     }
   }
 }
