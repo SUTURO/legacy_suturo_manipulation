@@ -5,6 +5,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	nh_ = nodehandle;
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
 	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);	
+	vis_pub_ = nh_->advertise<visualization_msgs::Marker>( "/suturo/visualization_marker", 10 );
 	
 	//wait because ros
 	ros::WallDuration(0.5).sleep();
@@ -196,6 +197,32 @@ int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::s
 	return 0;
 }
 
+void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::PoseStamped pose)
+ {
+// Publish the Goalmarker	
+  visualization_msgs::Marker goal_marker;
+  goal_marker.header.frame_id = pose.header.frame_id;
+  goal_marker.header.stamp = ros::Time();
+  goal_marker.ns = "suturo_manipulation";
+  goal_marker.id = 0;
+  goal_marker.type = visualization_msgs::Marker::SPHERE;
+  goal_marker.action = visualization_msgs::Marker::ADD;
+  goal_marker.pose.position.x = pose.pose.position.x;
+  goal_marker.pose.position.y = pose.pose.position.y;
+  goal_marker.pose.position.z = pose.pose.position.z;
+  goal_marker.pose.orientation.x = 0.0;
+  goal_marker.pose.orientation.y = 0.0;
+  goal_marker.pose.orientation.z = 0.0;
+  goal_marker.pose.orientation.w = 1.0;
+  goal_marker.scale.x = 0.1;
+  goal_marker.scale.y = 0.1;
+  goal_marker.scale.z = 0.1;
+  goal_marker.color.a = 1.0;
+  goal_marker.color.r = 0.0;
+  goal_marker.color.g = 1.0;
+  goal_marker.color.b = 0.0;
+  vis_pub_.publish( goal_marker );   
+}  
 
 
 

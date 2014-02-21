@@ -13,6 +13,8 @@
 #include <pr2_controllers_msgs/PointHeadActionResult.h>
 #include <control_msgs/PointHeadActionGoal.h>
 
+#include <visualization_msgs/Marker.h>
+
 
 class Grasping
 {
@@ -52,7 +54,6 @@ private:
 	 * 					0, otherwise
 	 */	
 	int updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, geometry_msgs::PoseStamped gripperPose, double gripper_pose);
-
 
 	/**
 	 * Calculates grasp und pregrasp position for a box.

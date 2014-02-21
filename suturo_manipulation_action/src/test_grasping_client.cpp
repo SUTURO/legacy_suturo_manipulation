@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 	goal.goal.objectName = argv[1];
 	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.newton = atof(argv[2]);
-	goal.goal.action.action = atof(argv[4]);
+	goal.goal.action.action = argv[4];
 
 	// send the goal to server
 	client.sendGoal(goal);

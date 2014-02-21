@@ -8,12 +8,14 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
+#include <visualization_msgs/Marker.h>
 
 class Suturo_Manipulation_Planning_Scene_Interface{
 private:
 	ros::NodeHandle* nh_; 
 	ros::Publisher attached_object_publisher_;
 	ros::Publisher collision_object_publisher_;
+	ros::Publisher vis_pub_;
 
 public:
 	Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle);
@@ -91,6 +93,8 @@ public:
 	 * 					0, otherwise
 	 */	
 	int isAnObjectAttachedToArm(std::string link_name);
+	
+	void publishMarker(geometry_msgs::PoseStamped pose);
 };
      
 #endif
