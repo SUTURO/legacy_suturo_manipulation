@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	
 	if (argc != 5)
 	{
-		ROS_INFO("arguments: dlink/corny/cafetfilter newton right_arm/left_arm grasp(1)/drop(0)");
+		ROS_INFO("arguments: dlink/corny/cafetfilter newton right_arm/left_arm drop_object/open_gripper/grasp");
 		return 1;
 	}
 		
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 	goal.goal.objectName = argv[1];
 	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.newton = atof(argv[2]);
-	goal.goal.grasp = atof(argv[4]);
+	goal.goal.action.action = atof(argv[4]);
 
 	// send the goal to server
 	client.sendGoal(goal);

@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_graspingAction.h>
+#include <suturo_manipulation_msgs/GraspingAndDrop.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_grasping.h>
@@ -38,7 +39,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
   ROS_INFO("Done.");
 
   string picking_arm = graspGoal->goal.bodypart.bodyPart;
-
+  string action = graspGoal->goal.action.action;
   if (picking_arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && 
   		picking_arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){  
     ROS_INFO("Unknown arm! Please use suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM or suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM as names!\n");
@@ -53,7 +54,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     ROS_INFO("Newton: %f", newton);
 
     // Check if we should grasp or drop...
-    if(graspGoal->goal.grasp == 1){
+    if(action == suturo_manipulation_msgs::GraspingAndDrop::GRASP){
       ROS_INFO("Begin to pick object...");
       // Grasp the object
       if (grasper.pick(obj_name, picking_arm, newton))
@@ -66,7 +67,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
-    } else if (graspGoal->goal.grasp==0) {
+    } else if (action == suturo_manipulation_msgs::GraspingAndDrop::DROP_OBJECT) {
       ROS_INFO("Begin to drop object...");
       // Drop the object
       if (grasper.dropObject(obj_name))
@@ -79,17 +80,19 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
-    } else {
+    } else if (action == suturo_manipulation_msgs::GraspingAndDrop::OPEN_GRIPPER){
       if (grasper.drop(picking_arm))
       {
-        ROS_INFO("Object handoffed...\n");
+        ROS_INFO("Opened gripper...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
         server_grasp->setSucceeded(r);
       } else {
-        ROS_INFO("Handoff failed!\n");
+        ROS_INFO("Open gripper failed!\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
+    } else {
+	ROS_INFO("Unknown message!");
     }
   }
 }
