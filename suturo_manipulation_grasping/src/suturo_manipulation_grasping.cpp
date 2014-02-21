@@ -329,8 +329,8 @@ int Grasping::updateGraspedCylinderPose(moveit_msgs::CollisionObject &co, geomet
 	
 	//update object position based on gripperposition
 	//in case die perceived position wasn't correct, it is now in the gripper
-	co.primitive_poses[0].position = gripper_pose.pose.position;
-	co.primitive_poses[0].position.x += Gripper::GRIPPER_DEPTH + r;
+	//~ co.primitive_poses[0].position = gripper_pose.pose.position;
+	//~ co.primitive_poses[0].position.x += Gripper::GRIPPER_DEPTH + r;
 	
 	//update object radius based on gripperstate
 	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] = gripper_state/2 - noise/2;
@@ -415,11 +415,10 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 	ROS_DEBUG_STREAM("set goalpose");
 	publishTfFrame(co);
 	move_group->setPoseTarget(poses.at(pos_id));
-	
+	pi_->publishMarker(poses.at(pos_id));
 	//move Arm to goalpose
 	ROS_INFO_STREAM("move to goalpose");
 	
-	pi_->publishMarker(poses.at(pos_id));
 	if (!move_group->move()){
 		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
 		return 0;
