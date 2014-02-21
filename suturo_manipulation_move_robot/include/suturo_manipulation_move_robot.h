@@ -27,6 +27,12 @@ private:
 	void subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& robotPoseFB);
 
 	bool checkCollision(geometry_msgs::PoseStamped targetPose);
+
+	bool checkXCoord(geometry_msgs::PoseStamped targetPose);
+
+	bool checkYCoord(geometry_msgs::PoseStamped targetPose);
+
+	bool checkOrientation(geometry_msgs::PoseStamped targetPose);
 	
 public:
 

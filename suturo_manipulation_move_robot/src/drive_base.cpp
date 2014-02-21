@@ -3,17 +3,15 @@
 using namespace std;
 
 //! ROS node initialization
-MoveRobot::MoveRobot(ros::NodeHandle &nh)
-{
+MoveRobot::MoveRobot(ros::NodeHandle &nh){
   nh_ = nh;
   //set up the publisher for the cmd_vel topic
   cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
-  loc_sub_ = nh_.subscribe("/amcl_pose", 50, &MoveRobot::subscriberCb, this);
+  loc_sub_ = nh_.subscribe("/initialpose", 50, &MoveRobot::subscriberCb, this);
 }
 
-MoveRobot::~MoveRobot()
-{
+MoveRobot::~MoveRobot(){
   
 }
 
@@ -33,20 +31,30 @@ void MoveRobot::subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& rob
 }
 
 bool MoveRobot::checkCollision(geometry_msgs::PoseStamped targetPose) {
-  
+  // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
 }
 
-//! Loop forever while sending drive commands based on keyboard input
-bool MoveRobot::driveBase(geometry_msgs::PoseStamped targetPose)
-{
-  // std::cout << "Type a command and then press enter.  "
-  //   "Use '+' to move forward, 'l' to turn left, "
-  //   "'r' to turn right, '.' to exit.\n";
+bool MoveRobot::checkXCoord(geometry_msgs::PoseStamped targetPose){
+  return (robotPose_.pose.position.x+0.2 > targetPose.pose.position.x || robotPose_.pose.position.x-0.2 < targetPose.pose.position.x);
+}
 
-  //we will be sending commands of type "twist"
+bool MoveRobot::checkYCoord(geometry_msgs::PoseStamped targetPose){
+  return (robotPose_.pose.position.y+0.2 > targetPose.pose.position.y || robotPose_.pose.position.y-0.2 < targetPose.pose.position.y);
+}
+
+bool MoveRobot::checkOrientation(geometry_msgs::PoseStamped targetPose){
+  return (robotPose_.pose.orientation.w == targetPose.pose.orientation.w && robotPose_.pose.orientation.x == targetPose.pose.orientation.x && robotPose_.pose.orientation.y == targetPose.pose.orientation.y && robotPose_.pose.orientation.z == targetPose.pose.orientation.z);
+}
+
+//
+bool MoveRobot::driveBase(geometry_msgs::PoseStamped targetPose){
+
+  // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
+  // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
+  // TODO: Drehen der Base um 180° einbauen
   geometry_msgs::Twist base_cmd;
 
-  while (nh_.ok() && (robotPose_.pose.position.x+0.2 > targetPose.pose.position.x || robotPose_.pose.position.x-0.2 < targetPose.pose.position.x)){
+  while (nh_.ok() && (checkXCoord(targetPose) && checkYCoord(targetPose) && checkOrientation(targetPose))){
     base_cmd.linear.x = 0.5;
     cmd_vel_pub_.publish(base_cmd);
   }
