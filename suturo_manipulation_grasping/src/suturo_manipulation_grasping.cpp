@@ -467,11 +467,10 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 	ROS_DEBUG_STREAM("set goalpose");
 	publishTfFrame(co);
 	move_group->setPoseTarget(poses.at(pos_id));
-	
+	pi_->publishMarker(poses.at(pos_id));
 	//move Arm to goalpose
 	ROS_INFO_STREAM("move to goalpose");
 	
-	pi_->publishMarker(poses.at(pos_id));
 	if (!move_group->move()){
 		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
 		return 0;
