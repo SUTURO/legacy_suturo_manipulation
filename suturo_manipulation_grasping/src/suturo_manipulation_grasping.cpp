@@ -406,14 +406,62 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		move_group->setPoseTarget(pre_poses.at(pos_id));
 		pi_->publishMarker(pre_poses.at(pos_id));
 		ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
-		if (move_group->move()){
-			break;	
+		if (!move_group->move()){
+			pos_id++;
+			continue;	
 		} 
-		pos_id++;
+		
+		//open gripper
+		double gripper_state;
+		if (arm == RIGHT_ARM){
+			gripper_state = gripper_->open_r_gripper();
+		}else{
+			gripper_state = gripper_->open_l_gripper();
+		}
+
+		//set goal to pose
+		ROS_DEBUG_STREAM("set goalpose");
+		publishTfFrame(co);
+		move_group->setPoseTarget(poses.at(pos_id));
+		pi_->publishMarker(poses.at(pos_id));
+		//move Arm to goalpose
+		ROS_INFO_STREAM("move to goalpose");
+
+		if (!move_group->move()){
+			pos_id++;	
+			continue;
+			//~ ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
+			//~ return 0;
+		}	else {
+			//close gripper
+			if (arm == RIGHT_ARM){
+				gripper_state = gripper_->close_r_gripper(force);
+			}else{
+				gripper_state = gripper_->close_l_gripper(force);
+			}
+			
+			//update object sizes to avoid selfkollisions
+			ROS_DEBUG_STREAM("update objectposition in planningscene.");
+			updateGraspedBoxPose(co, graspable_sides, pos_id, gripper_state);
+			updateGraspedCylinderPose(co, move_group->getCurrentPose(), gripper_state);
+			
+			//update collisionobject in planningscene
+			if (!pi_->addObject(co)) 
+				return 0;
+			
+			//attach object
+			ROS_INFO_STREAM("attach object");
+			if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_r_gripper_links())) 
+				return 0;
+				
+			ROS_INFO_STREAM("\n\n Picking finished \n");
+			return 1;
+		}
+			
 	}	
 	
 	if (pos_id == pre_poses.size()){
-		ROS_ERROR_STREAM("No pregraspposition reachable for " << object_name);
+		ROS_ERROR_STREAM("No graspposition reachable for " << object_name);
 		return 0;	
 	}
 
@@ -449,49 +497,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 			" in Frame " << goal_msg.goal.pointing_frame.c_str());
 	}
 	
-	//open gripper
-	double gripper_state;
-	if (arm == RIGHT_ARM){
-		gripper_state = gripper_->open_r_gripper();
-	}else{
-		gripper_state = gripper_->open_l_gripper();
-	}
-	
-	//set goal to pose
-	ROS_DEBUG_STREAM("set goalpose");
-	publishTfFrame(co);
-	move_group->setPoseTarget(poses.at(pos_id));
-	pi_->publishMarker(poses.at(pos_id));
-	//move Arm to goalpose
-	ROS_INFO_STREAM("move to goalpose");
-	
-	if (!move_group->move()){
-		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
-		return 0;
-	}
-	
-	//close gripper
-	if (arm == RIGHT_ARM){
-		gripper_state = gripper_->close_r_gripper(force);
-	}else{
-		gripper_state = gripper_->close_l_gripper(force);
-	}
-	
-	//update object sizes to avoid selfkollisions
-	ROS_DEBUG_STREAM("update objectposition in planningscene.");
-	updateGraspedBoxPose(co, graspable_sides, pos_id, gripper_state);
-	updateGraspedCylinderPose(co, move_group->getCurrentPose(), gripper_state);
-	
-	//update collisionobject in planningscene
-	if (!pi_->addObject(co)) 
-		return 0;
-	
-	//attach object
-	ROS_INFO_STREAM("attach object");
-	if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_r_gripper_links())) 
-		return 0;
-		
-	ROS_INFO_STREAM("\n\n Picking finished \n");
 	return 1;
 }
 
