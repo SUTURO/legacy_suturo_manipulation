@@ -5,8 +5,6 @@ project(suturo_manipulation_gripper_controller)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 
-
-
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   roscpp
@@ -111,6 +109,10 @@ add_library(suturo_manipulation_gripper_controller
    src/suturo_manipulation_gripper_controller.cpp
 )
 
+add_executable(suturo_manipulation_gripper_sensor_controller
+   src/suturo_manipulation_gripper_sensor_controller.cpp
+)
+
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_gripper_controller src/suturo_manipulation_gripper_controller.cpp)
 
@@ -125,6 +127,12 @@ add_library(suturo_manipulation_gripper_controller
 # )
 target_link_libraries(
   suturo_manipulation_gripper_controller
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+target_link_libraries(
+  suturo_manipulation_gripper_sensor_controller
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )
