@@ -409,81 +409,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		move_group->setPoseTarget(pre_poses.at(pos_id));
 		pi_->publishMarker(pre_poses.at(pos_id));
 		ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
-		if (move_group->move()){
-			break;	
-		} 
-		pos_id++;
-	}	
-	
-	if (pos_id == pre_poses.size()){
-		ROS_ERROR_STREAM("No pregraspposition reachable for " << object_name);
-		return 0;	
-	}
-
-
-	// Goal Message to move the head
-	control_msgs::PointHeadActionGoal goal_msg;
-
-	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    // Set Goal to pre grasp position
-    goal_msg.header.frame_id = pre_pose.header.frame_id;
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    // Set position from pre grasp
-    goal_msg.goal.target.point.x = pre_pose.pose.position.x;
-    goal_msg.goal.target.point.y = pre_pose.pose.position.y;
-    goal_msg.goal.target.point.z = pre_pose.pose.position.z;
-    goal_msg.goal.pointing_axis.x = 1;
-    goal_msg.goal.pointing_axis.y = 0;
-    goal_msg.goal.pointing_axis.z = 0;
-    goal_msg.goal.pointing_frame = "head_plate_frame";
-    goal_msg.goal.min_duration = ros::Duration(1.0);
-    goal_msg.goal.max_velocity = 10;
-
-    // Publish goal on topic /suturo/head_controller
-    if( !head_publisher ) {
-		ROS_INFO("Publisher invalid!\n");
-	} else {
-
-		head_publisher_->publish(goal_msg);
-		ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x << 
-			", y=" << goal_msg.goal.target.point.y << 
-			", z=" << goal_msg.goal.target.point.z << 
-			" in Frame " << goal_msg.goal.pointing_frame.c_str());
-	}
-	
-	//open gripper
-	double gripper_state;
-	if (arm == RIGHT_ARM){
-		gripper_state = gripper_->open_r_gripper();
-	}else{
-		gripper_state = gripper_->open_l_gripper();
-	}
-	
-	//set goal to pose
-	ROS_DEBUG_STREAM("set goalpose");
-	publishTfFrame(co);
-	move_group->setPoseTarget(poses.at(pos_id));
-	pi_->publishMarker(poses.at(pos_id));
-	//move Arm to goalpose
-	ROS_INFO_STREAM("move to goalpose");
-	
-	if (!move_group->move()){
-		ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
-		return 0;
-	}
-
-	//go into pregraspposition
-
-	int pos_id = 0;
-	while (pos_id < pre_poses.size()){
-		publishTfFrame(co);
-		move_group->setPoseTarget(pre_poses.at(pos_id));
-		pi_->publishMarker(pre_poses.at(pos_id));
-		ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
 		if (!move_group->move()){
 			pos_id++;
 			continue;	
@@ -542,7 +467,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		ROS_ERROR_STREAM("No graspposition reachable for " << object_name);
 		return 0;	
 	}
-	
+
 	return 1;
 }
 
