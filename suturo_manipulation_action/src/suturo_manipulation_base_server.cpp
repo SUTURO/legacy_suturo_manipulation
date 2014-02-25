@@ -1,11 +1,12 @@
 /**
-* This class implements the action server to grasp/drop a object.
+* 
 */
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_baseAction.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
+#include <suturo_manipulation_move_robot.h>
 
 
 using namespace std;
@@ -13,18 +14,28 @@ using namespace std;
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_baseAction> Server;
 
 /**
-* This method grasps or drops a object!
+* 
 */
 void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstPtr& baseGoal, ros::NodeHandle* nh, Server* server_base)
 {	
+	Suturo_Manipulation_Move_Robot moveRobot(nh);
+
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_baseResult r;
 	// Set header
 	r.succ.header.stamp = ros::Time();
 	// Set Answer fot planning to undefined
-	r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 
-	server_base->setSucceeded(r);
+	if (moveRobot.driveBase(baseGoal->ps)) {
+		// Set Answer fot planning to success
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+		server_base->setSucceeded(r);
+	} else {
+		// Set Answer fot planning to success
+		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+		server_base->setSucceeded(r);
+	}
 }
 
 
