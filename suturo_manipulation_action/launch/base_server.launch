@@ -1,0 +1,5 @@
+<launch>
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_base_server" type="suturo_manipulation_base_server" respawn="true" output="screen"/>
+
+</launch>
