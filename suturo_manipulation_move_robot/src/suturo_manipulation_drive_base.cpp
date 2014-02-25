@@ -9,6 +9,7 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* 
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
   loc_sub_ = nh_->subscribe("/amcl_pose", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+  ros::WallDuration(5.0).sleep();
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot(){
@@ -16,6 +17,8 @@ Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot(){
 }
 
 void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& robotPoseFB){
+  ROS_INFO("robotPose_ in CB: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
+
   robotPose_.header.seq = robotPoseFB.header.seq;
   robotPose_.header.stamp = robotPoseFB.header.stamp;
   robotPose_.header.frame_id = robotPoseFB.header.frame_id;
@@ -77,18 +80,21 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
   // TODO: Drehen der Base um 180° einbauen
-  
+  // TODO: Abfangen von 0 0 0 wenn amcl keine Pose gepublished hat
+
   // vorwärtsfahren bis Ziel erreicht wurde
-  while (nh_->ok() && checkXCoord(targetPose)){
-    base_cmd_.linear.x = 0.1;
-    cmd_vel_pub_.publish(base_cmd_);
+  //while (nh_->ok() && checkXCoord(targetPose)){
+  while(nh_->ok()){  
+    ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
+    //base_cmd_.linear.x = 0.1;
+    //cmd_vel_pub_.publish(base_cmd_);
   }
 
   // seitwärtsfahren bis Ziel erreicht wurde
-  while (nh_->ok() && checkYCoord(targetPose)){
-    base_cmd_.linear.y = 0.1;
-    cmd_vel_pub_.publish(base_cmd_);
-  }
+  //while (nh_->ok() && checkYCoord(targetPose)){
+   // base_cmd_.linear.y = 0.1;
+   // cmd_vel_pub_.publish(base_cmd_);
+ // }
  
   // tf::Quaternion q(robotPose_.pose.orientation.x, robotPose_.pose.orientation.y, robotPose_.pose.orientation.z, robotPose_.pose.orientation.w);
 
