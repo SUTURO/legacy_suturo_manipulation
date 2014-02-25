@@ -37,6 +37,8 @@ private:
 	bool checkYCoord(geometry_msgs::PoseStamped targetPose);
 
 	bool checkOrientation(geometry_msgs::PoseStamped targetPose);
+
+	bool checkLocalization();
 	
 public:
 

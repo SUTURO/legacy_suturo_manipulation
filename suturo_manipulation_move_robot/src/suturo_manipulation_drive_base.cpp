@@ -37,6 +37,10 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
   // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
 }
 
+bool Suturo_Manipulation_Move_Robot::checkLocalization(){
+  return (robotPose_.pose.position.x != 0 || robotPose_.pose.position.y != 0 || robotPose_.pose.position.z != 0);
+}
+
 bool Suturo_Manipulation_Move_Robot::checkXCoord(geometry_msgs::PoseStamped targetPose){
   return (robotPose_.pose.position.x+0.2 > targetPose.pose.position.x || robotPose_.pose.position.x-0.2 < targetPose.pose.position.x);
 }
@@ -80,21 +84,22 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
   // TODO: Drehen der Base um 180° einbauen
-  // TODO: Abfangen von 0 0 0 wenn amcl keine Pose gepublished hat
+  while (!checkLocalization()){
+    // Wait for localization...
+  }
 
   // vorwärtsfahren bis Ziel erreicht wurde
-  //while (nh_->ok() && checkXCoord(targetPose)){
-  while(nh_->ok()){  
+  while (nh_->ok() && checkXCoord(targetPose)){
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
-    //base_cmd_.linear.x = 0.1;
-    //cmd_vel_pub_.publish(base_cmd_);
+    base_cmd_.linear.x = 0.1;
+    cmd_vel_pub_.publish(base_cmd_);
   }
 
   // seitwärtsfahren bis Ziel erreicht wurde
-  //while (nh_->ok() && checkYCoord(targetPose)){
-   // base_cmd_.linear.y = 0.1;
-   // cmd_vel_pub_.publish(base_cmd_);
- // }
+  while (nh_->ok() && checkYCoord(targetPose)){
+    base_cmd_.linear.y = 0.1;
+    cmd_vel_pub_.publish(base_cmd_);
+  }
  
   // tf::Quaternion q(robotPose_.pose.orientation.x, robotPose_.pose.orientation.y, robotPose_.pose.orientation.z, robotPose_.pose.orientation.w);
 
