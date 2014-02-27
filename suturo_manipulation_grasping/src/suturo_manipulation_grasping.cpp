@@ -32,18 +32,18 @@ Grasping::~Grasping()
 
 void Grasping::publishTfFrame(moveit_msgs::CollisionObject co)
 {
-
-  ROS_DEBUG_STREAM("publish object frame " << co.id);
-  
-  transform_.setOrigin( tf::Vector3(co.primitive_poses[0].position.x, 
-				co.primitive_poses[0].position.y, co.primitive_poses[0].position.z) );
-				
-  transform_.setRotation( tf::Quaternion(co.primitive_poses[0].orientation.x,
-					co.primitive_poses[0].orientation.y,
-					co.primitive_poses[0].orientation.z,
-					co.primitive_poses[0].orientation.w) );
-					
-  br_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "odom_combined", co.id));
+//~ 
+  //~ ROS_DEBUG_STREAM("publish object frame " << co.id);
+  //~ 
+  //~ transform_.setOrigin( tf::Vector3(co.primitive_poses[0].position.x, 
+				//~ co.primitive_poses[0].position.y, co.primitive_poses[0].position.z) );
+				//~ 
+  //~ transform_.setRotation( tf::Quaternion(co.primitive_poses[0].orientation.x,
+				//~ co.primitive_poses[0].orientation.y,
+				//~ co.primitive_poses[0].orientation.z,
+				//~ co.primitive_poses[0].orientation.w) );
+					//~ 
+  //~ br_.sendTransform(tf::StampedTransform(transform_, ros::Time::now(), "odom_combined", co.id));
 }
 
 

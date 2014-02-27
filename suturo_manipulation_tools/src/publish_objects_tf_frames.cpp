@@ -30,8 +30,6 @@ void publishTfFrame(moveit_msgs::CollisionObject co, tf::Transform transform, tf
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "publish_objects_tf_frames");
-	ros::AsyncSpinner spinner(1);
-	spinner.start();
   ros::NodeHandle n;
 	
 	tf::Transform transform;
@@ -39,12 +37,20 @@ int main(int argc, char **argv)
 
 	Suturo_Manipulation_Planning_Scene_Interface pi(&n);
 	std::vector<moveit_msgs::CollisionObject> cos;
+	std::vector<moveit_msgs::AttachedCollisionObject> acos;
+
   while(true)
   {
     cos = pi.getObjects();
 		for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
 			publishTfFrame(*co, transform, br);
 		}
+		
+    acos = pi.getAttachedObjects();
+		for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator aco = acos.begin(); aco != acos.end(); ++aco){
+			publishTfFrame(aco->object, transform, br);
+		}
+		
 		boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
 
