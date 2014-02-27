@@ -35,6 +35,38 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseWithC
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
   // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
+  
+  double footprint_radius = 0.5; //?
+  
+  //get all collisionobjects
+	std::vector<moveit_msgs::CollisionObject> cos;
+	cos = pi_->getObjects();
+	for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
+		if (co->primitive_poses[0].orientation.x == 0 &&
+			co->primitive_poses[0].orientation.y == 0 &&
+			co->primitive_poses[0].orientation.z == 0 &&
+			co->primitive_poses[0].orientation.w == 1 ){
+			//andere orientierung ist zu schwer ;(
+			//todo? Höhe das Objekte beachten?
+			//transform goalpose into objectframe
+
+			listener_.transformPose(co->header.frame_id, targetPose, targetPose);
+			
+			//check dist
+			if (co->primitives[0].type == shape_msgs::SolidPrimitive::BOX){
+				double x_size = co->primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X];
+				double y_size = co->primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
+				double d_x = abs(co->primitive_poses[0].position.x - targetPose.pose.position.x);
+				double d_y = abs(co->primitive_poses[0].position.y - targetPose.pose.position.y);
+				//~ ROS_INFO_STREAM("d_x " << d_x << " d_y " << d_y);
+				if (d_x <= footprint_radius + x_size/2 && d_y <= footprint_radius + y_size/2) return true;
+			} else if (co->primitives[0].type == shape_msgs::SolidPrimitive::CYLINDER){
+				//unnötig?
+			}
+		}
+	}
+	
+	return false;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkLocalization(){

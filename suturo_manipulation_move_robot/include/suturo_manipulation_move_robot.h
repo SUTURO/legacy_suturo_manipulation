@@ -25,12 +25,15 @@ private:
 
 	geometry_msgs::Twist base_cmd_;
 
+	tf::TransformListener listener_;
+
+
 	/**
 	 * 
 	 */
 	void subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& robotPoseFB);
 
-	bool checkCollision(geometry_msgs::PoseStamped targetPose);
+
 
 	bool checkXCoord(geometry_msgs::PoseStamped targetPose);
 
@@ -61,7 +64,7 @@ public:
 	 */
 	bool driveBase(geometry_msgs::PoseStamped targetPose);
 
-
+	bool checkCollision(geometry_msgs::PoseStamped targetPose);
   
 };
 

@@ -36,7 +36,8 @@ int main(int argc, char** argv)
 	ROS_INFO("set y done!");
 	goal.ps.pose.position.z = atof(argv[3]);
 	ROS_INFO("set z done!");
-	goal.ps.header.frame_id = "/map";;
+	if (argc == 5) goal.ps.header.frame_id = argv[4];
+	else goal.ps.header.frame_id = "/map";
 	// ROS_INFO("set frame done!");
 
 	// send goal
