@@ -12,6 +12,7 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* 
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
   loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+  collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
   ros::WallDuration(5.0).sleep();
 }
 
@@ -112,6 +113,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   // return false;
 }
 
+
 bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped poseInBaseLink){
     try{
       //transform pose to base_link
@@ -123,7 +125,41 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
   return true;
 }
 
+void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan)
+{
+	//~ sensor_msgs::LaserScan base_scan;
+	//~ listener_.transformPose("/base_link", scan, base_scan);
+	for (int i = 0; i < scan.ranges.size(); i++){
+		
+		
+		double alpha = scan.angle_increment*i - 2.2688999176;
+		double a = tan(alpha*M_PI/180);
+		ROS_INFO_STREAM(a);
+		//~ double b = scan.ranges[i];
+		//~ double c = 0.275;//dist base_link to base_laser_link
+		
+		
+		//~ if (base_scan.ranges[i] < 0.3){
+			//~ ROS_INFO_WARN(i << "zu nah!!!!");
+			//~ inCollision_ = true;
+			//~ return;
+			ROS_INFO_STREAM(i << "scan " << scan.ranges[i]);
+		//~ }
+	}
+	
+}
+
+bool Suturo_Manipulation_Move_Robot::getInCollision()
+{
+	return inCollision_;
+}
+
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
+
+	if (checkCollision(targetPose)){
+		 ROS_ERROR_STREAM("targetpose in collision!");
+		 return false;
+	}
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc

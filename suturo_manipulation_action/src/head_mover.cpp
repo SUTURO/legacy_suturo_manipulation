@@ -9,6 +9,7 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_move_robot.h>
+#include <sensor_msgs/LaserScan.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
@@ -133,6 +134,30 @@ void openhand()
 	g.close_l_gripper();
 }
 
+void subscriberCb(const sensor_msgs::LaserScan& scan)
+{
+	//~ sensor_msgs::LaserScan base_scan;
+	//~ listener_.transformPose("/base_link", scan, base_scan);
+	for (int i = 0; i < scan.ranges.size(); i++){
+		
+		
+		double alpha = scan.angle_increment*i;
+		alpha = alpha * 180 / M_PI;
+		double b = scan.ranges[i];
+		double c = 0.275;//dist base_link to base_laser_link
+		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
+		ROS_INFO_STREAM(alpha << " a: " << a << " b: " << b);
+		//~ √(0,234548^2 + 0,275^2 + 2 × 0,234548 × 0,275 × cos(3,05162) )
+		//~ if (base_scan.ranges[i] < 0.3){
+			//~ ROS_INFO_WARN(i << "zu nah!!!!");
+			//~ inCollision_ = true;
+			//~ return;
+			//~ ROS_INFO_STREAM(i << "scan " << scan.ranges[i]);
+		//~ }
+	}
+	
+}
+
 int main(int argc, char **argv)
 {
 	ros::init (argc, argv, "right_arm_pick_place");
@@ -141,19 +166,23 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
+	ros::Subscriber sub_co = nh.subscribe("/base_scan", 50, &subscriberCb);
 	
-	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	putObjects(pub_co);
+	//~ 0,234548^2 + 0,275^2 + 2 × 0,234548 × 0,275 × cos(3,05162)
 	
-	geometry_msgs::PoseStamped targetPose;
-	targetPose.header.frame_id = "/table";
-	targetPose.pose.position.x = atof(argv[1]);
-	targetPose.pose.position.y = atof(argv[2]);
-	targetPose.pose.position.z = atof(argv[3]);
-	targetPose.pose.orientation.w = 1;
-	
-	Suturo_Manipulation_Move_Robot moveRobot(&nh);
-	ROS_INFO_STREAM("collision: " << (moveRobot.checkCollision(targetPose) == true));
+
+	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	//~ putObjects(pub_co);
+	//~ 
+	//~ geometry_msgs::PoseStamped targetPose;
+	//~ targetPose.header.frame_id = "/table";
+	//~ targetPose.pose.position.x = atof(argv[1]);
+	//~ targetPose.pose.position.y = atof(argv[2]);
+	//~ targetPose.pose.position.z = atof(argv[3]);
+	//~ targetPose.pose.orientation.w = 1;
+	//~ 
+	//~ Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	//~ ROS_INFO_STREAM("collision: " << (moveRobot.checkCollision(targetPose) == true));
 	
 	
 	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);

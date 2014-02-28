@@ -11,6 +11,7 @@
 #include <tf/transform_datatypes.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <sensor_msgs/LaserScan.h>
 
 
 class Suturo_Manipulation_Move_Robot{
@@ -22,6 +23,8 @@ private:
 	ros::Publisher cmd_vel_pub_;
 	// Localisation subscriber
 	ros::Subscriber loc_sub_;
+	
+	ros::Subscriber collision_sub_;
 	// robot position
 	geometry_msgs::PoseStamped robotPose_;
 
@@ -31,11 +34,15 @@ private:
 	
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
-
+	bool inCollision_;
+	
 	/**
 	 * 
 	 */
 	void subscriberCb(const geometry_msgs::PoseStamped& robotPoseFB);
+	
+	
+	void subscriberCbLaserScan(const sensor_msgs::LaserScan& scan);
 
 
 
@@ -71,6 +78,8 @@ public:
 	bool driveBase(geometry_msgs::PoseStamped targetPose);
 
 	bool checkCollision(geometry_msgs::PoseStamped targetPose);
+	
+	bool getInCollision();
   
 };
 
