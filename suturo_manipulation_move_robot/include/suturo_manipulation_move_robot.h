@@ -9,6 +9,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
+#include <suturo_manipulation_planning_scene_interface.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 
 class Suturo_Manipulation_Move_Robot{
@@ -26,6 +28,8 @@ private:
 	geometry_msgs::Twist base_cmd_;
 
 	tf::TransformListener listener_;
+	
+	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
 
 	/**

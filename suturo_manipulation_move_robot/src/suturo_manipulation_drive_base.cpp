@@ -5,6 +5,9 @@ using namespace std;
 //! ROS node initialization
 Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* nodehandle){
   nh_ = nodehandle;
+  
+  pi_ = new Suturo_Manipulation_Planning_Scene_Interface(nh_);
+  
   //set up the publisher for the cmd_vel topic
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
