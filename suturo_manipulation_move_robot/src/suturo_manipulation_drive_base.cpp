@@ -112,6 +112,17 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   // return false;
 }
 
+bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped poseInBaseLink){
+    try{
+      //transform pose to base_link
+      listener_.transformPose("/base_link", pose, poseInBaseLink);
+    }catch(...){
+      ROS_INFO("ERROR: Transformation failed.");
+      return false;
+    }
+  return true;
+}
+
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
@@ -122,25 +133,22 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   }
 
   geometry_msgs::PoseStamped targetPoseBaseLink;
-  geometry_msgs::PoseStamped robotPoseBaseLink;
-   try{
-    //transform pose to base_link
-    listener_.transformPose("/base_link", targetPose, targetPoseBaseLink);
-    listener_.transformPose("/base_link", robotPose_, robotPoseBaseLink);
-  }catch(...){
-    ROS_INFO("ERROR: Transformation failed.");
-    return 0;
-  }
+   
+  transformToBaseLink(targetPose, targetPoseBaseLink);
 
-
-  // vorwärtsfahren bis Ziel erreicht wurde
   ROS_INFO_STREAM(targetPose);
   ROS_INFO_STREAM(robotPose_);
-  while (nh_->ok() && checkXCoord(targetPose) && (robotPoseBaseLink.pose.position.x > targetPoseBaseLink.pose.position.x)){
+
+  // vorwärtsfahren bis Ziel erreicht wurde
+  while (nh_->ok() && checkXCoord(targetPose) && (0 < targetPoseBaseLink.pose.position.x)){
+
     ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
+
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
+
+    transformToBaseLink(targetPose, targetPoseBaseLink);
   }
 
   // seitwärtsfahren bis Ziel erreicht wurde
@@ -148,13 +156,16 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
-    if (robotPoseBaseLink.pose.position.y < targetPoseBaseLink.pose.position.y){
+
+    if (0 < targetPoseBaseLink.pose.position.y){
       base_cmd_.linear.y = 0.1;
     } else {
       base_cmd_.linear.y = (-0.1);
     }
     
     cmd_vel_pub_.publish(base_cmd_);
+    
+    transformToBaseLink(targetPose, targetPoseBaseLink);
   }
  
   // tf::Quaternion q(robotPose_.pose.orientation.x, robotPose_.pose.orientation.y, robotPose_.pose.orientation.z, robotPose_.pose.orientation.w);
