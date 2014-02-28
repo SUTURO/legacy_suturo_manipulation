@@ -31,7 +31,7 @@ private:
 	/**
 	 * 
 	 */
-	void subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& robotPoseFB);
+	void subscriberCb(const geometry_msgs::PoseStamped& robotPoseFB);
 
 
 

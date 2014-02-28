@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc != 4)
+	if (argc < 4)
 	{
 		ROS_INFO("arguments: position.x position.y position.z ");
 		return 1;
