@@ -8,7 +8,7 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* 
   //set up the publisher for the cmd_vel topic
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
-  loc_sub_ = nh_->subscribe("/amcl_pose", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+  loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
   ros::WallDuration(5.0).sleep();
 }
 
@@ -16,21 +16,21 @@ Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot(){
   
 }
 
-void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseWithCovarianceStamped& robotPoseFB){
+void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamped& robotPoseFB){
   ROS_INFO("robotPose_ in CB: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
 
   robotPose_.header.seq = robotPoseFB.header.seq;
   robotPose_.header.stamp = robotPoseFB.header.stamp;
   robotPose_.header.frame_id = robotPoseFB.header.frame_id;
 
-  robotPose_.pose.position.x = robotPoseFB.pose.pose.position.x;
-  robotPose_.pose.position.y = robotPoseFB.pose.pose.position.y;
-  robotPose_.pose.position.z = robotPoseFB.pose.pose.position.z;
+  robotPose_.pose.position.x = robotPoseFB.pose.position.x;
+  robotPose_.pose.position.y = robotPoseFB.pose.position.y;
+  robotPose_.pose.position.z = robotPoseFB.pose.position.z;
 
-  robotPose_.pose.orientation.w = robotPoseFB.pose.pose.orientation.w;
-  robotPose_.pose.orientation.x = robotPoseFB.pose.pose.orientation.x;
-  robotPose_.pose.orientation.y = robotPoseFB.pose.pose.orientation.y;
-  robotPose_.pose.orientation.z = robotPoseFB.pose.pose.orientation.z;
+  robotPose_.pose.orientation.w = robotPoseFB.pose.orientation.w;
+  robotPose_.pose.orientation.x = robotPoseFB.pose.orientation.x;
+  robotPose_.pose.orientation.y = robotPoseFB.pose.orientation.y;
+  robotPose_.pose.orientation.z = robotPoseFB.pose.orientation.z;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
@@ -74,11 +74,11 @@ bool Suturo_Manipulation_Move_Robot::checkLocalization(){
 }
 
 bool Suturo_Manipulation_Move_Robot::checkXCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.x+0.2 > targetPose.pose.position.x || robotPose_.pose.position.x-0.2 < targetPose.pose.position.x);
+  return (robotPose_.pose.position.x > targetPose.pose.position.x+0.2 || robotPose_.pose.position.x < targetPose.pose.position.x-0.2);
 }
 
 bool Suturo_Manipulation_Move_Robot::checkYCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.y+0.2 > targetPose.pose.position.y || robotPose_.pose.position.y-0.2 < targetPose.pose.position.y);
+  return (robotPose_.pose.position.y > targetPose.pose.position.y+0.2 || robotPose_.pose.position.y < targetPose.pose.position.y-0.2);
 }
 
 bool Suturo_Manipulation_Move_Robot::checkOrientation(geometry_msgs::PoseStamped targetPose){
@@ -121,7 +121,10 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   }
 
   // vorwärtsfahren bis Ziel erreicht wurde
+  ROS_INFO_STREAM(targetPose);
+  ROS_INFO_STREAM(robotPose_);
   while (nh_->ok() && checkXCoord(targetPose)){
+    ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
@@ -129,6 +132,9 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   // seitwärtsfahren bis Ziel erreicht wurde
   while (nh_->ok() && checkYCoord(targetPose)){
+	  
+    ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
+    ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
     base_cmd_.linear.y = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
   }
