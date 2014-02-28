@@ -31,6 +31,9 @@ private:
 	
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
+	tfScalar robotAngles_;
+	tfScalar targetAngles_;
+
 
 	/**
 	 * 
@@ -43,11 +46,11 @@ private:
 
 	bool checkYCoord(geometry_msgs::PoseStamped targetPose);
 
-	bool checkOrientation(geometry_msgs::PoseStamped targetPose);
+	bool checkOrientation(tf::Quaternion q2, tf::Quaternion q3);
 
 	bool checkLocalization();
 
-	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped poseInBaseLink);
+	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
 	
 public:
 
