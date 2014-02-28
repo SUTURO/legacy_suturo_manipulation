@@ -17,6 +17,8 @@
 class Suturo_Manipulation_Move_Robot{
 	
 private:
+  const static double footprint_radius = 0.5; //0.47
+
 	//! The node handle we'll be using
 	ros::NodeHandle* nh_;
 	//! We will be publishing to the "/base_controller/command" topic to issue commands
