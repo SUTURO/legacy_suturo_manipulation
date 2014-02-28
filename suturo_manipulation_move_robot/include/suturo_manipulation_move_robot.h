@@ -46,6 +46,8 @@ private:
 	bool checkOrientation(geometry_msgs::PoseStamped targetPose);
 
 	bool checkLocalization();
+
+	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped poseInBaseLink);
 	
 public:
 
