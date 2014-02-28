@@ -141,19 +141,16 @@ void subscriberCb(const sensor_msgs::LaserScan& scan)
 	for (int i = 0; i < scan.ranges.size(); i++){
 		
 		
-		double alpha = scan.angle_increment*i;
-		alpha = alpha * 180 / M_PI;
+		double alpha = scan.angle_increment*i + 0.872664626;
 		double b = scan.ranges[i];
-		double c = 0.275;//dist base_link to base_laser_link
+		double c = -0.275;//dist base_link to base_laser_link
 		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
-		ROS_INFO_STREAM(alpha << " a: " << a << " b: " << b);
-		//~ √(0,234548^2 + 0,275^2 + 2 × 0,234548 × 0,275 × cos(3,05162) )
-		//~ if (base_scan.ranges[i] < 0.3){
-			//~ ROS_INFO_WARN(i << "zu nah!!!!");
+		//~ ROS_INFO_STREAM((alpha * 180 / M_PI) << " a: " << a << " b: " << b);
+		if (a < 0.5){
+			ROS_WARN_STREAM(i << "zu nah!!!!");
 			//~ inCollision_ = true;
-			//~ return;
-			//~ ROS_INFO_STREAM(i << "scan " << scan.ranges[i]);
-		//~ }
+			return;
+		}
 	}
 	
 }
@@ -166,10 +163,12 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
-	ros::Subscriber sub_co = nh.subscribe("/base_scan", 50, &subscriberCb);
 	
-	//~ 0,234548^2 + 0,275^2 + 2 × 0,234548 × 0,275 × cos(3,05162)
-	
+	Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	while (true){
+		ROS_INFO_STREAM(moveRobot.getInCollision());
+		ros::WallDuration(0.5).sleep();
+	}
 
 	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	//~ putObjects(pub_co);

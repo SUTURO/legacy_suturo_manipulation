@@ -39,9 +39,7 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamp
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
   // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
-  
-  double footprint_radius = 0.5; //0.47
-  
+    
   //get all collisionobjects
 	std::vector<moveit_msgs::CollisionObject> cos;
 	cos = pi_->getObjects();
@@ -127,26 +125,18 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
 
 void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan)
 {
-	//~ sensor_msgs::LaserScan base_scan;
-	//~ listener_.transformPose("/base_link", scan, base_scan);
 	for (int i = 0; i < scan.ranges.size(); i++){
 		
-		
-		double alpha = scan.angle_increment*i - 2.2688999176;
-		double a = tan(alpha*M_PI/180);
-		ROS_INFO_STREAM(a);
-		//~ double b = scan.ranges[i];
-		//~ double c = 0.275;//dist base_link to base_laser_link
-		
-		
-		//~ if (base_scan.ranges[i] < 0.3){
-			//~ ROS_INFO_WARN(i << "zu nah!!!!");
-			//~ inCollision_ = true;
-			//~ return;
-			ROS_INFO_STREAM(i << "scan " << scan.ranges[i]);
-		//~ }
+		double alpha = scan.angle_increment*i + 0.872664626;
+		double b = scan.ranges[i];
+		double c = -0.275;//dist base_link to base_laser_link
+		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
+		if (a < footprint_radius){
+			inCollision_ = true;
+			return;
+		}
 	}
-	
+	inCollision_ = false;
 }
 
 bool Suturo_Manipulation_Move_Robot::getInCollision()
