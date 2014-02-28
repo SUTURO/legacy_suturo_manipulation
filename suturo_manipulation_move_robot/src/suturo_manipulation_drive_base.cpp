@@ -123,10 +123,22 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     // Wait for localization...
   }
 
+  geometry_msgs::PoseStamped targetPoseBaseLink;
+  geometry_msgs::PoseStamped robotPoseBaseLink;
+   try{
+    //transform pose to base_link
+    listener_.transformPose("/base_link", targetPose, targetPoseBaseLink);
+    listener_.transformPose("/base_link", robotPose_, robotPoseBaseLink);
+  }catch(...){
+    ROS_INFO("ERROR: Transformation failed.");
+    return 0;
+  }
+
+
   // vorwärtsfahren bis Ziel erreicht wurde
   ROS_INFO_STREAM(targetPose);
   ROS_INFO_STREAM(robotPose_);
-  while (nh_->ok() && checkXCoord(targetPose)){
+  while (nh_->ok() && checkXCoord(targetPose) && (robotPoseBaseLink.pose.position.x > targetPoseBaseLink.pose.position.x)){
     ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
     base_cmd_.linear.x = 0.1;
@@ -135,10 +147,15 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   // seitwärtsfahren bis Ziel erreicht wurde
   while (nh_->ok() && checkYCoord(targetPose)){
-	  
+
     ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
     ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
-    base_cmd_.linear.y = 0.1;
+    if (robotPoseBaseLink.pose.position.y < targetPoseBaseLink.pose.position.y){
+      base_cmd_.linear.y = 0.1;
+    } else {
+      base_cmd_.linear.y = (-0.1);
+    }
+    
     cmd_vel_pub_.publish(base_cmd_);
   }
  
