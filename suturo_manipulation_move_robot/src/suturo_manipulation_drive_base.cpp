@@ -12,6 +12,7 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* 
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
   // localisation subscriber
   loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+  collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
   ros::WallDuration(5.0).sleep();
 }
 
@@ -38,9 +39,7 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamp
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
   // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
-  
-  double footprint_radius = 0.5; //0.47
-  
+    
   //get all collisionobjects
 	std::vector<moveit_msgs::CollisionObject> cos;
 	cos = pi_->getObjects();
@@ -136,6 +135,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   // return false;
 }
 
+
 bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink){
   try{
     //transform pose to base_link
@@ -147,11 +147,38 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
   return true;
 }
 
+void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan)
+{
+	for (int i = 0; i < scan.ranges.size(); i++){
+		
+		double alpha = scan.angle_increment*i + 0.872664626;
+		double b = scan.ranges[i];
+		double c = -0.275;//dist base_link to base_laser_link
+		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
+		if (a < footprint_radius){
+			inCollision_ = true;
+			return;
+		}
+	}
+	inCollision_ = false;
+}
+
+bool Suturo_Manipulation_Move_Robot::getInCollision()
+{
+	return inCollision_;
+}
+
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
+
+	if (checkCollision(targetPose)){
+		 ROS_ERROR_STREAM("targetpose in collision!");
+		 return false;
+	}
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
   // TODO: Drehen der Base um 180° einbauen
+  // TODO: Collision Check einbauen
   while (!checkLocalization()){
     // Wait for localization...
   }
@@ -197,76 +224,5 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     transformToBaseLink(targetPose, targetPoseBaseLink);
   }
   ROS_INFO("after y");
-  return true; 
-  // tf::Quaternion q(robotPose_.pose.orientation.x, robotPose_.pose.orientation.y, robotPose_.pose.orientation.z, robotPose_.pose.orientation.w);
-
-  // tf::Matrix3x3 matrix(q);
-  // double roll, pitch, yaw;
-  // matrix.getRPY(roll, pitch, yaw);
-
-  // ROS_INFO("RPY robotPose_: roll: %f, pitch: %f, yaw:%f ", roll, pitch, yaw);
-
-  // rotateBase();
-  
-  // while (nh_->ok() && (checkXCoord(targetPose) && checkYCoord(targetPose) && checkOrientation(targetPose))){
-  //   base_cmd_.linear.x = 0.1;
-  //   cmd_vel_pub_.publish(base_cmd_);
-  // }
-
-  // char cmd[50];
-  // int counter = 0;
-  // while(nh_.ok() ){
-
-  // if(action == "forward"){
-  //   base_cmd.linear.x = 1;
-  //   base_cmd.linear.y = 1;
-  //   cmd_vel_pub_.publish(base_cmd);
-  //   ros::WallDuration(1).sleep();
-  //   counter ++;
-  // } else if (action == "rotate"){
-  //   base_cmd.angular.z = -1;
-  //   cmd_vel_pub_.publish(base_cmd);
-  //   counter ++;
-  // }
-  //   std::cin.getline(cmd, 50);
-  //   if(cmd[0]!='+' && cmd[0]!='l' && cmd[0]!='r' && cmd[0]!='.')
-  //   {
-  //     std::cout << "unknown command:" << cmd << "\n";
-  //     continue;
-  //   }
-
-  //   base_cmd.linear.x = base_cmd.linear.y = base_cmd.angular.z = 0;   
-  //   //move forward
-  //   if(cmd[0]=='+'){
-  //     base_cmd.linear.x = 0.25;
-  //   } 
-  //   //turn left (yaw) and drive forward at the same time
-  //   else if(cmd[0]=='l'){
-  //     base_cmd.angular.z = 0.75;
-  //     base_cmd.linear.x = 0.25;
-  //   } 
-  //   //turn right (yaw) and drive forward at the same time
-  //   else if(cmd[0]=='r'){
-  //     base_cmd.angular.z = -0.75;
-  //     base_cmd.linear.x = 0.25;
-  //   } 
-  //   //quit
-  //   else if(cmd[0]=='.'){
-  //     break;
-  //   }
-    
-  // publish the assembled command
-  // cmd_vel_pub_.publish(base_cmd);
-  // }
-  
+  return true;   
 }
-
-// int main(int argc, char** argv)
-// {
-//   //init the ROS node
-//   ros::init(argc, argv, "robot_driver1");
-//   ros::NodeHandle nh;
-
-//   RobotDriver driver(nh);
-//   driver.driveKeyboard(5, "forward");
-// }
