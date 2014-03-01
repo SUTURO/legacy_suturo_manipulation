@@ -76,9 +76,9 @@ public:
 	 * 
 	 * @return a list of all attached objects
 	 */	
-	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
+	int getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos);
 	
-	std::vector<moveit_msgs::CollisionObject> getObjects();
+	int getObjects(std::vector<moveit_msgs::CollisionObject> &cos);
 
 	/**
 	 * Get an attached object.
