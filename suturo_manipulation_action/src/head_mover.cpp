@@ -163,12 +163,13 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
+	geometry_msgs::PoseStamped p;
+	p.header.frame_id = "/base_footprint";
+	p.pose.position.x = 0.40;
+	p.pose.position.y = 0;
+	p.pose.position.z = 0.625;
+	p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
 	
-	Suturo_Manipulation_Move_Robot moveRobot(&nh);
-	while (true){
-		ROS_INFO_STREAM(moveRobot.getInCollision());
-		ros::WallDuration(0.5).sleep();
-	}
 
 	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	//~ putObjects(pub_co);

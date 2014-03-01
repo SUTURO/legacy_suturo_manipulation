@@ -42,7 +42,8 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
     
   //get all collisionobjects
 	std::vector<moveit_msgs::CollisionObject> cos;
-	cos = pi_->getObjects();
+	
+	if (!pi_->getObjects(cos)) return true;
 	for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
 		if (co->primitive_poses[0].orientation.x == 0 &&
 				co->primitive_poses[0].orientation.y == 0 &&

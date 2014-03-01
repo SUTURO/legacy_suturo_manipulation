@@ -586,7 +586,8 @@ int Grasping::drop(string arm)
 	}
 	
 	//detach any attached objects
-	std::vector<moveit_msgs::AttachedCollisionObject> acos = pi_->getAttachedObjects();
+	std::vector<moveit_msgs::AttachedCollisionObject> acos;
+	if(!pi_->getAttachedObjects(acos)) return 0;
 	
 	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
 		if (it->link_name == eof){

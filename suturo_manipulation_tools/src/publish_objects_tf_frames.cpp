@@ -38,15 +38,17 @@ int main(int argc, char **argv)
 	Suturo_Manipulation_Planning_Scene_Interface pi(&n);
 	std::vector<moveit_msgs::CollisionObject> cos;
 	std::vector<moveit_msgs::AttachedCollisionObject> acos;
-
-  while(true)
+	
+	boost::this_thread::sleep(boost::posix_time::seconds(3));
+	
+	ROS_INFO_STREAM("tf publisher started..........");
+	
+  while(pi.getObjects(cos) && pi.getAttachedObjects(acos))
   {
-    cos = pi.getObjects();
 		for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
 			publishTfFrame(*co, transform, br);
 		}
 		
-    acos = pi.getAttachedObjects();
 		for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator aco = acos.begin(); aco != acos.end(); ++aco){
 			publishTfFrame(aco->object, transform, br);
 		}
