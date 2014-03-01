@@ -45,6 +45,7 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
 	
 	if (!pi_->getObjects(cos)) return true;
 	for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
+		ROS_INFO_STREAM("trololol");
 		if (co->primitive_poses[0].orientation.x == 0 &&
 				co->primitive_poses[0].orientation.y == 0 &&
 				co->primitive_poses[0].orientation.z == 0 &&
@@ -89,7 +90,7 @@ bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion targetOrien
 
 bool Suturo_Manipulation_Move_Robot::rotateBase(){
   geometry_msgs::PoseStamped targetBaseLink;
-  
+  ROS_INFO_STREAM("start shit");
   // 180° rotation
   targetPose_.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
 
@@ -117,9 +118,9 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
 }
 
 bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink){
-  
-  listener_.waitForTransform("/map", "/base_link",
-                              ros::Time::now(), ros::Duration(10.0));
+  //~ ROS_INFO_STREAM("wait");
+  //~ listener_.waitForTransform("/map", "/base_link",
+                              //~ ros::Time::now(), ros::Duration(3.0));
   try{
     //transform pose to base_link
     listener_.transformPose("/base_link", pose, poseInBaseLink);
@@ -154,7 +155,7 @@ bool Suturo_Manipulation_Move_Robot::getInCollision()
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
 
   targetPose_ = targetPose;
-
+ROS_INFO_STREAM("start shit1");
 	if (checkCollision(targetPose_)){
 		 ROS_ERROR_STREAM("targetpose in collision!");
 		 return false;
@@ -163,15 +164,15 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
 
-  while (!checkLocalization()){
-    // Wait for localization...
-  }
-
+  //~ while (!checkLocalization()){
+    //~ // Wait for localization...
+  //~ }
+ROS_INFO_STREAM("loc ok");
   geometry_msgs::PoseStamped targetPoseBaseLink;
    
   transformToBaseLink(targetPose_, targetPoseBaseLink);
 
-
+ROS_INFO_STREAM("transform ok");
   if (targetPoseBaseLink.pose.position.x < 0){
     rotateBase();    
   }

@@ -19,14 +19,14 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstPtr& baseGoal, ros::NodeHandle* nh, Server* server_base)
 {	
 	Suturo_Manipulation_Move_Robot moveRobot(nh);
-
+ROS_INFO_STREAM("got shit");
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_baseResult r;
 	// Set header
 	r.succ.header.stamp = ros::Time();
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
-
+	//~ ROS_INFO_STREAM();
 	if (moveRobot.driveBase(baseGoal->ps)) {
 		// Set Answer fot planning to success
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
