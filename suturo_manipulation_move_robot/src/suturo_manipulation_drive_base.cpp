@@ -75,65 +75,42 @@ bool Suturo_Manipulation_Move_Robot::checkLocalization(){
 }
 
 bool Suturo_Manipulation_Move_Robot::checkXCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.x > targetPose.pose.position.x+0.2 || robotPose_.pose.position.x < targetPose.pose.position.x-0.2);
+  return (robotPose_.pose.position.x > targetPose.pose.position.x+0.05 || robotPose_.pose.position.x < targetPose.pose.position.x-0.05);
 }
 
 bool Suturo_Manipulation_Move_Robot::checkYCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.y > targetPose.pose.position.y+0.2 || robotPose_.pose.position.y < targetPose.pose.position.y-0.2);
+  return (robotPose_.pose.position.y > targetPose.pose.position.y+0.05 || robotPose_.pose.position.y < targetPose.pose.position.y-0.05);
 }
 
-bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion q2, tf::Quaternion q3){
-  // return (robotPose_.pose.orientation.w == targetPose.pose.orientation.w && robotPose_.pose.orientation.x == targetPose.pose.orientation.x && robotPose_.pose.orientation.y == targetPose.pose.orientation.y && robotPose_.pose.orientation.z == targetPose.pose.orientation.z);
-  // return true;
-  ROS_INFO("checkOrientation");
-  return (q3.angle(q2) > 0.1 || q3.angle(q2) < -0.1);
+bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion targetOrientation, tf::Quaternion robotOrientation){
+  return ((robotOrientation.angle(targetOrientation) > 0.05) || (robotOrientation.angle(targetOrientation) < -0.05));
 }
 
-bool Suturo_Manipulation_Move_Robot::rotateBase(){
-  geometry_msgs::PoseStamped rotationPose;
-  geometry_msgs::PoseStamped rotationPoseBaseLink;
-  // if (robotPose_.pose.orientation.w == 0 && robotPose_.pose.orientation.x == 0 && robotPose_.pose.orientation.y == 0 && robotPose_.pose.orientation.z == 0){
-    rotationPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
-    rotationPose.header.frame_id = "/map";
-    
-    transformToBaseLink(rotationPose, rotationPoseBaseLink);
-    ROS_INFO("FUFUFUF");
-    tf::Quaternion q2(rotationPoseBaseLink.pose.orientation.x, rotationPoseBaseLink.pose.orientation.y, rotationPoseBaseLink.pose.orientation.z, rotationPoseBaseLink.pose.orientation.w);
-    tf::Quaternion q3(0, 0, 0, 1);
-    // tf::Quaternion q3(0, 0, 0, 1);
-    // targetAngles_ = q2.getAngle();
-    //  ROS_INFO("targetAngles_ set");
-    // tf::Matrix3x3 m(q2);
-    // double roll, pitch, yaw;
-    // m.getRPY(roll, pitch, yaw);
-    // ROS_INFO("RPY rotationPose: roll: %f, pitch: %f, yaw:%f ", roll, pitch, yaw);
+bool Suturo_Manipulation_Move_Robot::rotateBase(geometry_msgs::PoseStamped target){
+  geometry_msgs::PoseStamped targetBaseLink;
+  
+  // 180° rotation
+  target.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
 
+  transformToBaseLink(target, targetBaseLink);
 
-    // tf::Quaternion q2(robotPose_.pose.orientation.x, robotPose_.pose.orientation.y, robotPose_.pose.orientation.z, robotPose_.pose.orientation.w);
-    // robotAngles_ = q.getAngle();
-    // ROS_INFO("robotAngles_ set");
-    // tf::Matrix3x3 m2(q);
-    // m2.getRPY(roll, pitch, yaw);
-    // ROS_INFO("RPY robotPose: roll: %f, pitch: %f, yaw:%f ", roll, pitch, yaw);
+  tf::Quaternion targetOrientation(targetBaseLink.pose.orientation.x, targetBaseLink.pose.orientation.y, targetBaseLink.pose.orientation.z, targetBaseLink.pose.orientation.w);
+  tf::Quaternion robotOrientation(0, 0, 0, 1);
 
-    while (nh_->ok() && checkOrientation(q2, q3)) {
-      base_cmd_.angular.z = 0.2;     
-      cmd_vel_pub_.publish(base_cmd_);
+  ROS_INFO("Begin to rotate base");
 
-      transformToBaseLink(rotationPose, rotationPoseBaseLink);
-      tf::Quaternion q2(rotationPoseBaseLink.pose.orientation.x, rotationPoseBaseLink.pose.orientation.y, rotationPoseBaseLink.pose.orientation.z, rotationPoseBaseLink.pose.orientation.w);
+  while (nh_->ok() && checkOrientation(targetOrientation, robotOrientation)) {
+    base_cmd_.angular.z = 0.2;     
+    cmd_vel_pub_.publish(base_cmd_);
 
-      ROS_INFO_STREAM("q3 und q2 " << q3.angle(q2));
-      // ROS_INFO_STREAM("targetAngles_ " << targetAngles_);
-      // ROS_INFO_STREAM("robotAngles_ " << robotAngles_);
-    }
-    return true;
-  // } else {
-    // rotationPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, -(M_PI_2), 0);
-    // return true;
-  // }
-
-  // return false;
+    transformToBaseLink(target, targetBaseLink);
+    tf::Quaternion quat_new(targetBaseLink.pose.orientation.x, targetBaseLink.pose.orientation.y, targetBaseLink.pose.orientation.z, targetBaseLink.pose.orientation.w);
+    targetOrientation = quat_new;
+    ROS_INFO_STREAM("checkOrientation: " << checkOrientation(targetOrientation, robotOrientation));
+    ROS_INFO_STREAM("robotOrientation und targetOrientation " << robotOrientation.angle(targetOrientation));
+  }
+  ROS_INFO("rotateBase done");
+  return true;
 }
 
 
@@ -178,8 +155,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
-  // TODO: Drehen der Base um 180° einbauen
-  // TODO: Collision Check einbauen
+
   while (!checkLocalization()){
     // Wait for localization...
   }
@@ -188,32 +164,28 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
    
   transformToBaseLink(targetPose, targetPoseBaseLink);
 
-  ROS_INFO_STREAM(targetPose);
-  ROS_INFO_STREAM(robotPose_);
 
-  ROS_INFO("before rotateBase");
-  rotateBase();
+  if (targetPoseBaseLink.pose.position.x < 0){
+    rotateBase(targetPose);    
+  }
 
-  ROS_INFO("after rotateBase");
-  // vorwärtsfahren bis Ziel erreicht wurde
-  while (nh_->ok() && checkXCoord(targetPose) && (0 < targetPoseBaseLink.pose.position.x)){
 
-    // ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
-    // ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
+  ROS_INFO("begin to move vorward");
+  // move vorward
+  // while (nh_->ok() && checkXCoord(targetPose) && (0 < targetPoseBaseLink.pose.position.x) && !getInCollision()){
+  while (nh_->ok() && checkXCoord(targetPose) && !getInCollision()){
 
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
 
     transformToBaseLink(targetPose, targetPoseBaseLink);
   }
-  ROS_INFO("after x");
 
-  // seitwärtsfahren bis Ziel erreicht wurde
-  while (nh_->ok() && checkYCoord(targetPose)){
+  ROS_INFO("move forward done, begin to move sideward");
+  // move sideward
+  while (nh_->ok() && checkYCoord(targetPose) && !getInCollision()){
 
-    // ROS_INFO("targetPose_ in driveBase: x: %f, y: %f, z: %f", targetPose.pose.position.x, targetPose.pose.position.y, targetPose.pose.position.z);
-    // ROS_INFO("robotPose_ in driveBase: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
-
+    // check if goal is on the left or right side
     if (0 < targetPoseBaseLink.pose.position.y){
       base_cmd_.linear.y = 0.1;
     } else {
@@ -224,6 +196,10 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     
     transformToBaseLink(targetPose, targetPoseBaseLink);
   }
-  ROS_INFO("after y");
+  ROS_INFO("move sideward done, target should be arrived");
+
+  ROS_INFO_STREAM(targetPose);
+  ROS_INFO_STREAM(robotPose_);
+
   return true;   
 }
