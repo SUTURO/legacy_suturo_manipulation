@@ -3,8 +3,6 @@
 
 #include <ros/ros.h>
 
-#include <tf/transform_broadcaster.h>
-
 #include <moveit/move_group_interface/move_group.h>
 
 #include <suturo_manipulation_gripper_controller.h>
@@ -34,8 +32,6 @@ private:
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
-	tf::TransformBroadcaster br_;
-  tf::Transform transform_;
   ros::Publisher* head_publisher_;
 
 	/**
@@ -103,26 +99,19 @@ private:
 	/**
 	 * Adds Grasppositions possible from above and below, to the vactors.
 	 */
-	void addBoxGraspPositionsZ(double z, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+	void addGraspPositionsZ(double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 				
-	/**
-	 * Adds Grasppositions possible from the left and right, to the vactors.
-	 */				
-	void addBoxGraspPositionsY(double y, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
-				std::vector<geometry_msgs::PoseStamped> &pre_poses);
-
 	/**
 	 * Adds Grasppositions possible from the front and behind, to the vactors.
-	 */
-	void addBoxGraspPositionsX(double x, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
-				std::vector<geometry_msgs::PoseStamped> &pre_poses);
-				
-	void addCylinderGraspPositionsX(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+	 */				
+	void addGraspPositionsX(double h, double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 	
-	
-	void addCylinderGraspPositionsY(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
+	/**
+	 * Adds Grasppositions possible from left and right, to the vactors.
+	 */	
+	void addGraspPositionsY(double h, double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 	
 public:

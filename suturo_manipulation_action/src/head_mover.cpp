@@ -163,16 +163,16 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
-	geometry_msgs::PoseStamped p;
-	p.header.frame_id = "/base_footprint";
-	p.pose.position.x = 0.40;
-	p.pose.position.y = 0;
-	p.pose.position.z = 0.625;
-	p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
+	//~ geometry_msgs::PoseStamped p;
+	//~ p.header.frame_id = "/base_footprint";
+	//~ p.pose.position.x = 0.40;
+	//~ p.pose.position.y = 0;
+	//~ p.pose.position.z = 0.625;
+	//~ p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
 	
 
-	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	//~ putObjects(pub_co);
+	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	putObjects(pub_co);
 	//~ 
 	//~ geometry_msgs::PoseStamped targetPose;
 	//~ targetPose.header.frame_id = "/table";
