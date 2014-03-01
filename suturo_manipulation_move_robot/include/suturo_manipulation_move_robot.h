@@ -36,9 +36,9 @@ private:
 	
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
 
+	geometry_msgs::PoseStamped targetPose_;
+
 	bool inCollision_;
-	tfScalar robotAngles_;
-	tfScalar targetAngles_;
 	/**
 	 * 
 	 * 
@@ -107,7 +107,7 @@ public:
 	 * @return true, if successfull
 	 * 					false, otherwise
 	 */
-	bool rotateBase(geometry_msgs::PoseStamped target);
+	bool rotateBase();
 
   /**
 	 * 
