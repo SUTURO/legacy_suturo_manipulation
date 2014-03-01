@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * This program publishes boxes in to the planningscene, that were published by the perception,
+ * in order to test grasping without the knowledge.
+ */
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "perception_client");
@@ -58,16 +63,6 @@ int main(int argc, char **argv)
 				co.primitive_poses[0] = cubi.pose;
 				
 				pi.addObject(co);
-				
-        //~ std::stringstream vfh_ss;
-        //~ for (int j = 0; j < clusterSrv.response.perceivedObjs[i].c_vfh_estimation.size(); j++)
-        //~ {
-          //~ vfh_ss << clusterSrv.response.perceivedObjs[i].c_vfh_estimation.at(j);
-          //~ vfh_ss << " ";
-        //~ }
-        //~ ROS_INFO("VFH Estimation: %s ", vfh_ss.str().c_str());
-        //~ ROS_INFO("SVM Result: %s ", clusterSrv.response.perceivedObjs[i].c_svm_result.c_str());
-        //~ ROS_INFO("Pose: %d ", clusterSrv.response.perceivedObjs[i].c_pose);
       }
       ROS_INFO_STREAM("------------------------------------------------------------");
     }

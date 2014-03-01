@@ -11,6 +11,10 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 
+/**
+ * This Programm publishes a tf frame into every collisionobject and attached object.
+ */
+
 void publishTfFrame(moveit_msgs::CollisionObject co, tf::Transform transform, tf::TransformBroadcaster br)
 {
 
@@ -45,10 +49,12 @@ int main(int argc, char **argv)
 	
   while(pi.getObjects(cos) && pi.getAttachedObjects(acos))
   {
+		//publish tf frame in every collisionobject
 		for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
 			publishTfFrame(*co, transform, br);
 		}
 		
+		//publish tf frame in every attachedobject
 		for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator aco = acos.begin(); aco != acos.end(); ++aco){
 			publishTfFrame(aco->object, transform, br);
 		}

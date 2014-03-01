@@ -206,6 +206,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::s
 	
 	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
 		if (it->link_name == link_name){
+			//if the link names are the same, the object is attached to it
 			return 1;
 		} 
 	}
@@ -221,22 +222,22 @@ void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::
   goal_marker.header.stamp = ros::Time();
   goal_marker.ns = "suturo_manipulation";
   goal_marker.id = 0;
-  goal_marker.type = visualization_msgs::Marker::SPHERE;
+  goal_marker.type = visualization_msgs::Marker::ARROW;
   goal_marker.action = visualization_msgs::Marker::ADD;
-  goal_marker.pose.position.x = pose.pose.position.x;
-  goal_marker.pose.position.y = pose.pose.position.y;
-  goal_marker.pose.position.z = pose.pose.position.z;
-  goal_marker.pose.orientation.x = 0.0;
-  goal_marker.pose.orientation.y = 0.0;
-  goal_marker.pose.orientation.z = 0.0;
-  goal_marker.pose.orientation.w = 1.0;
+  goal_marker.pose = pose.pose;
+  
   goal_marker.scale.x = 0.1;
   goal_marker.scale.y = 0.1;
   goal_marker.scale.z = 0.1;
+  
   goal_marker.color.a = 1.0;
-  goal_marker.color.r = 0.0;
-  goal_marker.color.g = 1.0;
+  goal_marker.color.r = 1.0;
+  goal_marker.color.g = 0.0;
   goal_marker.color.b = 0.0;
+  
+  goal_marker.scale.z = 0.04;
+  goal_marker.scale.y = 0.04;
+  goal_marker.scale.x = 0.09;
   vis_pub_.publish( goal_marker );   
 }  
 

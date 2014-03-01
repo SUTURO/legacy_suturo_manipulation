@@ -41,22 +41,57 @@ private:
 	tfScalar targetAngles_;
 	/**
 	 * 
+	 * 
 	 */
 	void subscriberCb(const geometry_msgs::PoseStamped& robotPoseFB);
 	
-	
+	/**
+	 * Calculates the distance between the base_foortprint and the environment.
+	 * If the distance is smaller then "footprint_radius", "inCollision_" will 
+	 * be set to true;
+	 * 
+	 */	
 	void subscriberCbLaserScan(const sensor_msgs::LaserScan& scan);
 
 
-
+  /**
+	 * 
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool checkXCoord(geometry_msgs::PoseStamped targetPose);
 
+  /**
+	 * 
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool checkYCoord(geometry_msgs::PoseStamped targetPose);
 
+  /**
+	 * 
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool checkOrientation(tf::Quaternion q2, tf::Quaternion q3);
 
+  /**
+	 * 
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool checkLocalization();
 
+  /**
+	 * 
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
 	
 public:
@@ -66,22 +101,33 @@ public:
 
 	~Suturo_Manipulation_Move_Robot();
  	
- 	/**
+  /**
 	 * 
 	 * 
-	 * @return 
+	 * @return true, if successfull
+	 * 					false, otherwise
 	 */
 	bool rotateBase();
 
-	/**
+  /**
 	 * 
 	 * 
-	 * @return 
+	 * @return true, if successfull
+	 * 					false, otherwise
 	 */
 	bool driveBase(geometry_msgs::PoseStamped targetPose);
 
+  /**
+	 * Checks if the given pose is in collision with a collisionobject.
+	 * 
+	 * @return true, if successfull
+	 * 					false, otherwise
+	 */
 	bool checkCollision(geometry_msgs::PoseStamped targetPose);
-	
+
+	/**
+	 * @return inCollision_
+	 */	
 	bool getInCollision();
   
 };
