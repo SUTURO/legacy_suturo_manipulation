@@ -107,7 +107,7 @@ public:
 	 * @return true, if successfull
 	 * 					false, otherwise
 	 */
-	bool rotateBase();
+	bool rotateBase(geometry_msgs::PoseStamped target);
 
   /**
 	 * 
