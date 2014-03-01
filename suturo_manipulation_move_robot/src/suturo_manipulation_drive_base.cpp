@@ -50,9 +50,10 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
 				co->primitive_poses[0].orientation.z == 0 &&
 				co->primitive_poses[0].orientation.w == 1 ){
 			//andere orientierung ist zu schwer ;(
+			//aber alle gegenstände von knowledge werden mit dieser orientierung gepublisht
 			//todo? Höhe das Objekte beachten?
+			
 			//transform goalpose into objectframe
-
 			listener_.transformPose(co->header.frame_id, targetPose, targetPose);
 			
 			//check dist
