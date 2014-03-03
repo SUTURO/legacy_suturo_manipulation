@@ -131,6 +131,7 @@ add_executable(test_move_base_client src/test_move_base_client.cpp)
 add_executable(test_head_subscriber src/test_head_subscriber.cpp)
 add_executable(head_mover src/head_mover.cpp)
 add_executable(spawn_planningscene src/spawn_planningscene.cpp)
+add_executable(spawn_planningscene_gazebo src/spawn_planningscene_gazebo.cpp)
 
 
 
@@ -152,6 +153,7 @@ add_dependencies(test_head_client suturo_manipulation_msgs ${catkin_EXPORTED_TAR
 add_dependencies(test_move_base_client suturo_manipulation_msgs suturo_manipulation_move_robot ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_head_subscriber suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(spawn_planningscene suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(spawn_planningscene_gazebo suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against
@@ -183,6 +185,11 @@ target_link_libraries(
 
 target_link_libraries(
   spawn_planningscene
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  spawn_planningscene_gazebo
   ${catkin_LIBRARIES}
 )
 
