@@ -121,6 +121,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
 
 	// set Pose
+	pi.publishMarker(transformedPose);
 	group.setPoseTarget(transformedPose);
 	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
 			group.getCurrentPose().pose.position.y,
