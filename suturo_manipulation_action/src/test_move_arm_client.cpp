@@ -16,9 +16,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc != 6)
+	if (argc != 10)
 	{
-		ROS_INFO("arguments: x y z frame arm");
+		ROS_INFO("arguments: x y z; x y z w frame arm");
 		return 1;
 	}
 	// create goal
@@ -39,9 +39,19 @@ int main(int argc, char** argv)
 	ROS_INFO("set y done!");
 	goal.ps.pose.position.z = atof(argv[3]);
 	ROS_INFO("set z done!");
-	goal.ps.header.frame_id = argv[4];;
+	
+	goal.ps.pose.orientation.x = atof(argv[4]);
+	ROS_INFO("set orientation x done!");
+	goal.ps.pose.orientation.y = atof(argv[5]);
+	ROS_INFO("set orientation y done!");
+	goal.ps.pose.orientation.z = atof(argv[6]);
+	ROS_INFO("set orientation z done!");
+	goal.ps.pose.orientation.w = atof(argv[7]);
+	ROS_INFO("set orientation w done!");
+
+	goal.ps.header.frame_id = argv[8];
 	ROS_INFO("set frame done!");
-	goal.bodypart.bodyPart = argv[5];
+	goal.bodypart.bodyPart = argv[9];
 	ROS_INFO("set arm done!");
 
 	// send goal
