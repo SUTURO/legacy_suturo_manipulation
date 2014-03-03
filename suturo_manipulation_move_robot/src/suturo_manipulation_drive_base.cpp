@@ -45,7 +45,6 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
 	
 	if (!pi_->getObjects(cos)) return true;
 	for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co){
-		ROS_INFO_STREAM("trololol");
 		if (co->primitive_poses[0].orientation.x == 0 &&
 				co->primitive_poses[0].orientation.y == 0 &&
 				co->primitive_poses[0].orientation.z == 0 &&
