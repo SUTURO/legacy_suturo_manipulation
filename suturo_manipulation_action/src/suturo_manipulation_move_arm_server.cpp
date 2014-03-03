@@ -115,18 +115,10 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	move_group_interface::MoveGroup group(arm);
 	
 	// set orientation
-	// transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
-	// transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
-	// transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
-	// transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
-	if(arm == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
-		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
-	} else {
-		transformedPose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -(M_PI_2));
-	}
-	
-
-
+	transformedPose.pose.orientation.x = goal->ps.pose.orientation.x;
+	transformedPose.pose.orientation.y = goal->ps.pose.orientation.y;
+	transformedPose.pose.orientation.z = goal->ps.pose.orientation.z;
+	transformedPose.pose.orientation.w = goal->ps.pose.orientation.w;
 
 	// set Pose
 	group.setPoseTarget(transformedPose);
