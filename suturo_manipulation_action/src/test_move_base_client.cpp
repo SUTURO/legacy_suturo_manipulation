@@ -4,6 +4,7 @@
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_baseAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <tf/transform_listener.h>
 
 typedef actionlib::SimpleActionClient<suturo_manipulation_msgs::suturo_manipulation_baseAction> Client;
 
@@ -13,9 +14,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc < 4)
+	if (argc < 5)
 	{
-		ROS_INFO("arguments: position.x position.y position.z ");
+		ROS_INFO("arguments: position.x position.y position.z 0/1 ");
 		return 1;
 	}
 	// create goal
@@ -41,6 +42,12 @@ int main(int argc, char** argv)
 	goal.ps.pose.orientation.z = 0;
 	goal.ps.pose.orientation.w = 1;
 	// if (argc == 5) goal.ps.header.frame_id = argv[4];
+	if (atof(argv[4]) == 0){
+		goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);		
+	} else {
+		goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+	}
+	// targetPose_.header.frame_id = "/map";
 	goal.ps.header.frame_id = "/map";
 	ROS_INFO("set frame done!");
 

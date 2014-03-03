@@ -38,6 +38,10 @@ private:
 
 	geometry_msgs::PoseStamped targetPose_;
 
+	geometry_msgs::PoseStamped targetPoseBaseLink_;
+
+	double twist_;
+
 	bool inCollision_;
 	/**
 	 * 
@@ -93,6 +97,8 @@ private:
 	 * 					false, otherwise
 	 */
 	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
+
+	bool calculateTwist(tf::Quaternion targetOrientation);
 	
 public:
 
