@@ -28,7 +28,7 @@ void publishTfFrame(moveit_msgs::CollisionObject co, tf::Transform transform, tf
 					co.primitive_poses[0].orientation.z,
 					co.primitive_poses[0].orientation.w) );
 					
-  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom_combined", co.id));
+  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), co.header.frame_id, co.id));
 }
 
 int main(int argc, char **argv)
@@ -56,6 +56,7 @@ int main(int argc, char **argv)
 		
 		//publish tf frame in every attachedobject
 		for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator aco = acos.begin(); aco != acos.end(); ++aco){
+			ROS_DEBUG_STREAM(*aco);
 			publishTfFrame(aco->object, transform, br);
 		}
 		
