@@ -119,16 +119,16 @@ private:
 	* @return true, if successfull
 	*					false, otherwise
 	*/
-	bool calculateYTwist(tf::Quaternion* targetOrientation);
+	// bool calculateYTwist(tf::Quaternion* targetOrientation);
 
 	/**
 	* Checks if the robot is nearer to the home orientation
-	* as to the reverse home orientation.
+	* as to the reverse home ori.
 	*
 	* @return true, if correct
 	*					false, otherwise
 	*/
-	bool robotNearerAtHome();
+	// bool robotNearerAtHome();
 
 	/**
 	* Checks if the target is nearer to the reverse home
@@ -137,7 +137,7 @@ private:
 	* @return true, if correct
 	*					false, otherwise
 	*/
-	bool targetNearerAt180();
+	// bool targetNearerAt180();
 
 	/**
 	* Checks if the target is nearer to the cable orientation
@@ -147,7 +147,7 @@ private:
 	* @return true, if correct
 	*					false, otherwise
 	*/
-	bool targetNearerAtCableAndNearerTo180();
+	// bool targetNearerAtCableAndNearerTo180();
 
 	/**
 	* Checks if the robot is nearer to the home orientation
@@ -157,7 +157,7 @@ private:
 	* @return true, if correct
 	*					false, otherwise
 	*/
-	bool robotNearerToHomeAndBetweenHomeAnd90();
+	// bool robotNearerToHomeAndBetweenHomeAnd90();
 
 	/**
 	* Checks if the robot is nearer to the home orientation
@@ -166,7 +166,7 @@ private:
 	* @return true, if correct
 	*					false, otherwise
 	*/
-	bool robotNearerAtCableAndNearerToHome();
+	// bool robotNearerAtCableAndNearerToHome();
 	
 public:
 

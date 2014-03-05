@@ -72,90 +72,123 @@ bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrie
   return !((targetOrientation->angle(robotOrientation) > 0.01) || (targetOrientation->angle(robotOrientation) < -0.01));
 }
 
-bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuaternion){
-  // TODO: Schöner machen
+// bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuaternion){
+//   // TODO: Schöner machen
 
-  geometry_msgs::PoseStamped homePose;
-  geometry_msgs::PoseStamped homePose180;
-  geometry_msgs::PoseStamped cablePose;
-  geometry_msgs::PoseStamped homePoseBase;
-  geometry_msgs::PoseStamped homePose180Base;
-  geometry_msgs::PoseStamped cablePoseBase;
+//   geometry_msgs::PoseStamped homePose;
+//   geometry_msgs::PoseStamped homePose180;
+//   geometry_msgs::PoseStamped cablePose;
+//   geometry_msgs::PoseStamped homePoseBase;
+//   geometry_msgs::PoseStamped homePose180Base;
+//   geometry_msgs::PoseStamped cablePoseBase;
 
-  geometry_msgs::PoseStamped robotPose;
+//   geometry_msgs::PoseStamped robotPose;
 
-  homePose.header.frame_id = "/map";
-  homePose180.header.frame_id = "/map";
-  cablePose.header.frame_id = "/map";
+//   homePose.header.frame_id = "/map";
+//   homePose180.header.frame_id = "/map";
+//   cablePose.header.frame_id = "/map";
 
-  homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-  homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
-  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+//   homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+//   homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+//   cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
 
-  transformToBaseLink(homePose, homePoseBase);
-  transformToBaseLink(homePose180, homePose180Base);
-  transformToBaseLink(cablePose, cablePoseBase);
+//   transformToBaseLink(homePose, homePoseBase);
+//   transformToBaseLink(homePose180, homePose180Base);
+//   transformToBaseLink(cablePose, cablePoseBase);
 
-  tf::Quaternion robotPoseQuaternion(0,0,0,1);
-  tf::Quaternion homePoseOuaternion(homePoseBase.pose.orientation.x, homePoseBase.pose.orientation.y, homePoseBase.pose.orientation.z, homePoseBase.pose.orientation.w);
-  tf::Quaternion homePose180Quaternion(homePose180Base.pose.orientation.x, homePose180Base.pose.orientation.y, homePose180Base.pose.orientation.z, homePose180Base.pose.orientation.w);
-  tf::Quaternion cablePoseQuaternion(cablePoseBase.pose.orientation.x, cablePoseBase.pose.orientation.y, cablePoseBase.pose.orientation.z, cablePoseBase.pose.orientation.w);
+//   tf::Quaternion robotPoseQuaternion(0,0,0,1);
+//   tf::Quaternion homePoseOuaternion(homePoseBase.pose.orientation.x, homePoseBase.pose.orientation.y, homePoseBase.pose.orientation.z, homePoseBase.pose.orientation.w);
+//   tf::Quaternion homePose180Quaternion(homePose180Base.pose.orientation.x, homePose180Base.pose.orientation.y, homePose180Base.pose.orientation.z, homePose180Base.pose.orientation.w);
+//   tf::Quaternion cablePoseQuaternion(cablePoseBase.pose.orientation.x, cablePoseBase.pose.orientation.y, cablePoseBase.pose.orientation.z, cablePoseBase.pose.orientation.w);
 
-  homeToCable_ = homePose180Quaternion.angle(cablePoseQuaternion);
+//   homeToCable_ = homePose180Quaternion.angle(cablePoseQuaternion);
 
-  targetToHome_ = targetQuaternion->angle(homePoseOuaternion);
-  targetToHome180_ = targetQuaternion->angle(homePose180Quaternion);
+//   targetToHome_ = targetQuaternion->angle(homePoseOuaternion);
+//   targetToHome180_ = targetQuaternion->angle(homePose180Quaternion);
   
-  robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
-  robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
+//   robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
+//   robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
 
-  robotToCable_ = robotPoseQuaternion.angle(cablePoseQuaternion);
-  targetToCable_ = targetQuaternion->angle(cablePoseQuaternion);
+//   robotToCable_ = robotPoseQuaternion.angle(cablePoseQuaternion);
+//   targetToCable_ = targetQuaternion->angle(cablePoseQuaternion);
 
-  if ( (robotNearerAtHome() || targetNearerAtCableAndNearerTo180()) && (targetNearerAt180() || robotNearerToHomeAndBetweenHomeAnd90()) || robotNearerAtCableAndNearerToHome() ) {
-    yTwist_ = 0.2;
-    return true;
-  } else {
-    yTwist_ = -0.2;
-    return true;
-  }
-  return false;
-}
+//   if ( (robotNearerAtHome() || targetNearerAtCableAndNearerTo180()) && (targetNearerAt180() || robotNearerToHomeAndBetweenHomeAnd90()) || robotNearerAtCableAndNearerToHome() ) {
+//     yTwist_ = 0.2;
+//     return true;
+//   } else {
+//     yTwist_ = -0.2;
+//     return true;
+//   }
+//   return false;
+// }
 
-bool Suturo_Manipulation_Move_Robot::robotNearerAtHome(){
-  return robotToHome_ < robotToHome180_;
-}
+// bool Suturo_Manipulation_Move_Robot::robotNearerAtHome(){
+//   return robotToHome_ < robotToHome180_;
+// }
 
-bool Suturo_Manipulation_Move_Robot::targetNearerAt180(){
-  return targetToHome180_ < targetToHome_;
-}
+// bool Suturo_Manipulation_Move_Robot::targetNearerAt180(){
+//   return targetToHome180_ < targetToHome_;
+// }
 
-bool Suturo_Manipulation_Move_Robot::targetNearerAtCableAndNearerTo180(){
-  return (robotToHome_ > robotToHome180_ && robotToCable_ > targetToCable_ && targetToHome_ > targetToHome180_);
-}
+// bool Suturo_Manipulation_Move_Robot::targetNearerAtCableAndNearerTo180(){
+//   return (robotToHome_ > robotToHome180_ && robotToCable_ > targetToCable_ && targetToHome_ > targetToHome180_);
+// }
 
-bool Suturo_Manipulation_Move_Robot::robotNearerToHomeAndBetweenHomeAnd90(){
-  return (targetToHome_ > robotToHome_ && homeToCable_ < targetToCable_);
-}
+// bool Suturo_Manipulation_Move_Robot::robotNearerToHomeAndBetweenHomeAnd90(){
+//   return (targetToHome_ > robotToHome_ && homeToCable_ < targetToCable_);
+// }
 
-bool Suturo_Manipulation_Move_Robot::robotNearerAtCableAndNearerToHome(){
-  return (robotToCable_ < targetToCable_ && robotToHome_ < robotToHome180_);
-}
+// bool Suturo_Manipulation_Move_Robot::robotNearerAtCableAndNearerToHome(){
+//   return (robotToCable_ < targetToCable_ && robotToHome_ < robotToHome180_);
+// }
 
 bool Suturo_Manipulation_Move_Robot::rotateBase(){
 
   tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   tf::Quaternion robotOrientation(0, 0, 0, 1);
 
-  // ROS_INFO("Begin to rotate base");
+  ROS_INFO("Begin to rotate base");
 
-  // calculateYTwist(targetQuaternion);
+  // // calculateYTwist(targetQuaternion);
 
-  while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion)) {
-    // base_cmd_.angular.z = yTwist_;
-    base_cmd_.angular.z = 0.2;
+  // while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion)) {
+  //   // base_cmd_.angular.z = yTwist_;
+  //   base_cmd_.angular.z = 0.2;
+  //   cmd_vel_pub_.publish(base_cmd_);
+
+  //   transformToBaseLink(targetPose_, targetPoseBaseLink_);
+  //   targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+  // }
+
+  geometry_msgs::PoseStamped cablePose;
+  geometry_msgs::PoseStamped cablePoseBaseLink;
+
+  cablePose.header.frame_id = "/map";
+
+  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI+M_PI_2);
+
+  transformToBaseLink(cablePose, cablePoseBaseLink);
+
+  tf::Quaternion robotPoseQuaternion(0,0,0,1);
+  tf::Quaternion cableOuaternion(cablePoseBaseLink.pose.orientation.x, cablePoseBaseLink.pose.orientation.y, cablePoseBaseLink.pose.orientation.z, cablePoseBaseLink.pose.orientation.w);
+
+  double robotToCable = cableOuaternion.angle(robotPoseQuaternion);
+  double robotToCableNew;
+  double twist = 0.2;
+  bool check = false;
+
+  while(nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion)){
+    base_cmd_.angular.z = twist;
     cmd_vel_pub_.publish(base_cmd_);
 
+    transformToBaseLink(cablePose, cablePoseBaseLink);
+    tf::Quaternion cableOuaternion(cablePoseBaseLink.pose.orientation.x, cablePoseBaseLink.pose.orientation.y, cablePoseBaseLink.pose.orientation.z, cablePoseBaseLink.pose.orientation.w);
+    robotToCableNew = cableOuaternion.angle(robotPoseQuaternion);
+
+    if (!check && robotToCable > robotToCableNew+0.05) {
+      twist = -0.2;
+      check = true;
+    }
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
     targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   }
