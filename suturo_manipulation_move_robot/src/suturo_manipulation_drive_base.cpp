@@ -87,32 +87,46 @@ bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion targetOrien
   return ((robotOrientation.angle(targetOrientation) > 0.01) || (robotOrientation.angle(targetOrientation) < -0.01));
 }
 
-bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetOrientation){
+bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuaternion){
   // TODO: Schöner machen
 
-  geometry_msgs::PoseStamped f;
-  geometry_msgs::PoseStamped s;
-  geometry_msgs::PoseStamped f_b;
-  geometry_msgs::PoseStamped s_b;
+  geometry_msgs::PoseStamped homePose;
+  geometry_msgs::PoseStamped homePose180;
+  geometry_msgs::PoseStamped cablePose;
+  geometry_msgs::PoseStamped robotPose;
 
-  f.header.frame_id = "/map";
-  s.header.frame_id = "/map";
+  homePose.header.frame_id = "/map";
+  homePose180.header.frame_id = "/map";
+  cablePose.header.frame_id = "/map";
 
-  f.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-  s.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+  homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_4);
 
-  transformToBaseLink(f, f_b);
-  transformToBaseLink(s, s_b);
+  transformToBaseLink(homePose, homePose);
+  transformToBaseLink(homePose180, homePose180);
+  transformToBaseLink(cablePose, cablePose);
+  transformToBaseLink(robotPose_, robotPose);
 
-  tf::Quaternion firstOrientation(f_b.pose.orientation.x, f_b.pose.orientation.y, f_b.pose.orientation.z, f_b.pose.orientation.w);
-  tf::Quaternion secondOrientation(s_b.pose.orientation.x, s_b.pose.orientation.y, s_b.pose.orientation.z, s_b.pose.orientation.w);
+  tf::Quaternion robotPoseQuaternion(robotPose.pose.orientation.x, robotPose.pose.orientation.y, robotPose.pose.orientation.z, robotPose.pose.orientation.w);
+  tf::Quaternion homePoseOuaternion(homePose.pose.orientation.x, homePose.pose.orientation.y, homePose.pose.orientation.z, homePose.pose.orientation.w);
+  tf::Quaternion homePose180Quaternion(homePose180.pose.orientation.x, homePose180.pose.orientation.y, homePose180.pose.orientation.z, homePose180.pose.orientation.w);
+  tf::Quaternion cablePoseQuaternion(cablePose.pose.orientation.x, cablePose.pose.orientation.y, cablePose.pose.orientation.z, cablePose.pose.orientation.w);
 
-  int first = firstOrientation.angle(targetOrientation);
-  int sec = secondOrientation.angle(targetOrientation);
+  int homeToCable = homePose.angle(cablePoseQuaternion);
+
+  int targetToHome = targetQuaternion.angle(homePoseOuaternion);
+  int targetToHome180 = targetQuaternion.angle(homePose180Quaternion);
+  
+  int robotToHome = robotPoseQuaternion.angle(homePoseOuaternion);
+  int robotToHome180 = robotPoseQuaternion.angle(homePose180Quaternion);
+
+  int robotToCable = robotPoseQuaternion.angle(cablePoseQuaternion);
+  int targetToCable = targetQuaternion.angle(cablePoseQuaternion);
 
 
   ROS_INFO_STREAM("check rotate: " << (first - sec));
-  if ((first - sec) > 0) {
+  if (homeToCable < robotToCable && targetToCable < homeToCable && (targetToHome180 < targetToHome && robotToHome < robotToHome180)) {
     twist_ = 0.2;
     return true;
   } else {
@@ -126,20 +140,20 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
 
   transformToBaseLink(targetPose_, targetPoseBaseLink_);
 
-  tf::Quaternion targetOrientation(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+  tf::Quaternion targetQuaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   tf::Quaternion robotOrientation(0, 0, 0, 1);
 
   ROS_INFO("Begin to rotate base");
 
-  calculateTwist(targetOrientation);
+  calculateTwist(targetQuaternion);
 
-  while (nh_->ok() && checkOrientation(targetOrientation, robotOrientation)) {
+  while (nh_->ok() && checkOrientation(targetQuaternion, robotOrientation)) {
     base_cmd_.angular.z = twist_;     
     cmd_vel_pub_.publish(base_cmd_);
 
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
     tf::Quaternion quat_new(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-    targetOrientation = quat_new;
+    targetQuaternion = quat_new;
 
   }
   ROS_INFO("rotateBase done");
