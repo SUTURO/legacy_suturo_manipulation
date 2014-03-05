@@ -60,19 +60,19 @@ bool Suturo_Manipulation_Move_Robot::checkLocalization(){
   return (robotPose_.pose.position.x != 0 || robotPose_.pose.position.y != 0 || robotPose_.pose.position.z != 0);
 }
 
-bool Suturo_Manipulation_Move_Robot::checkXCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.x > targetPose.pose.position.x+0.01 || robotPose_.pose.position.x < targetPose.pose.position.x-0.01);
+bool Suturo_Manipulation_Move_Robot::xCoordArrived(geometry_msgs::PoseStamped targetPose){
+  return !(robotPose_.pose.position.x > targetPose.pose.position.x+0.01 || robotPose_.pose.position.x < targetPose.pose.position.x-0.01);
 }
 
-bool Suturo_Manipulation_Move_Robot::checkYCoord(geometry_msgs::PoseStamped targetPose){
-  return (robotPose_.pose.position.y > targetPose.pose.position.y+0.01 || robotPose_.pose.position.y < targetPose.pose.position.y-0.01);
+bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped targetPose){
+  return !(robotPose_.pose.position.y > targetPose.pose.position.y+0.01 || robotPose_.pose.position.y < targetPose.pose.position.y-0.01);
 }
 
-bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion* targetOrientation, tf::Quaternion robotOrientation){
-  return ((targetOrientation->angle(robotOrientation) > 0.01) || (targetOrientation->angle(robotOrientation) < -0.01));
+bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion* targetOrientation){
+  return !((targetOrientation->angle(robotOrientation) > 0.01) || (targetOrientation->angle(robotOrientation) < -0.01));
 }
 
-bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion* targetQuaternion){
+bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuaternion){
   // TODO: Schöner machen
 
   geometry_msgs::PoseStamped homePose;
@@ -101,25 +101,45 @@ bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion* targetQuater
   tf::Quaternion homePose180Quaternion(homePose180Base.pose.orientation.x, homePose180Base.pose.orientation.y, homePose180Base.pose.orientation.z, homePose180Base.pose.orientation.w);
   tf::Quaternion cablePoseQuaternion(cablePoseBase.pose.orientation.x, cablePoseBase.pose.orientation.y, cablePoseBase.pose.orientation.z, cablePoseBase.pose.orientation.w);
 
-  int homeToCable = homePose180Quaternion.angle(cablePoseQuaternion);
+  homeToCable_ = homePose180Quaternion.angle(cablePoseQuaternion);
 
-  int targetToHome = targetQuaternion->angle(homePoseOuaternion);
-  int targetToHome180 = targetQuaternion->angle(homePose180Quaternion);
+  targetToHome_ = targetQuaternion->angle(homePoseOuaternion);
+  targetToHome180_ = targetQuaternion->angle(homePose180Quaternion);
   
-  int robotToHome = robotPoseQuaternion.angle(homePoseOuaternion);
-  int robotToHome180 = robotPoseQuaternion.angle(homePose180Quaternion);
+  robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
+  robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
 
-  int robotToCable = robotPoseQuaternion.angle(cablePoseQuaternion);
-  int targetToCable = targetQuaternion->angle(cablePoseQuaternion);
+  robotToCable_ = robotPoseQuaternion.angle(cablePoseQuaternion);
+  targetToCable_ = targetQuaternion->angle(cablePoseQuaternion);
 
-  if ((robotToHome < robotToHome180 || (robotToHome > robotToHome180 && robotToCable > targetToCable && targetToHome > targetToHome180)) && (targetToHome180 < targetToHome || (targetToHome > robotToHome && homeToCable < targetToCable)) || (robotToCable < targetToCable && robotToHome < robotToHome180)) {
-    twist_ = 0.2;
+  if ( (robotNearerAtHome() || targetNearerAtCableAndNearerTo180()) && (targetNearerAt180() || robotNearerToHomeAndBetweenHomeAnd90()) || robotNearerAtCableAndNearerToHome() ) {
+    yTwist_ = 0.2;
     return true;
   } else {
-    twist_ = -0.2;
+    yTwist_ = -0.2;
     return true;
   }
   return false;
+}
+
+bool Suturo_Manipulation_Move_Robot::robotNearerAtHome(){
+  return robotToHome_ < robotToHome180_;
+}
+
+bool Suturo_Manipulation_Move_Robot::targetNearerAt180(){
+  return targetToHome180_ < targetToHome_;
+}
+
+bool Suturo_Manipulation_Move_Robot::targetNearerAtCableAndNearerTo180(){
+  return (robotToHome_ > robotToHome180_ && robotToCable_ > targetToCable_ && targetToHome_ > targetToHome180_);
+}
+
+bool Suturo_Manipulation_Move_Robot::robotNearerToHomeAndBetweenHomeAnd90(){
+  return (targetToHome_ > robotToHome_ && homeToCable_ < targetToCable_);
+}
+
+bool Suturo_Manipulation_Move_Robot::robotNearerAtCableAndNearerToHome(){
+  return (robotToCable_ < targetToCable_ && robotToHome_ < robotToHome180_);
 }
 
 bool Suturo_Manipulation_Move_Robot::rotateBase(){
@@ -129,10 +149,10 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
 
   ROS_INFO("Begin to rotate base");
 
-  calculateTwist(targetQuaternion);
+  calculateYTwist(targetQuaternion);
 
-  while (nh_->ok() && checkOrientation(targetQuaternion, robotOrientation)) {
-    base_cmd_.angular.z = twist_;
+  while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion)) {
+    base_cmd_.angular.z = yTwist_;
     cmd_vel_pub_.publish(base_cmd_);
 
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
@@ -153,8 +173,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
   return true;
 }
 
-void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan)
-{
+void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan){
 	for (int i = 0; i < scan.ranges.size(); i++){
 		
 		//cosinussatz um abstand zu mittelpunk zu berechnen
@@ -171,8 +190,7 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
 	inCollision_ = false;
 }
 
-bool Suturo_Manipulation_Move_Robot::getInCollision()
-{
+bool Suturo_Manipulation_Move_Robot::getInCollision(){
 	return inCollision_;
 }
 
@@ -204,7 +222,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   
   ROS_INFO("begin to move vorward");
   // move vorward
-  while (nh_->ok() && checkXCoord(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
+  while (nh_->ok() && !xCoordArrived(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
 
@@ -213,7 +231,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   ROS_INFO("move forward done, begin to move sideward");
   // move sideward
-  while (nh_->ok() && checkYCoord(targetPose_) && !getInCollision()){
+  while (nh_->ok() && !yCoordArrived(targetPose_) && !getInCollision()){
 
     base_cmd_.linear.x = 0;
 
