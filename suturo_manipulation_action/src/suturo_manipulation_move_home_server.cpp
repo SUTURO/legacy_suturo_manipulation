@@ -10,20 +10,17 @@
 #include <moveit/move_group_interface/move_group.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
-#include <control_msgs/PointHeadActionGoal.h>
-#include <pr2_controllers_msgs/PointHeadActionResult.h>
 #include <tf/transform_listener.h>
+#include <suturo_manipulation_msgs/torque_values.h>
 
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server;
 
-control_msgs::PointHeadActionGoal goal_msg;
-
-bool moved = 0;
-
 // TF Listener...
 tf::TransformListener* listener = NULL;
+
+double yaw_error, pitch_error;
 
 // Transform the incoming frame to /torso_lift_link for the head move controller
 int transform(geometry_msgs::PoseStamped &goalPose,
@@ -52,34 +49,6 @@ int transform(geometry_msgs::PoseStamped &goalPose,
 	}
 
     return 1;
-}
-
-template <class T>
-/**
-* This method formats a ros time to a string.
-* Thanks to https://code.ros.org/trac/ros/ticket/2030
-*/
-std::string time_to_str(T ros_t)
-{
-  char buf[1024]      = "";
-  time_t t = ros_t.sec;
-  struct tm *tms = localtime(&t);
-  strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
-  return std::string(buf);
-}
-
-/**
-* This method is a callback method and checks, if the head moved.
-*/
-void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
-{
-  if(goal_msg.goal_id.id == msg.status.goal_id.id){
-  	ROS_INFO("Get result!");
-  	moved = 1;
-  } else {
-  	ROS_INFO("No result!");
-  	moved = 0;
-  }
 }
 
 /**
@@ -122,7 +91,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			server_home->setAborted(r);
 		}
 
-        // Publish goal on topic /suturo/head_controller
+        // Publish goal on topic /suturo/head_controller_goal_point
         if( !publisher ) {
         	ROS_INFO("Publisher invalid!\n");
         	r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
@@ -130,8 +99,29 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
         } else {
             publisher->publish(transformedPose);
             ROS_INFO("Home Goal published!\n");
-            r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-            server_home->setSucceeded(r);
+
+            int counter = 0;
+            int duration = 0;
+			
+			// Checking of the goal is reached
+			while (duration < 3 && counter < 15){
+				if (yaw_error < 5 && pitch_error < 1){
+					duration++;
+					ROS_INFO_STREAM("Duration Home Server: " <<  duration);
+				} else {
+					duration = 0;
+					ROS_INFO("Over Treshold home Server");
+				}
+				ros::Duration(1).sleep();
+				counter++;
+			}
+			if(counter >= 15){
+				r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+				server_home->setAborted(r);
+			} else {
+				r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+				server_home->setSucceeded(r);			
+			}
         }
 	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){
 		// bodypart = left_arm
@@ -197,6 +187,14 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 	}
 }
 
+/**
+* This callback saves the current controller_errors in class variables
+*/
+void subCallback(const suturo_manipulation_msgs::torque_valuesConstPtr& msg){
+	yaw_error = msg->yaw_error;
+	pitch_error = msg->pitch_error;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -206,6 +204,9 @@ int main(int argc, char** argv)
 
 	// Publish a topic for the head controller
     ros::Publisher head_publisher = n.advertise<geometry_msgs::PoseStamped>("/suturo/head_controller_goal_point", 1000);
+
+    // Subscribe to the controller_errors
+	ros::Subscriber sub = n.subscribe("/suturo/head_controller/torque_values", 1000, subCallback);
 
 	// create the action server
 	Server server_home(n, "suturo_man_move_home_server", boost::bind(&moveHome, _1, &head_publisher, &server_home), false);

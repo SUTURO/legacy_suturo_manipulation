@@ -74,11 +74,23 @@ public:
 	/**
 	 * Get a list of all attached objects.
 	 * 
-	 * @return a list of all attached objects
+	 * @return 1, if successfull
+	 * 					0, otherwise
 	 */	
-	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
+// <<<<<<< HEAD
+// 	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
 	
-	std::vector<moveit_msgs::CollisionObject> getObjects();
+// 	std::vector<moveit_msgs::CollisionObject> getObjects();
+// =======
+	int getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos);
+
+	/**
+	 * Get a list of all collision objects.
+	 * 
+	 * @return 1, if successfull
+	 * 					0, otherwise
+	 */		
+	int getObjects(std::vector<moveit_msgs::CollisionObject> &cos);
 
 	/**
 	 * Get an attached object.
@@ -96,6 +108,10 @@ public:
 	 */	
 	int isAnObjectAttachedToArm(std::string link_name);
 	
+	/**
+	 * Publish a Marker for rviz at the given pose.
+	 * 
+	 */	
 	void publishMarker(geometry_msgs::PoseStamped pose);
 };
      

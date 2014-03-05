@@ -15,6 +15,9 @@
 
   <node pkg="suturo_manipulation_action" name="suturo_manipulation_grasping_action_server" type="suturo_manipulation_grasping_action_server" respawn="true" output="screen"/>
 
-  <include file="$(find suturo_manipulation_pr2_movit)/launch/moveit_rviz.launch"/>
+   <node pkg="suturo_manipulation_action" name="suturo_manipulation_base_server" type="suturo_manipulation_base_server" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_tools" name="suturo_manipulation_tf_publisher" type="publish_objects_tf_frames" respawn="true" output="screen"/>
 
 </launch>

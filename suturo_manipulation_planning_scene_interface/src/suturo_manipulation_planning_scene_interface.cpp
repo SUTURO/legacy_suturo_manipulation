@@ -49,7 +49,8 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	}
   
   //check if another object is attached to this link
-  std::vector<moveit_msgs::AttachedCollisionObject> acos = getAttachedObjects();
+  std::vector<moveit_msgs::AttachedCollisionObject> acos;
+  if (!getAttachedObjects(acos)) return 0;
 	
 	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
 		if (it->object.id == object_name){
@@ -118,13 +119,26 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObject(std::string object_n
 	return 1;
 }
 
-std::vector<moveit_msgs::AttachedCollisionObject> Suturo_Manipulation_Planning_Scene_Interface::getAttachedObjects()
+int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos)
 {
 	moveit_msgs::PlanningScene ps;
 	if (!getPlanningScene(ps)){
 		ROS_ERROR_STREAM("Failed to get planningscene");
+		return 0;
 	}
-	return ps.robot_state.attached_collision_objects;
+	acos = ps.robot_state.attached_collision_objects;
+	return 1;
+}
+
+int Suturo_Manipulation_Planning_Scene_Interface::getObjects(std::vector<moveit_msgs::CollisionObject> &cos)
+{
+	moveit_msgs::PlanningScene ps;
+	if (!getPlanningScene(ps)){
+		ROS_ERROR_STREAM("Failed to get planningscene");
+		return 0;
+	}
+	cos = ps.world.collision_objects;
+	return 1;
 }
 
 std::vector<moveit_msgs::CollisionObject> Suturo_Manipulation_Planning_Scene_Interface::getObjects()
@@ -138,7 +152,8 @@ std::vector<moveit_msgs::CollisionObject> Suturo_Manipulation_Planning_Scene_Int
 
 int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string object_name, moveit_msgs::AttachedCollisionObject &co)
 {
-	std::vector<moveit_msgs::AttachedCollisionObject> attachedObjects = getAttachedObjects();
+	std::vector<moveit_msgs::AttachedCollisionObject> attachedObjects;
+	if (!getAttachedObjects(attachedObjects)) return 0;
 	//search for object_name in the list of attached objects
 	for (int i = 0; i < attachedObjects.size(); i++){
 		co = attachedObjects.at(i);
@@ -195,10 +210,12 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::string link_name)
 {
 	
-	std::vector<moveit_msgs::AttachedCollisionObject> acos = getAttachedObjects();
+	std::vector<moveit_msgs::AttachedCollisionObject> acos;
+	if(!getAttachedObjects(acos)) return 0;
 	
 	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
 		if (it->link_name == link_name){
+			//if the link names are the same, the object is attached to it
 			return 1;
 		} 
 	}
@@ -214,22 +231,41 @@ void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::
   goal_marker.header.stamp = ros::Time();
   goal_marker.ns = "suturo_manipulation";
   goal_marker.id = 0;
-  goal_marker.type = visualization_msgs::Marker::SPHERE;
+// <<<<<<< HEAD
+//   goal_marker.type = visualization_msgs::Marker::SPHERE;
+//   goal_marker.action = visualization_msgs::Marker::ADD;
+//   goal_marker.pose.position.x = pose.pose.position.x;
+//   goal_marker.pose.position.y = pose.pose.position.y;
+//   goal_marker.pose.position.z = pose.pose.position.z;
+//   goal_marker.pose.orientation.x = 0.0;
+//   goal_marker.pose.orientation.y = 0.0;
+//   goal_marker.pose.orientation.z = 0.0;
+//   goal_marker.pose.orientation.w = 1.0;
+//   goal_marker.scale.x = 0.1;
+//   goal_marker.scale.y = 0.1;
+//   goal_marker.scale.z = 0.1;
+//   goal_marker.color.a = 1.0;
+//   goal_marker.color.r = 0.0;
+//   goal_marker.color.g = 1.0;
+//   goal_marker.color.b = 0.0;
+// =======
+  goal_marker.type = visualization_msgs::Marker::ARROW;
   goal_marker.action = visualization_msgs::Marker::ADD;
-  goal_marker.pose.position.x = pose.pose.position.x;
-  goal_marker.pose.position.y = pose.pose.position.y;
-  goal_marker.pose.position.z = pose.pose.position.z;
-  goal_marker.pose.orientation.x = 0.0;
-  goal_marker.pose.orientation.y = 0.0;
-  goal_marker.pose.orientation.z = 0.0;
-  goal_marker.pose.orientation.w = 1.0;
+  goal_marker.pose = pose.pose;
+  
   goal_marker.scale.x = 0.1;
   goal_marker.scale.y = 0.1;
   goal_marker.scale.z = 0.1;
+  
   goal_marker.color.a = 1.0;
-  goal_marker.color.r = 0.0;
-  goal_marker.color.g = 1.0;
+  goal_marker.color.r = 1.0;
+  goal_marker.color.g = 0.0;
   goal_marker.color.b = 0.0;
+  
+  goal_marker.scale.z = 0.04;
+  goal_marker.scale.y = 0.04;
+  goal_marker.scale.x = 0.09;
+
   vis_pub_.publish( goal_marker );   
 }  
 

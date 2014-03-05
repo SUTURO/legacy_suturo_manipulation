@@ -12,10 +12,10 @@
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
 	//real
-	//~ double tischposiZ = 0.86;
+	double tischposiZ = 0.81;
 	//gazebo
 	 //~ roslaunch pr2_teleop_general pr2_teleop_general_keyboard_bodyhead_only.launch
-	double tischposiZ = 0.57;
+	//~ double tischposiZ = 0.57;
 
 void putObjects(ros::Publisher pub_co)
 {
@@ -47,7 +47,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0845;//tischposiZ + 0.0716;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(M_PI_2, M_PI_2, M_PI_2);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
   
 
   // remove table
@@ -97,7 +97,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.0985;//tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
 
   co.id = "corny";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
@@ -113,7 +113,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03 + 0.0715;//tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
   
   ros::WallDuration(2.0).sleep();
 }

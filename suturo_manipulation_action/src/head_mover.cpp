@@ -8,6 +8,8 @@
 #include <shape_tools/solid_primitive_dims.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_planning_scene_interface.h>
+#include <suturo_manipulation_move_robot.h>
+#include <sensor_msgs/LaserScan.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
@@ -60,7 +62,10 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.x = 0.85;
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = tischposiZ/2;
-	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
+	co.primitive_poses[0].orientation.x = 0;  
+	co.primitive_poses[0].orientation.y = 0;  
+	co.primitive_poses[0].orientation.z = 0;  
+	co.primitive_poses[0].orientation.w = 1;  
   pub_co.publish(co);
 
   // remove table
@@ -75,9 +80,17 @@ void putObjects(ros::Publisher pub_co)
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.03;
   co.primitive_poses[0].position.x = 0.85;
   co.primitive_poses[0].position.y = 0;
-  co.primitive_poses[0].position.z = tischposiZ+0.015;
-	co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
-  pub_co.publish(co);
+
+ //  co.primitive_poses[0].position.z = tischposiZ+0.015;
+	// co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);  
+ //  pub_co.publish(co);
+
+  co.primitive_poses[0].position.z = tischposiZ+0.015;	
+  co.primitive_poses[0].orientation.x = 0;  
+	co.primitive_poses[0].orientation.y = 0;  
+	co.primitive_poses[0].orientation.z = 0;  
+	co.primitive_poses[0].orientation.w = 1;
+	pub_co.publish(co);
 
   // remove box1
   co.id = "cafetfilter";
@@ -126,6 +139,27 @@ void openhand()
 	g.close_l_gripper();
 }
 
+void subscriberCb(const sensor_msgs::LaserScan& scan)
+{
+	//~ sensor_msgs::LaserScan base_scan;
+	//~ listener_.transformPose("/base_link", scan, base_scan);
+	for (int i = 0; i < scan.ranges.size(); i++){
+		
+		
+		double alpha = scan.angle_increment*i + 0.872664626;
+		double b = scan.ranges[i];
+		double c = -0.275;//dist base_link to base_laser_link
+		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
+		//~ ROS_INFO_STREAM((alpha * 180 / M_PI) << " a: " << a << " b: " << b);
+		if (a < 0.5){
+			ROS_WARN_STREAM(i << "zu nah!!!!");
+			//~ inCollision_ = true;
+			return;
+		}
+	}
+	
+}
+
 int main(int argc, char **argv)
 {
 	ros::init (argc, argv, "right_arm_pick_place");
@@ -134,16 +168,48 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh;
 	
+	// ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	// putObjects(pub_co);
+	
+	// Gripper g;
+
+	// if (argc == 2){
+	// 	g.open_l_gripper();
+	// } else if (argc == 3) {
+	// 	g.close_l_gripper();
+	// }
+	//~ geometry_msgs::PoseStamped p;
+	//~ p.header.frame_id = "/base_footprint";
+	//~ p.pose.position.x = 0.40;
+	//~ p.pose.position.y = 0;
+	//~ p.pose.position.z = 0.625;
+	//~ p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
+	
+
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
+	//~ 
+	//~ geometry_msgs::PoseStamped targetPose;
+	//~ targetPose.header.frame_id = "/table";
+	//~ targetPose.pose.position.x = atof(argv[1]);
+	//~ targetPose.pose.position.y = atof(argv[2]);
+	//~ targetPose.pose.position.z = atof(argv[3]);
+	//~ targetPose.pose.orientation.w = 1;
+	//~ 
+	//~ Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	//~ ROS_INFO_STREAM("collision: " << (moveRobot.checkCollision(targetPose) == true));
 	
-	Gripper g;
-
-	if (argc == 2){
-		g.open_l_gripper();
-	} else if (argc == 3) {
-		g.close_l_gripper();
-	}
+	
+	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	//~ putObjects(pub_co);
+	//~ 
+	//~ Gripper g;
+//~ 
+	//~ if (argc == 2){
+		//~ g.open_l_gripper();
+	//~ } else if (argc == 3) {
+		//~ g.close_l_gripper();
+	//~ }
 	
 //~ move_group_interface::MoveGroup group("right_arm");
 	//~ geometry_msgs::PoseStamped p;
