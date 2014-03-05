@@ -147,12 +147,13 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   tf::Quaternion robotOrientation(0, 0, 0, 1);
 
-  ROS_INFO("Begin to rotate base");
+  // ROS_INFO("Begin to rotate base");
 
-  calculateYTwist(targetQuaternion);
+  // calculateYTwist(targetQuaternion);
 
   while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion)) {
-    base_cmd_.angular.z = yTwist_;
+    // base_cmd_.angular.z = yTwist_;
+    base_cmd_.angular.z = 0.2;
     cmd_vel_pub_.publish(base_cmd_);
 
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
