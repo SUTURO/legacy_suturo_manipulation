@@ -70,6 +70,7 @@ bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped ta
 
 bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion* targetOrientation){
   return !((targetOrientation->angle(robotOrientation) > 0.01) || (targetOrientation->angle(robotOrientation) < -0.01));
+  // return !((robotOrientation.angle(&targetOrientation) > 0.01) || (robotOrientation.angle(&targetOrientation) < -0.01));
 }
 
 // bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuaternion){
@@ -191,6 +192,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
     }
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
     targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+    ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
   }
   ROS_INFO("rotateBase done");
   return true;
