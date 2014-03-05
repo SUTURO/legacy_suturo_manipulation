@@ -254,7 +254,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   transformToBaseLink(targetPose_, targetPoseBaseLink_);
   ROS_INFO("transform drivebase");
 
-  rotateBase();    
+  // rotateBase();    
   base_cmd_.angular.z = 0;
   
   ROS_INFO("begin to move vorward");
