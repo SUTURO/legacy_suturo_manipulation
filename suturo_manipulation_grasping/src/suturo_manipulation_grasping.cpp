@@ -177,68 +177,6 @@ int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<
 }
 
 
-void Grasping::addCylinderGraspPositionsX(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
-				std::vector<geometry_msgs::PoseStamped> &pre_poses)
-{				
-	geometry_msgs::PoseStamped pose;
-	geometry_msgs::PoseStamped pre_pose;
-	pose.header.frame_id = frame_id;
-	pre_pose.header.frame_id = frame_id;
-	
-	//grasp from the front
-	pose.pose.position.x = 0 - Gripper::GRIPPER_DEPTH - r - 0.005;
-	pose.pose.position.y = 0;
-	pose.pose.position.z = h;
-	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-	
-	pre_pose = pose;
-	pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
-	
-	poses.push_back(pose);
-	pre_poses.push_back(pre_pose);
-	
-	//grasp from behind
-	pose.pose.position.x = Gripper::GRIPPER_DEPTH + r + 0.005;
-	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
-	
-	pre_pose = pose;
-	pre_pose.pose.position.x += Gripper::GRIPPER_DEPTH;
-	
-	poses.push_back(pose);
-	pre_poses.push_back(pre_pose);	
-}
-
-void Grasping::addCylinderGraspPositionsY(double h, double r, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
-				std::vector<geometry_msgs::PoseStamped> &pre_poses)
-{				
-	geometry_msgs::PoseStamped pose;
-	geometry_msgs::PoseStamped pre_pose;
-	pose.header.frame_id = frame_id;
-	pre_pose.header.frame_id = frame_id;
-	
-	//grasp from the left
-	pose.pose.position.x = 0;
-	pose.pose.position.y = Gripper::GRIPPER_DEPTH + r + 0.005;
-	pose.pose.position.z = h;
-	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_2);
-	
-	pre_pose = pose;
-	pre_pose.pose.position.y += Gripper::GRIPPER_DEPTH;
-	
-	poses.push_back(pose);
-	pre_poses.push_back(pre_pose);
-	
-	//grasp from right
-	pose.pose.position.y = 0 - Gripper::GRIPPER_DEPTH - r - 0.005;
-	pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
-	
-	pre_pose = pose;
-	pre_pose.pose.position.y -= Gripper::GRIPPER_DEPTH;
-	
-	poses.push_back(pose);
-	pre_poses.push_back(pre_pose);	
-}
-
 int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses)
 {		
@@ -260,16 +198,6 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 		return 0;
 	}
 	
-// <<<<<<< HEAD
-// 	publishTfFrame(co);
-	
-// 	//number of height points where we can grasp
-// 	int grasp_pose_count = (h / cylinder_safty_dist) -1;
-// 	for (int i = 1; i <= grasp_pose_count; i++){
-// 		 addCylinderGraspPositionsX((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
-// 		 addCylinderGraspPositionsY((h/2)-(cylinder_safty_dist*i), r, co.id, poses, pre_poses);
-// =======
-
 	//number of height points where we can grasp
 	int grasp_pose_count = (h / cylinder_safty_dist) -1;
 	for (int i = 1; i <= grasp_pose_count; i++){
@@ -406,10 +334,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 
 		//set goal to pose
 		ROS_DEBUG_STREAM("set goalpose");
-// <<<<<<< HEAD
-// 		publishTfFrame(co);
-// =======
-// >>>>>>> origin/move_robot
 		move_group->setPoseTarget(poses.at(pos_id));
 		pi_->publishMarker(poses.at(pos_id));
 		//move Arm to goalpose
@@ -418,8 +342,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		if (!move_group->move()){
 			pos_id++;	
 			continue;
-			//~ ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
-			//~ return 0;
 		}	else {
 			//close gripper
 			if (arm == RIGHT_ARM){
