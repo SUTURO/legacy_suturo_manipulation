@@ -12130,7 +12130,7 @@
       <static>0</static>
       <link name='link'>
         <inertial>
-          <mass>0.090000</mass>
+          <mass>0.050000</mass>
           <inertia>
             <ixx>0.000580</ixx>
             <ixy>0.000000</ixy>
@@ -12190,7 +12190,7 @@
       <static>0</static>
       <link name='link'>
         <inertial>
-          <mass>0.090000</mass>
+          <mass>0.050000</mass>
           <inertia>
             <ixx>0.000580</ixx>
             <ixy>0.000000</ixy>
@@ -12250,7 +12250,7 @@
       <static>0</static>
       <link name='link'>
         <inertial>
-          <mass>0.090000</mass>
+          <mass>0.050000</mass>
           <inertia>
             <ixx>0.000580</ixx>
             <ixy>0.000000</ixy>
