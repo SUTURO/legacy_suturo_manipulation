@@ -198,7 +198,6 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 		return 0;
 	}
 	
-
 	//number of height points where we can grasp
 	int grasp_pose_count = (h / cylinder_safty_dist) -1;
 	for (int i = 1; i <= grasp_pose_count; i++){
@@ -343,8 +342,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		if (!move_group->move()){
 			pos_id++;	
 			continue;
-			//~ ROS_ERROR_STREAM("Failed to move to " << object_name << " at: " << poses.at(pos_id));
-			//~ return 0;
 		}	else {
 			//close gripper
 			if (arm == RIGHT_ARM){
