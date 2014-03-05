@@ -90,49 +90,49 @@ bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion targetOrien
 bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuaternion){
   // TODO: Schöner machen
 
-  geometry_msgs::PoseStamped homePose;
-  geometry_msgs::PoseStamped homePose180;
-  geometry_msgs::PoseStamped cablePose;
-  geometry_msgs::PoseStamped robotPose;
+  // geometry_msgs::PoseStamped homePose;
+  // geometry_msgs::PoseStamped homePose180;
+  // geometry_msgs::PoseStamped cablePose;
+  // geometry_msgs::PoseStamped robotPose;
 
-  homePose.header.frame_id = "/map";
-  homePose180.header.frame_id = "/map";
-  cablePose.header.frame_id = "/map";
+  // homePose.header.frame_id = "/map";
+  // homePose180.header.frame_id = "/map";
+  // cablePose.header.frame_id = "/map";
 
-  homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-  homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
-  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_4);
+  // homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  // homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+  // cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_4);
 
-  transformToBaseLink(homePose, homePose);
-  transformToBaseLink(homePose180, homePose180);
-  transformToBaseLink(cablePose, cablePose);
-  transformToBaseLink(robotPose_, robotPose);
+  // transformToBaseLink(homePose, homePose);
+  // transformToBaseLink(homePose180, homePose180);
+  // transformToBaseLink(cablePose, cablePose);
+  // transformToBaseLink(robotPose_, robotPose);
 
-  tf::Quaternion robotPoseQuaternion(robotPose.pose.orientation.x, robotPose.pose.orientation.y, robotPose.pose.orientation.z, robotPose.pose.orientation.w);
-  tf::Quaternion homePoseOuaternion(homePose.pose.orientation.x, homePose.pose.orientation.y, homePose.pose.orientation.z, homePose.pose.orientation.w);
-  tf::Quaternion homePose180Quaternion(homePose180.pose.orientation.x, homePose180.pose.orientation.y, homePose180.pose.orientation.z, homePose180.pose.orientation.w);
-  tf::Quaternion cablePoseQuaternion(cablePose.pose.orientation.x, cablePose.pose.orientation.y, cablePose.pose.orientation.z, cablePose.pose.orientation.w);
+  // tf::Quaternion robotPoseQuaternion(robotPose.pose.orientation.x, robotPose.pose.orientation.y, robotPose.pose.orientation.z, robotPose.pose.orientation.w);
+  // tf::Quaternion homePoseOuaternion(homePose.pose.orientation.x, homePose.pose.orientation.y, homePose.pose.orientation.z, homePose.pose.orientation.w);
+  // tf::Quaternion homePose180Quaternion(homePose180.pose.orientation.x, homePose180.pose.orientation.y, homePose180.pose.orientation.z, homePose180.pose.orientation.w);
+  // tf::Quaternion cablePoseQuaternion(cablePose.pose.orientation.x, cablePose.pose.orientation.y, cablePose.pose.orientation.z, cablePose.pose.orientation.w);
 
-  int homeToCable = homePose.angle(cablePoseQuaternion);
+  // int homeToCable = homePose.angle(cablePoseQuaternion);
 
-  int targetToHome = targetQuaternion.angle(homePoseOuaternion);
-  int targetToHome180 = targetQuaternion.angle(homePose180Quaternion);
+  // int targetToHome = targetQuaternion.angle(homePoseOuaternion);
+  // int targetToHome180 = targetQuaternion.angle(homePose180Quaternion);
   
-  int robotToHome = robotPoseQuaternion.angle(homePoseOuaternion);
-  int robotToHome180 = robotPoseQuaternion.angle(homePose180Quaternion);
+  // int robotToHome = robotPoseQuaternion.angle(homePoseOuaternion);
+  // int robotToHome180 = robotPoseQuaternion.angle(homePose180Quaternion);
 
-  int robotToCable = robotPoseQuaternion.angle(cablePoseQuaternion);
-  int targetToCable = targetQuaternion.angle(cablePoseQuaternion);
+  // int robotToCable = robotPoseQuaternion.angle(cablePoseQuaternion);
+  // int targetToCable = targetQuaternion.angle(cablePoseQuaternion);
 
 
-  ROS_INFO_STREAM("check rotate: " << (first - sec));
-  if (homeToCable < robotToCable && targetToCable < homeToCable && (targetToHome180 < targetToHome && robotToHome < robotToHome180)) {
-    twist_ = 0.2;
-    return true;
-  } else {
-    twist_ = -0.2;
-    return true;
-  }
+  // ROS_INFO_STREAM("check rotate: " << (first - sec));
+  // if (targetToCable < homeToCable && (targetToHome180 < targetToHome && robotToHome < robotToHome180)) {
+  //   twist_ = 0.2;
+  //   return true;
+  // } else {
+  //   twist_ = -0.2;
+  //   return true;
+  // }
   return false;
 }
 
