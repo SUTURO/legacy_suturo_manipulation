@@ -10,5 +10,8 @@ string HEAD=head
 #both arms
 string BOTH_ARMS=both_arms
 
+#all
+string ALL=arms_head
+
 # header for time/frame information
 string bodyPart

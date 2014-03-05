@@ -180,6 +180,25 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
 		}
+	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::ALL)){
+		// bodypart = arms_head
+		ROS_INFO("Move to thinking pose!");
+		// set group to move
+		move_group_interface::MoveGroup group(body_part);
+		
+		// set group name to go home
+		group.setNamedTarget("thinking");
+		
+		//move bodypart
+		if (group.move()){
+			ROS_INFO("START THINKING!\n");
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+			server_home->setSucceeded(r);
+		} else {
+			ROS_INFO("Thinking failed!\n");
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_home->setAborted(r);
+		}		
 	} else {
 		ROS_INFO("Unknown bodypart!\n");
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
