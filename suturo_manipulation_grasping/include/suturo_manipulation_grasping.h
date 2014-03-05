@@ -114,6 +114,8 @@ private:
 	void addGraspPositionsY(double h, double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 
+				
+	int lookAt(geometry_msgs::PoseStamped pose);
 public:
 	
 	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);

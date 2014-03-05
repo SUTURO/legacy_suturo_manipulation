@@ -296,6 +296,41 @@ std::string time_to_str(T ros_t)
   return std::string(buf);
 }
 
+int Grasping::lookAt(geometry_msgs::PoseStamped pose)
+{
+	// Goal Message to move the head
+	control_msgs::PointHeadActionGoal goal_msg;
+
+	goal_msg.header.seq = 1;
+	goal_msg.header.stamp = ros::Time::now();
+	// Set Goal to pre grasp position
+	goal_msg.header.frame_id =  pose.header.frame_id;
+	goal_msg.goal_id.stamp = goal_msg.header.stamp;
+	// set unique id with timestamp
+	goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+	goal_msg.goal.target.header = goal_msg.header;
+	// Set position from pre grasp
+	goal_msg.goal.target.point = pose.pose.position;
+	goal_msg.goal.pointing_axis.x = 1;
+	goal_msg.goal.pointing_axis.y = 0;
+	goal_msg.goal.pointing_axis.z = 0;
+	goal_msg.goal.pointing_frame = "head_plate_frame";
+	goal_msg.goal.min_duration = ros::Duration(1.0);
+	goal_msg.goal.max_velocity = 10;
+
+	// Publish goal on topic /suturo/head_controller
+	if( !head_publisher_ ) {
+		ROS_INFO("Publisher invalid!\n");
+	} else {
+		head_publisher_->publish(goal_msg);
+		ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x << 
+			", y=" << goal_msg.goal.target.point.y << 
+			", z=" << goal_msg.goal.target.point.z << 
+			" in Frame " << goal_msg.goal.pointing_frame.c_str());
+	}
+	return 1;
+}
+
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm, 
 		std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses, 
 		double force, int graspable_sides)
@@ -375,6 +410,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		return 0;	
 	}
 
+	lookAt(poses.at(pos_id));
 	return 1;
 }
 
