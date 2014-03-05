@@ -141,15 +141,6 @@ int Suturo_Manipulation_Planning_Scene_Interface::getObjects(std::vector<moveit_
 	return 1;
 }
 
-std::vector<moveit_msgs::CollisionObject> Suturo_Manipulation_Planning_Scene_Interface::getObjects()
-{
-	moveit_msgs::PlanningScene ps;
-	if (!getPlanningScene(ps)){
-		ROS_ERROR_STREAM("Failed to get planningscene");
-	}
-	return ps.world.collision_objects;
-}
-
 int Suturo_Manipulation_Planning_Scene_Interface::getAttachedObject(std::string object_name, moveit_msgs::AttachedCollisionObject &co)
 {
 	std::vector<moveit_msgs::AttachedCollisionObject> attachedObjects;
