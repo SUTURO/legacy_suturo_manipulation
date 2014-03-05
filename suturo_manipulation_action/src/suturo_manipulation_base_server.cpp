@@ -11,6 +11,8 @@
 
 using namespace std;
 
+Suturo_Manipulation_Move_Robot *moveRobot_;
+
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_baseAction> Server;
 
 /**
@@ -18,8 +20,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 */
 void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstPtr& baseGoal, ros::NodeHandle* nh, Server* server_base)
 {	
-	Suturo_Manipulation_Move_Robot moveRobot(nh);
-ROS_INFO_STREAM("got shit");
+	
 	// create a move result message
 	suturo_manipulation_msgs::suturo_manipulation_baseResult r;
 	// Set header
@@ -27,7 +28,7 @@ ROS_INFO_STREAM("got shit");
 	// Set Answer fot planning to undefined
 	r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
 	//~ ROS_INFO_STREAM();
-	if (moveRobot.driveBase(baseGoal->ps)) {
+	if (moveRobot_->driveBase(baseGoal->ps)) {
 		// Set Answer fot planning to success
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		server_base->setSucceeded(r);
@@ -43,6 +44,8 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_move_base_server");
 	ros::NodeHandle nh;
+
+	moveRobot_ = new Suturo_Manipulation_Move_Robot(&nh);
 	
 	Server server_base(nh, "suturo_man_move_base_server", boost::bind(&moveBase, _1, &nh, &server_base), false);
 	server_base.start();

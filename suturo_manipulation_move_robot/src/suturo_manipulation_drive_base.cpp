@@ -13,7 +13,7 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* 
   // localisation subscriber
   loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
   collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
-  ros::WallDuration(5.0).sleep();
+  ros::WallDuration(1.0).sleep();
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot(){
@@ -21,25 +21,11 @@ Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot(){
 }
 
 void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamped& robotPoseFB){
-  // ROS_INFO("robotPose_ in CB: x: %f, y: %f, z: %f", robotPose_.pose.position.x, robotPose_.pose.position.y, robotPose_.pose.position.z);
-
-  robotPose_.header.seq = robotPoseFB.header.seq;
-  robotPose_.header.stamp = robotPoseFB.header.stamp;
-  robotPose_.header.frame_id = robotPoseFB.header.frame_id;
-
-  robotPose_.pose.position.x = robotPoseFB.pose.position.x;
-  robotPose_.pose.position.y = robotPoseFB.pose.position.y;
-  robotPose_.pose.position.z = robotPoseFB.pose.position.z;
-
-  robotPose_.pose.orientation.w = robotPoseFB.pose.orientation.w;
-  robotPose_.pose.orientation.x = robotPoseFB.pose.orientation.x;
-  robotPose_.pose.orientation.y = robotPoseFB.pose.orientation.y;
-  robotPose_.pose.orientation.z = robotPoseFB.pose.orientation.z;
+  robotPose_.header = robotPoseFB.header;
+  robotPose_.pose = robotPoseFB.pose;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
-  // Vorschlag von Georg: Einen Kreis um den PR2 ziehen, dann eine Linie zum Ziel, dann auf der Linie prüfen, ob eine Kollision entsteht
-    
   //get all collisionobjects
 	std::vector<moveit_msgs::CollisionObject> cos;
 	
@@ -62,7 +48,6 @@ bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped t
 				double y_size = co->primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
 				double d_x = abs(co->primitive_poses[0].position.x - targetPose.pose.position.x);
 				double d_y = abs(co->primitive_poses[0].position.y - targetPose.pose.position.y);
-				//~ ROS_INFO_STREAM("d_x " << d_x << " d_y " << d_y);
 				if (d_x <= footprint_radius + x_size/2 && d_y <= footprint_radius + y_size/2) return true;
 			} 
 		}
@@ -83,11 +68,11 @@ bool Suturo_Manipulation_Move_Robot::checkYCoord(geometry_msgs::PoseStamped targ
   return (robotPose_.pose.position.y > targetPose.pose.position.y+0.01 || robotPose_.pose.position.y < targetPose.pose.position.y-0.01);
 }
 
-bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion targetOrientation, tf::Quaternion robotOrientation){
-  return ((robotOrientation.angle(targetOrientation) > 0.01) || (robotOrientation.angle(targetOrientation) < -0.01));
+bool Suturo_Manipulation_Move_Robot::checkOrientation(tf::Quaternion* targetOrientation, tf::Quaternion robotOrientation){
+  return ((targetOrientation->angle(robotOrientation) > 0.01) || (targetOrientation->angle(robotOrientation) < -0.01));
 }
 
-bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuaternion){
+bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion* targetQuaternion){
   // TODO: Schöner machen
 
   geometry_msgs::PoseStamped homePose;
@@ -105,20 +90,11 @@ bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuatern
 
   homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
-  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_4);
+  cablePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
 
   transformToBaseLink(homePose, homePoseBase);
-  ros::Duration(5).sleep();
-  ROS_INFO("transform twist 1");
   transformToBaseLink(homePose180, homePose180Base);
-  ros::Duration(5).sleep();
-  ROS_INFO("transform twist 2");
   transformToBaseLink(cablePose, cablePoseBase);
-  ros::Duration(5).sleep();
-  ROS_INFO("transform twist 3, done");
-  // transformToBaseLink(robotPose_, robotPose);
-  // ros::Duration(5).sleep();
-  // ROS_INFO("transform twist 4, done");
 
   tf::Quaternion robotPoseQuaternion(0,0,0,1);
   tf::Quaternion homePoseOuaternion(homePoseBase.pose.orientation.x, homePoseBase.pose.orientation.y, homePoseBase.pose.orientation.z, homePoseBase.pose.orientation.w);
@@ -127,18 +103,16 @@ bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuatern
 
   int homeToCable = homePose180Quaternion.angle(cablePoseQuaternion);
 
-  int targetToHome = targetQuaternion.angle(homePoseOuaternion);
-  int targetToHome180 = targetQuaternion.angle(homePose180Quaternion);
+  int targetToHome = targetQuaternion->angle(homePoseOuaternion);
+  int targetToHome180 = targetQuaternion->angle(homePose180Quaternion);
   
   int robotToHome = robotPoseQuaternion.angle(homePoseOuaternion);
   int robotToHome180 = robotPoseQuaternion.angle(homePose180Quaternion);
 
   int robotToCable = robotPoseQuaternion.angle(cablePoseQuaternion);
-  int targetToCable = targetQuaternion.angle(cablePoseQuaternion);
+  int targetToCable = targetQuaternion->angle(cablePoseQuaternion);
 
-
-  // ROS_INFO_STREAM("check rotate: " << (first - sec));
-  if (robotToHome < robotToHome180 && (targetToHome180 < targetToHome || (targetToHome > robotToHome && homeToCable < targetToCable)) || (robotToCable < targetToCable && robotToHome < robotToHome180)) {
+  if ((robotToHome < robotToHome180 || (robotToHome > robotToHome180 && robotToCable > targetToCable && targetToHome > targetToHome180)) && (targetToHome180 < targetToHome || (targetToHome > robotToHome && homeToCable < targetToCable)) || (robotToCable < targetToCable && robotToHome < robotToHome180)) {
     twist_ = 0.2;
     return true;
   } else {
@@ -150,7 +124,7 @@ bool Suturo_Manipulation_Move_Robot::calculateTwist(tf::Quaternion targetQuatern
 
 bool Suturo_Manipulation_Move_Robot::rotateBase(){
 
-  tf::Quaternion targetQuaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+  tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   tf::Quaternion robotOrientation(0, 0, 0, 1);
 
   ROS_INFO("Begin to rotate base");
@@ -158,13 +132,11 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   calculateTwist(targetQuaternion);
 
   while (nh_->ok() && checkOrientation(targetQuaternion, robotOrientation)) {
-    base_cmd_.angular.z = twist_;     
+    base_cmd_.angular.z = twist_;
     cmd_vel_pub_.publish(base_cmd_);
 
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
-    tf::Quaternion quat_new(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-    targetQuaternion = quat_new;
-
+    targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
   }
   ROS_INFO("rotateBase done");
   return true;
@@ -192,6 +164,7 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
 		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
 		if (a < footprint_radius){
 			inCollision_ = true;
+      ROS_INFO_STREAM("subscriber LaserScan: " << inCollision_);
 			return;
 		}
 	}
@@ -205,6 +178,9 @@ bool Suturo_Manipulation_Move_Robot::getInCollision()
 
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
 
+  // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
+  // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
+  
   base_cmd_.linear.x = 0;
   base_cmd_.linear.y = 0;
   base_cmd_.angular.z = 0;
@@ -215,9 +191,6 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 		 ROS_ERROR_STREAM("targetpose in collision!");
 		 return false;
 	}
-
-  // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
-  // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
 
   while (!checkLocalization()){
     // Wait for localization...
@@ -232,8 +205,6 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   ROS_INFO("begin to move vorward");
   // move vorward
   while (nh_->ok() && checkXCoord(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
-  // while (nh_->ok() && checkXCoord(targetPose_) && !getInCollision()){
-
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
 

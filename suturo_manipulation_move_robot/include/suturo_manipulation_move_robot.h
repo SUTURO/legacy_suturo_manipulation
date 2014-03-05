@@ -25,11 +25,11 @@ private:
 	ros::Publisher cmd_vel_pub_;
 	// Localisation subscriber
 	ros::Subscriber loc_sub_;
-	
+	// Subscriber for laserscan
 	ros::Subscriber collision_sub_;
 	// robot position
 	geometry_msgs::PoseStamped robotPose_;
-
+	// 
 	geometry_msgs::Twist base_cmd_;
 
 	tf::TransformListener listener_;
@@ -80,7 +80,7 @@ private:
 	 * @return true, if successfull
 	 * 					false, otherwise
 	 */
-	bool checkOrientation(tf::Quaternion q2, tf::Quaternion q3);
+	bool checkOrientation(tf::Quaternion* q2, tf::Quaternion q3);
 
   /**
 	 * 
@@ -98,7 +98,7 @@ private:
 	 */
 	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
 
-	bool calculateTwist(tf::Quaternion targetOrientation);
+	bool calculateTwist(tf::Quaternion* targetOrientation);
 	
 public:
 
