@@ -77,11 +77,6 @@ public:
 	 * @return 1, if successfull
 	 * 					0, otherwise
 	 */	
-// <<<<<<< HEAD
-// 	std::vector<moveit_msgs::AttachedCollisionObject> getAttachedObjects();
-	
-// 	std::vector<moveit_msgs::CollisionObject> getObjects();
-// =======
 	int getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos);
 
 	/**
