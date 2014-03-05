@@ -373,7 +373,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		pi_->publishMarker(poses.at(pos_id));
 		//move Arm to goalpose
 		ROS_INFO_STREAM("move to goalpose");
-
+		
+		lookAt(poses.at(pos_id));
+		
 		if (!move_group->move()){
 			pos_id++;	
 			continue;
@@ -409,8 +411,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		ROS_ERROR_STREAM("No graspposition reachable for " << object_name);
 		return 0;	
 	}
-
-	lookAt(poses.at(pos_id));
 	return 1;
 }
 

@@ -21,7 +21,7 @@ typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulat
 
 tf::TransformListener* listener = NULL;
 
-control_msgs::PointHeadActionGoal goal_msg;
+//~ control_msgs::PointHeadActionGoal goal_msg;
 
 /**
  * Transform the incoming frame to /base_link
@@ -63,6 +63,41 @@ std::string time_to_str(T ros_t)
   struct tm *tms = localtime(&t);
   strftime(buf, 1024, "%Y-%m-%d-%H-%M-%S", tms);
   return std::string(buf);
+}
+
+int lookAt(geometry_msgs::PoseStamped pose, ros::Publisher* head_publisher)
+{
+	// Goal Message to move the head
+	control_msgs::PointHeadActionGoal goal_msg;
+
+	goal_msg.header.seq = 1;
+	goal_msg.header.stamp = ros::Time::now();
+	// Set Goal to pre grasp position
+	goal_msg.header.frame_id =  pose.header.frame_id;
+	goal_msg.goal_id.stamp = goal_msg.header.stamp;
+	// set unique id with timestamp
+	goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
+	goal_msg.goal.target.header = goal_msg.header;
+	// Set position from pre grasp
+	goal_msg.goal.target.point = pose.pose.position;
+	goal_msg.goal.pointing_axis.x = 1;
+	goal_msg.goal.pointing_axis.y = 0;
+	goal_msg.goal.pointing_axis.z = 0;
+	goal_msg.goal.pointing_frame = "head_plate_frame";
+	goal_msg.goal.min_duration = ros::Duration(1.0);
+	goal_msg.goal.max_velocity = 10;
+
+	// Publish goal on topic /suturo/head_controller
+	if( !head_publisher ) {
+		ROS_INFO("Publisher invalid!\n");
+	} else {
+		head_publisher->publish(goal_msg);
+		ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x << 
+			", y=" << goal_msg.goal.target.point.y << 
+			", z=" << goal_msg.goal.target.point.z << 
+			" in Frame " << goal_msg.goal.pointing_frame.c_str());
+	}
+	return 1;
 }
 
 /**
@@ -139,31 +174,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	//    server_home->setSucceeded(r);
 	// }
 
-	// Set home Coordinates, time and frame
-	goal_msg.header.seq = 1;
-    goal_msg.header.stamp = ros::Time::now();
-    goal_msg.header.frame_id = goal->ps.header.frame_id;
-    goal_msg.goal_id.stamp = goal_msg.header.stamp;
-    // set unique id with timestamp
-    goal_msg.goal_id.id = "goal_"+time_to_str(goal_msg.header.stamp);
-    goal_msg.goal.target.header = goal_msg.header;
-    goal_msg.goal.target.point.x = transformedPose.pose.position.x;
-    goal_msg.goal.target.point.y = transformedPose.pose.position.y;
-    goal_msg.goal.target.point.z = transformedPose.pose.position.z;
-    goal_msg.goal.pointing_axis.x = 1;
-    goal_msg.goal.pointing_axis.y = 0;
-    goal_msg.goal.pointing_axis.z = 0;
-    goal_msg.goal.pointing_frame = "head_plate_frame";
-    goal_msg.goal.min_duration = ros::Duration(1.0);
-    goal_msg.goal.max_velocity = 10;
-
-    // Publish goal on topic /suturo/head_controller
-    if( !publisher ) {
-		ROS_INFO("Publisher invalid!\n");
-	} else {
-		publisher->publish(goal_msg);
-		ROS_INFO("Published pre grasp goal: x: %f, y: %f, z: %f in Frame %s", goal_msg.goal.target.point.x,	goal_msg.goal.target.point.y, goal_msg.goal.target.point.z, goal_msg.goal.pointing_frame.c_str());
-	}
+	lookAt(transformedPose, publisher);
 
 
 	if (group.move()){
