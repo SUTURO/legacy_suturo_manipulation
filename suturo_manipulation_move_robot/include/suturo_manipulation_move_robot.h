@@ -43,12 +43,7 @@ private:
 	double yTwist_;
 	// bool for collision, true if collision
 	bool inCollision_;
-	// Angle between home quaternion and cable quaternion
-	int homeToCable_;
-	// Angle between target quaternion and cable quaternion
-	int targetToHome_;
-	// Angle between target quaternion and reverse home quaternion (180°)
-	int targetToHome180_;
+
 	// Angle between robot quaternion and home quaternion
 	int robotToHome_;
 	// Angle between robot quaternion and reverse home quaternion
@@ -118,54 +113,7 @@ private:
 	* @return true, if successfull
 	*					false, otherwise
 	*/
-	// bool calculateYTwist(tf::Quaternion* targetOrientation);
-
-	/**
-	* Checks if the robot is nearer to the home orientation
-	* as to the reverse home ori.
-	*
-	* @return true, if correct
-	*					false, otherwise
-	*/
-	// bool robotNearerAtHome();
-
-	/**
-	* Checks if the target is nearer to the reverse home
-	* orientation as to the normal home orientation.
-	*
-	* @return true, if correct
-	*					false, otherwise
-	*/
-	// bool targetNearerAt180();
-
-	/**
-	* Checks if the target is nearer to the cable orientation
-	* as the robot and if the target is nearer to the reverse 
-	* home orientation as to the normal home orientation.
-	*
-	* @return true, if correct
-	*					false, otherwise
-	*/
-	// bool targetNearerAtCableAndNearerTo180();
-
-	/**
-	* Checks if the robot is nearer to the home orientation
-	* as the target and if the robot and target are between the home
-	* orientation and 90°.
-	*
-	* @return true, if correct
-	*					false, otherwise
-	*/
-	// bool robotNearerToHomeAndBetweenHomeAnd90();
-
-	/**
-	* Checks if the robot is nearer to the home orientation
-	* as the target and if the robot is nearer to the cable orientation.
-	*
-	* @return true, if correct
-	*					false, otherwise
-	*/
-	// bool robotNearerAtCableAndNearerToHome();
+	bool calculateYTwist(tf::Quaternion* targetOrientation);
 	
 public:
 

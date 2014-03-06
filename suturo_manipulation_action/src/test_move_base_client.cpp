@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 	if (atof(argv[4]) == 0){
 		goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);		
 	} else {
-	    goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+		goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
 	}
 	// targetPose_.header.frame_id = "/map";
 	goal.ps.header.frame_id = "/map";
