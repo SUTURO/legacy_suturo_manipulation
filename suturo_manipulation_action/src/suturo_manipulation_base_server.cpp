@@ -1,5 +1,5 @@
 /**
-* 
+* This Server receives a target where the robot should move.
 */
 
 #include <ros/ros.h>
@@ -16,7 +16,7 @@ Suturo_Manipulation_Move_Robot *moveRobot_;
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_baseAction> Server;
 
 /**
-* 
+* Sends the goal to Suturo_Manipulation_Move_Robot and returns Success / Fail.
 */
 void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstPtr& baseGoal, ros::NodeHandle* nh, Server* server_base)
 {	
@@ -35,7 +35,7 @@ void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstP
 	} else {
 		// Set Answer fot planning to success
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		server_base->setSucceeded(r);
+		server_base->setAborted(r);
 	}
 }
 
