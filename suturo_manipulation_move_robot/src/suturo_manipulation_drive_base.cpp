@@ -243,7 +243,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     base_cmd_.linear.x = 0;
 
     // check if goal is on the left or right side
-    if (0 < targetPoseBaseLink_.pose.position.y){
+    if (0 < targetPoseBaseLink_.pose.position.y && !check){
       base_cmd_.linear.y = 0.1;
       check = true;
     } else {
