@@ -122,7 +122,6 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	Grasping grasper(&pi);
 	ROS_INFO("Done.");
 
-
 	// Set arm which should be moved
 	string arm = goal->bodypart.bodyPart;
 	if (arm != suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM && arm != suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
@@ -158,9 +157,10 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 	// set Pose
 	pi.publishMarker(transformedPose);
 	group.setPoseTarget(transformedPose);
-	ROS_INFO("current Position: x=%f, y=%f, z=%f in Frame %s", group.getCurrentPose().pose.position.x,
-			group.getCurrentPose().pose.position.y,
-			group.getCurrentPose().pose.position.z, group.getCurrentPose().header.frame_id.c_str());
+	ROS_INFO_STREAM("current Position: x=" << group.getCurrentPose().pose.position.x << 
+			", y=" << group.getCurrentPose().pose.position.y << 
+			", z=" << group.getCurrentPose().pose.position.z << 
+			" in Frame " << group.getCurrentPose().header.frame_id.c_str());
 
 	// // Publish goal on topic /suturo/head_controller
 	// if( !publisher ) {
@@ -176,7 +176,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 
 	lookAt(transformedPose, publisher);
 
-
+	//move arm
 	if (group.move()){
 		ROS_INFO("Arm moved!\n");
 	    r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -191,7 +191,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "suturo_manipulation_move_arm_server");
-	ros::NodeHandle nh;
+	ros::NodeHandle n;
 	listener = new (tf::TransformListener);
 
 	// Publish a topic for the head controller
@@ -199,7 +199,6 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 	
 	// create the action server
-
 	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
 
 	// start the server
