@@ -35,7 +35,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
   ROS_INFO("Create Planning Scene Interface...");
   Suturo_Manipulation_Planning_Scene_Interface pi(nh);
   ROS_INFO("Done. Create Grasper...")	;
-  Grasping grasper(&pi);
+  Grasping grasper(&pi, publisher);
   ROS_INFO("Done.");
 
   string picking_arm = graspGoal->goal.bodypart.bodyPart;
@@ -58,7 +58,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     if(action == suturo_manipulation_msgs::GraspingAndDrop::GRASP){
       ROS_INFO("Begin to pick object...");
       // Grasp the object
-      if (grasper.pick(obj_name, picking_arm, newton, publisher))
+      if (grasper.pick(obj_name, picking_arm, newton))
       {
         ROS_INFO("Object picked...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
