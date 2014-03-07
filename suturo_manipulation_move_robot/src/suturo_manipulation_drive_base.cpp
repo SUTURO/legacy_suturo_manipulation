@@ -71,7 +71,7 @@ bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped ta
 }
 
 bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion* targetOrientation){
-  return (targetOrientation->angle(robotOrientation) < 0.01) && (targetOrientation->angle(robotOrientation) > -0.01);
+  return (targetOrientation->angle(robotOrientation) < 0.05) && (targetOrientation->angle(robotOrientation) > -0.05);
   // return !((robotOrientation.angle(&targetOrientation) > 0.01) || (robotOrientation.angle(&targetOrientation) < -0.01));
 }
 
