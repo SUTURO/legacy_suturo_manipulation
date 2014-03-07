@@ -8,6 +8,8 @@
 #include <suturo_manipulation_gripper_controller.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
+#include <pr2_controllers_msgs/PointHeadActionResult.h>
+#include <control_msgs/PointHeadActionGoal.h>
 
 #include <visualization_msgs/Marker.h>
 
@@ -113,12 +115,12 @@ private:
 	 */	
 	void addGraspPositionsY(double h, double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
-
 				
 	int lookAt(geometry_msgs::PoseStamped pose);
+	
 public:
 	
-	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi);
+	Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher=NULL);
 
 	~Grasping();
 	
@@ -128,7 +130,7 @@ public:
 	 * @return 1, if succesfull
 	 * 					0, otherwise
 	 */	
-	int pick(std::string objectName, std::string arm, double force=50.0, ros::Publisher* head_publisher = NULL);
+	int pick(std::string objectName, std::string arm, double force=50.0);
 	
 	/**
 	 * Drops an object.
