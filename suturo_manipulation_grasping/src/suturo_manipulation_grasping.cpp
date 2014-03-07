@@ -5,7 +5,7 @@ using namespace std;
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
-Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
+Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher)
 {
 	//initialize private variables
 	group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
@@ -14,7 +14,7 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
 	group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
 	group_l_arm_->setPlanningTime(5.0);
 	
-	
+	head_publisher_ = head_publisher;
 	gripper_ = new Gripper();
 	
 	//pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
@@ -179,7 +179,7 @@ int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<
 
 int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses)
-{	
+{		
 	ROS_INFO_STREAM("calculate graspposition for " << co.id);
 	
 	//test if object is a cylinder
@@ -203,7 +203,7 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 	for (int i = 1; i <= grasp_pose_count; i++){
 		 addGraspPositionsX((h/2)-(cylinder_safty_dist*i), r, 0, co.id, poses, pre_poses);
 		 addGraspPositionsY((h/2)-(cylinder_safty_dist*i), r, 0, co.id, poses, pre_poses);
-		 
+
 	}
 	
 	return 1;
@@ -411,13 +411,11 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 		ROS_ERROR_STREAM("No graspposition reachable for " << object_name);
 		return 0;	
 	}
+	
 	return 1;
 }
 
-
-
-int Grasping::pick(std::string objectName, std::string arm, double force, ros::Publisher* head_publisher)
-
+int Grasping::pick(std::string object_name, std::string arm, double force)
 {
 	if (!gripper_->is_connected_to_controller()){
 		ROS_ERROR_STREAM("not connected to grippercontroller");
@@ -447,7 +445,7 @@ int Grasping::pick(std::string objectName, std::string arm, double force, ros::P
 	int graspable_sides = calcGraspPosition(co, poses, pre_poses);
 	if (graspable_sides == 0)
 		return 0;
-	
+
 	return pick(co, arm, poses, pre_poses, force, graspable_sides);
 }
 
@@ -467,7 +465,6 @@ int Grasping::dropObject(string object_name)
 		return 1;
 	}
 
-
 	if(aco.link_name == group_r_arm_->getEndEffectorLink()) {
 		gripper_->open_r_gripper();
 	} else if (aco.link_name == group_l_arm_->getEndEffectorLink()){
@@ -475,7 +472,6 @@ int Grasping::dropObject(string object_name)
 	}
 	
 	//detach object
-
 	pi_->detachObject(object_name);
 	ROS_INFO_STREAM("\n\n Droped " << object_name << " successfully.\n");
 	return 1;
@@ -513,6 +509,6 @@ int Grasping::drop(string arm)
 			pi_->detachObject(it->object.id);
 		}
 	}
-	
+
 	return 1;
 }
