@@ -48,10 +48,7 @@ private:
 	int robotToHome_;
 	// Angle between robot quaternion and reverse home quaternion
 	int robotToHome180_;
-	// Angle between robot quaternion and cable quaternion
-	int robotToCable_;
-	// Angle between target quaternion and cable quaternion
-	int targetToCable_;
+
 	/**
 	 * Sets robotPose_ with incoming data from the localization topic.
 	 */

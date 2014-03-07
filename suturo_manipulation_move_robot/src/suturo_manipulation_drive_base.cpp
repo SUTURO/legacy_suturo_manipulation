@@ -133,6 +133,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   return true;
 }
 
+
 bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink){
   try{
     //transform pose to base_link
@@ -220,7 +221,6 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
   }
-
   ROS_INFO("move sideward done, target should be arrived");
 
   ROS_INFO_STREAM(targetPose_);

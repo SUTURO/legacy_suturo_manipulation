@@ -11,6 +11,7 @@
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 
+
 /**
  * This Programm publishes a tf frame into every collisionobject and attached object.
  */
@@ -28,6 +29,7 @@ void publishTfFrame(moveit_msgs::CollisionObject co, tf::Transform transform, tf
 					co.primitive_poses[0].orientation.z,
 					co.primitive_poses[0].orientation.w) );
 					
+
   br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), co.header.frame_id, co.id));
 }
 
@@ -65,6 +67,8 @@ int main(int argc, char **argv)
 
   return 0;
 }
+
+
 
 
 

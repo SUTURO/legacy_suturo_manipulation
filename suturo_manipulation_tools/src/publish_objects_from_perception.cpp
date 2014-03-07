@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 /**
  * This program publishes boxes in to the planningscene, that were published by the perception,
  * in order to test grasping without the knowledge.
  */
+
 
 int main(int argc, char **argv)
 {
@@ -63,6 +65,7 @@ int main(int argc, char **argv)
 				co.primitive_poses[0] = cubi.pose;
 				
 				pi.addObject(co);
+				
       }
       ROS_INFO_STREAM("------------------------------------------------------------");
     }

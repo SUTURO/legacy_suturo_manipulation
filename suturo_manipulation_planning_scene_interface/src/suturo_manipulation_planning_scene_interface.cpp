@@ -238,6 +238,7 @@ void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::
   goal_marker.scale.z = 0.04;
   goal_marker.scale.y = 0.04;
   goal_marker.scale.x = 0.09;
+
   vis_pub_.publish( goal_marker );   
 }  
 
