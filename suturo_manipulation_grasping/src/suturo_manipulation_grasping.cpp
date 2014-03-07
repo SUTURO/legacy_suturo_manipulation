@@ -31,7 +31,6 @@ Grasping::~Grasping()
 
 void Grasping::addGraspPositionsZ(double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses)
-
 {
 	geometry_msgs::PoseStamped pose;
 	geometry_msgs::PoseStamped pre_pose;
@@ -177,6 +176,7 @@ int Grasping::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<
 	return result;
 }
 
+
 int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses, 
 				std::vector<geometry_msgs::PoseStamped> &pre_poses)
 {	
@@ -203,6 +203,7 @@ int Grasping::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::ve
 	for (int i = 1; i <= grasp_pose_count; i++){
 		 addGraspPositionsX((h/2)-(cylinder_safty_dist*i), r, 0, co.id, poses, pre_poses);
 		 addGraspPositionsY((h/2)-(cylinder_safty_dist*i), r, 0, co.id, poses, pre_poses);
+		 
 	}
 	
 	return 1;
@@ -280,7 +281,6 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, int graspab
 	
 	return 1;
 }
-
 
 template <class T>
 /**
