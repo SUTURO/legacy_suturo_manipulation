@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "test_move_base_client");
 	Client client("suturo_man_move_base_server", true);
 	// wait for complete client initialisation
-	ros::WallDuration(0.5).sleep();
+	ros::WallDuration(1).sleep();
 	// waiting for connection
 	client.waitForServer();
 	ROS_INFO("Connected to server, ready to move base!");
