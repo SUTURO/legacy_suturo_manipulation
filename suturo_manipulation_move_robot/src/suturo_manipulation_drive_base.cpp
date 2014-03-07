@@ -89,8 +89,8 @@ bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuate
   homePose.header.frame_id = "/map";
   homePose180.header.frame_id = "/map";
 
-  homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-  homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+  homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+  homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
 
   transformToBaseLink(homePose, homePoseBase);
   transformToBaseLink(homePose180, homePose180Base);
@@ -121,12 +121,12 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   ROS_INFO("Begin to rotate base");
 
   if (calculateYTwist(targetQuaternion)){
-    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision()) {
+    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision() && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
       base_cmd_.angular.z = yTwist_;
       cmd_vel_pub_.publish(base_cmd_);
 
-      transformToBaseLink(targetPose_, targetPoseBaseLink_);
       targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+      ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
     }
   }
   ROS_INFO("rotateBase done");
@@ -201,16 +201,19 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   }
 
   ROS_INFO("move forward done, begin to move sideward");
+  bool check = false;
   // move sideward
   while (nh_->ok() && !yCoordArrived(targetPose_) && !getInCollision()){
 
     base_cmd_.linear.x = 0;
 
     // check if goal is on the left or right side
-    if (0 < targetPoseBaseLink_.pose.position.y){
+    if (0 < targetPoseBaseLink_.pose.position.y && !check){
       base_cmd_.linear.y = 0.1;
+      check = true;
     } else {
       base_cmd_.linear.y = (-0.1);
+      check = true;
     }
     
     cmd_vel_pub_.publish(base_cmd_);
