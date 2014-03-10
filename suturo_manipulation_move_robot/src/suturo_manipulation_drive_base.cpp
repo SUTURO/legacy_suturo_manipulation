@@ -209,7 +209,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     base_cmd_.linear.x = 0;
 
     // check if goal is on the left or right side
-    if (0 < targetPoseBaseLink_.pose.position.y && !check){
+    if (0 < targetPoseBaseLink_.pose.position.y){
       base_cmd_.linear.y = 0.1;
       check = true;
     } else {
@@ -220,6 +220,8 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     cmd_vel_pub_.publish(base_cmd_);
     
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
+    std::cout << "Transformed pose:" << targetPoseBaseLink_.pose.position.x << " ";
+    std::cout << targetPoseBaseLink_.pose.position.y << std::endl;
   }
   ROS_INFO("move sideward done, target should be arrived");
 
