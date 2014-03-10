@@ -35,7 +35,7 @@ void putObjects(ros::Publisher pub_co)
 
   co.id = "dlink";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
 
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
