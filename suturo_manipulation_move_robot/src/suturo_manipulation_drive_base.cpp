@@ -148,7 +148,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
 void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan){
 	for (int i = 0; i < scan.ranges.size(); i++){
 		
-		//cosinussatz um abstand zu mittelpunk zu berechnen
+		//cosinussatz um abstand zu mittelpunkt zu berechnen
 		double alpha = scan.angle_increment*i + 0.872664626;
 		double b = scan.ranges[i];
 		double c = -0.275;//dist base_link to base_laser_link
