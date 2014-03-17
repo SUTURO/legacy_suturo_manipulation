@@ -196,9 +196,11 @@ int main(int argc, char **argv)
 	//~ targetPose.pose.position.z = atof(argv[3]);
 	//~ targetPose.pose.orientation.w = 1;
 	//~ 
-	//~ Suturo_Manipulation_Move_Robot moveRobot(&nh);
-	//~ ROS_INFO_STREAM("collision: " << (moveRobot.checkCollision(targetPose) == true));
-	
+	Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	while(true){
+		ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision()));
+		ros::WallDuration(0.5).sleep();
+	}
 	
 	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	//~ putObjects(pub_co);

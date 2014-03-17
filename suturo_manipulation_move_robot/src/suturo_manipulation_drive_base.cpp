@@ -25,6 +25,40 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamp
   robotPose_.pose = robotPoseFB.pose;
 }
 
+bool Suturo_Manipulation_Move_Robot::checkFullCollision(double danger_zone)
+{
+	moveit_msgs::PlanningScene ps;
+	pi_->getPlanningScene(ps);
+	
+	//increase collisionobject size
+	for (int i = 0; i < ps.world.collision_objects.size(); i++){
+		moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
+		if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
+			co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
+			co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
+			co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
+		} else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
+			co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
+			co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
+		}
+	}
+
+	robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+  robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+  planning_scene::PlanningScene planning_scene(kinematic_model);
+	
+	planning_scene.setPlanningSceneMsg(ps);
+	
+	collision_detection::CollisionRequest collision_request;
+  collision_detection::CollisionResult collision_result;
+	
+	collision_result.clear();
+	planning_scene.checkCollision(collision_request, collision_result);
+	
+	
+	return collision_result.collision;
+}
+
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose) {
   //get all collisionobjects
 	std::vector<moveit_msgs::CollisionObject> cos;

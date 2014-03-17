@@ -13,6 +13,11 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/LaserScan.h>
 
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_scene/planning_scene.h>
+
+#include <moveit/kinematic_constraints/utils.h>
+
 
 class Suturo_Manipulation_Move_Robot{
 	
@@ -144,6 +149,8 @@ public:
 	 * 					false, otherwise
 	 */
 	bool checkCollision(geometry_msgs::PoseStamped targetPose);
+	
+	bool checkFullCollision(double danger_zone=0.05);
 
 	/**
 	 * @return inCollision_
