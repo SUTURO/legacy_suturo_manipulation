@@ -5,7 +5,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 	nh_ = nodehandle;
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
 	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);	
-	vis_pub_ = nh_->advertise<visualization_msgs::Marker>( "/suturo/visualization_marker", 10 );
+	vis_pub_ = nh_->advertise<visualization_msgs::Marker>( "visualization_marker", 10 );
 	
 	//wait because ros
 	ros::WallDuration(0.5).sleep();
@@ -220,7 +220,7 @@ void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::
   visualization_msgs::Marker goal_marker;
   goal_marker.header.frame_id = pose.header.frame_id;
   goal_marker.header.stamp = ros::Time();
-  goal_marker.ns = "suturo_manipulation";
+  goal_marker.ns = "suturo_manipulation/eef_poses";
   goal_marker.id = 0;
   goal_marker.type = visualization_msgs::Marker::ARROW;
   goal_marker.action = visualization_msgs::Marker::ADD;
