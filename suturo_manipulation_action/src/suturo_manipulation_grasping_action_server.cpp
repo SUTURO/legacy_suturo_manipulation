@@ -55,11 +55,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 		ROS_INFO_STREAM(suturo_manipulation_msgs::GraspingAndDrop::GRASP);
 		ROS_INFO_STREAM(action);
     // Check if we should grasp or drop...
-<<<<<<< HEAD
     if(action == suturo_manipulation_msgs::GraspingAndDrop::GRASP){
-=======
-    if(graspGoal->goal.grasp == 1){
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
       ROS_INFO("Begin to pick object...");
       // Grasp the object
       if (grasper.pick(obj_name, picking_arm, newton))
@@ -72,11 +68,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
-<<<<<<< HEAD
     } else if (action == suturo_manipulation_msgs::GraspingAndDrop::DROP_OBJECT) {
-=======
-    } else if (graspGoal->goal.grasp==0) {
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
       ROS_INFO("Begin to drop object...");
       // Drop the object
       if (grasper.dropObject(obj_name))
@@ -89,7 +81,6 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
         server_grasp->setAborted(r);
       }
-<<<<<<< HEAD
     } else if (action == suturo_manipulation_msgs::GraspingAndDrop::OPEN_GRIPPER){
       if (grasper.drop(picking_arm))
       {
@@ -104,19 +95,6 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     } else {
 			ROS_INFO("Unknown action!");
 			server_grasp->setAborted(r);
-=======
-    } else {
-      if (grasper.handoff(obj_name, picking_arm, newton))
-      {
-        ROS_INFO("Object handoffed...\n");
-        r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-        server_grasp->setSucceeded(r);
-      } else {
-        ROS_INFO("Handoff failed!\n");
-        r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-        server_grasp->setAborted(r);
-      }
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
     }
   }
 }

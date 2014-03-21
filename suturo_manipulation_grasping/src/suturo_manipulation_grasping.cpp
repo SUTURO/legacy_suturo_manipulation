@@ -5,14 +5,7 @@ using namespace std;
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
-<<<<<<< HEAD
 Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher)
-=======
-bool leftArmGrasping;
-bool rightArmGrasping;
-
-Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface* pi)
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
 {
 	//initialize private variables
 	group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
@@ -456,12 +449,7 @@ int Grasping::pick(std::string object_name, std::string arm, double force)
 	return pick(co, arm, poses, pre_poses, force, graspable_sides);
 }
 
-<<<<<<< HEAD
-
 int Grasping::dropObject(string object_name)
-=======
-int Grasping::drop(string objectName)
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
 {
 	if (!gripper_->is_connected_to_controller()){
 		ROS_ERROR_STREAM("Not connected to grippercontroller.");
@@ -476,24 +464,10 @@ int Grasping::drop(string objectName)
 		return 1;
 	}
 
-<<<<<<< HEAD
 	if(aco.link_name == group_r_arm_->getEndEffectorLink()) {
 		gripper_->open_r_gripper();
 	} else if (aco.link_name == group_l_arm_->getEndEffectorLink()){
-=======
-	//open gripper
-	if (r_grasp && l_grasp){
-		gripper_->open_r_gripper();
-		rightArmGrasping=0;
 		gripper_->open_l_gripper();
-		leftArmGrasping=0;
-	} else if(r_grasp) {
-		gripper_->open_r_gripper();
-		rightArmGrasping=0;
-	} else if (l_grasp){
->>>>>>> MAN-59 #time 3h began to implement handoff, but still doesnt work
-		gripper_->open_l_gripper();
-		leftArmGrasping=0;
 	}
 	
 	//detach object
@@ -538,44 +512,3 @@ int Grasping::drop(string arm)
 	return 1;
 }
 
-int Grasping::handoff(std::string objectName, std::string new_arm, double force)
-{
-	if (!gripper_->is_connected_to_controller()){
-		ROS_ERROR_STREAM("not connected to grippercontroller");
-		return 0;
-	}
-
-	//get object from planningscene
-	moveit_msgs::AttachedCollisionObject aco;
-	if (pi_->getAttachedObject(objectName, aco))
-	{
-		ROS_INFO("Get object");
-	} else {
-		ROS_INFO_STREAM(objectName << " not attached.");
-		return 1;
-	}
-	
-	pi_->detachObject(objectName);
-
-	geometry_msgs::PoseStamped pose;
-	geometry_msgs::PoseStamped pre_pose;
-	
-	//get object from planningscene
-	moveit_msgs::CollisionObject co;
-	if (!pi_->getObject(objectName, co))
-		return 0;
-	
-	if (!calcGraspPosition(co, pose, pre_pose))
-		return 0;
-	
-	bool picking = pick(co, new_arm, pose, pre_pose, force);
-
-	if (new_arm == LEFT_ARM)
-	{
-		gripper_->open_r_gripper();
-	} else {
-		gripper_->open_l_gripper();
-	}
-
-	return picking;
-}

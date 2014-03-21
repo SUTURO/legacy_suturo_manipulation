@@ -47,7 +47,7 @@ private:
 	// twist value for y roatation
 	double yTwist_;
 	// bool for collision, true if collision
-	bool inCollision_;
+	std::vector<double> collisions_;
 
 	// Angle between robot quaternion and home quaternion
 	int robotToHome_;
@@ -155,7 +155,7 @@ public:
 	/**
 	 * @return inCollision_
 	 */	
-	bool getInCollision();
+	std::vector<double> getCollisions();
   
 };
 

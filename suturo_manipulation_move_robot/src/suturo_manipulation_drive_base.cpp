@@ -155,7 +155,9 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   ROS_INFO("Begin to rotate base");
 
   if (calculateYTwist(targetQuaternion)){
-    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision() && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
+		//TODO:HEILE MACHEN
+    //~ while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision() && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
+    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
       base_cmd_.angular.z = yTwist_;
       cmd_vel_pub_.publish(base_cmd_);
 
@@ -180,6 +182,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
 }
 
 void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan){
+	collisions_.clear();
 	for (int i = 0; i < scan.ranges.size(); i++){
 		
 		//cosinussatz um abstand zu mittelpunkt zu berechnen
@@ -188,16 +191,16 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
 		double c = -0.275;//dist base_link to base_laser_link
 		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
 		if (a < footprint_radius){
-			inCollision_ = true;
-      ROS_INFO_STREAM("subscriber LaserScan: " << inCollision_);
-			return;
+			collisions_.push_back(alpha);
 		}
 	}
-	inCollision_ = false;
+	if (!collisions_.empty()){
+		ROS_ERROR_STREAM("COLLISION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111elf" );
+	}
 }
 
-bool Suturo_Manipulation_Move_Robot::getInCollision(){
-	return inCollision_;
+std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions(){
+	return collisions_;
 }
 
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
@@ -228,7 +231,9 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   
   ROS_INFO("begin to move vorward");
   // move vorward
-  while (nh_->ok() && !xCoordArrived(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
+  //TODO: HEILE MACHEN
+  //~ while (nh_->ok() && !xCoordArrived(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
+  while (nh_->ok() && !xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0){
     base_cmd_.linear.x = 0.1;
     cmd_vel_pub_.publish(base_cmd_);
 
@@ -238,7 +243,9 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   ROS_INFO("move forward done, begin to move sideward");
   bool check = false;
   // move sideward
-  while (nh_->ok() && !yCoordArrived(targetPose_) && !getInCollision()){
+  //TODO: HEILE MACHEN
+  //~ while (nh_->ok() && !yCoordArrived(targetPose_) && !getInCollision()){
+  while (nh_->ok() && !yCoordArrived(targetPose_)){
 
     base_cmd_.linear.x = 0;
 
