@@ -1,8 +1,0 @@
-#goal definition
-suturo_manipulation_msgs/RobotBodyPart bodypart
----
-#result definition
-ActionAnswer succ
----
-#feedback
-int32[] sequence

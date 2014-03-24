@@ -1,8 +1,0 @@
-#goal definition
-suturo_manipulation_grasping_goal goal
----
-#result definition
-ActionAnswer succ
----
-#feedback
-int32[] sequence
