@@ -17,6 +17,11 @@ using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_homeAction> Server;
 
+const string left_arm_group = "left_arm";
+const string right_arm_group = "right_arm";
+const string both_arms_group = "both_arms";
+const string arms_head_group = "arms_head";
+
 control_msgs::PointHeadActionGoal goal_msg;
 
 bool moved = 0;
@@ -108,67 +113,50 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		  		server_home->setAborted(r);
 			}
 		}
-	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM)){
-		// bodypart = left_arm
-		ROS_INFO("Move left_arm home!");
-		// set group to move
-		move_group_interface::MoveGroup group(body_part);
+	}  else {
+
+		ROS_INFO_STREAM("Move to " << body_part.c_str());
 		
-		// set group name to go home
-		group.setNamedTarget(body_part+"_home");
+		// set group to move
+		move_group_interface::MoveGroup* group;
+		
+		if (body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM 
+				|| body_part==suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM_CAM_POSE){
+			ROS_INFO_STREAM(left_arm_group);
+			group = new move_group_interface::MoveGroup(left_arm_group);
+				
+		} else if (body_part==suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM){
+			
+			group = new move_group_interface::MoveGroup(right_arm_group);
+			
+		} else if (body_part==suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS){
+			
+			group = new move_group_interface::MoveGroup(both_arms_group);
+			
+		} else if (body_part==suturo_manipulation_msgs::RobotBodyPart::THINK){
+			
+			group = new move_group_interface::MoveGroup(arms_head_group);
+			
+		} else {
+			ROS_INFO("Unknown bodypart!\n");
+			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+			server_home->setAborted(r);	
+			return;
+		}
+		
+		// set target pose
+		group->setNamedTarget(body_part);
 		
 		//move bodypart
-		if (group.move()){
-			ROS_INFO("Moved home!\n");
+		if (group->move()){
+			ROS_INFO("Moved into Position!\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 			server_home->setSucceeded(r);
 		} else {
-			ROS_INFO("Moving home failed!\n");
+			ROS_INFO("...or not\n");
 			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 			server_home->setAborted(r);
 		}
-	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM)){
-		// bodypart = right_arm
-		ROS_INFO("Move right_arm home!");
-		// set group to move
-		move_group_interface::MoveGroup group(body_part);
-		
-		// set group name to go home
-		group.setNamedTarget(body_part+"_home");
-		
-		//move bodypart
-		if (group.move()){
-			ROS_INFO("Moved home!\n");
-			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-			server_home->setSucceeded(r);
-		} else {
-			ROS_INFO("Moving home failed!\n");
-			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-			server_home->setAborted(r);
-		}
-	} else if ((body_part==suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS)){
-		// bodypart = both_arms
-		ROS_INFO("Move both arms home!");
-		// set group to move
-		move_group_interface::MoveGroup group(body_part);
-		
-		// set group name to go home
-		group.setNamedTarget(body_part+"_home");
-		
-		//move bodypart
-		if (group.move()){
-			ROS_INFO("Moved home!\n");
-			r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
-			server_home->setSucceeded(r);
-		} else {
-			ROS_INFO("Moving home failed!\n");
-			r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-			server_home->setAborted(r);
-		}
-	} else {
-		ROS_INFO("Unknown bodypart!\n");
-		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
-		server_home->setAborted(r);	
 	}
 }
 
