@@ -188,6 +188,13 @@ int main(int argc, char **argv)
 
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
+	
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	moveit_msgs::PlanningScene ps;
+	ROS_INFO_STREAM(pi.getPlanningScene(ps));
+	ROS_INFO_STREAM(ps);
+	
+	
 	//~ 
 	//~ geometry_msgs::PoseStamped targetPose;
 	//~ targetPose.header.frame_id = "/table";
@@ -196,7 +203,7 @@ int main(int argc, char **argv)
 	//~ targetPose.pose.position.z = atof(argv[3]);
 	//~ targetPose.pose.orientation.w = 1;
 	//~ 
-	Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	//~ Suturo_Manipulation_Move_Robot moveRobot(&nh);
 	//~ while(true){
 		//~ ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision()));
 		//~ ros::WallDuration(0.5).sleep();
