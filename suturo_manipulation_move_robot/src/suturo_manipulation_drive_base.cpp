@@ -157,7 +157,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
   if (calculateYTwist(targetQuaternion)){
 		//TODO:HEILE MACHEN
     //~ while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision() && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
-    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_) && getCollisions.empty()) {
+    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_) && getCollisions().empty()) {
       base_cmd_.angular.z = zTwist_;
       cmd_vel_pub_.publish(base_cmd_);
 
@@ -207,9 +207,9 @@ std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions(){
 
 bool Suturo_Manipulation_Move_Robot::collisionInFront(){
 
-  for (int position = getCollisions.size()-1; position > 0; position--){
+  for (int position = getCollisions().size()-1; position > 0; position--){
     // between 90 degrees and 270 degrees
-    if (getCollisions.at(position) > 1.57 && getCollisions.at(position) < 4.71){
+    if (getCollisions().at(position) > 1.57 && getCollisions().at(position) < 4.71){
       ROS_INFO("Collision in front!");
       return true;
     }
@@ -220,10 +220,10 @@ bool Suturo_Manipulation_Move_Robot::collisionInFront(){
 
 bool Suturo_Manipulation_Move_Robot::collisionOnLeft(){
 
-  for (int position = getCollisions.size()-1; position > 0; position--){
+  for (int position = getCollisions().size()-1; position > 0; position--){
     // wenn auf der linken seite des robos 90 grad ist
     // between 45 degrees and 135 degrees
-    if (getCollisions.at(position) > 0.79 && getCollisions.at(position) < 2.36){
+    if (getCollisions().at(position) > 0.79 && getCollisions().at(position) < 2.36){
       ROS_INFO("Collision on left side!");
       return true;
     }
@@ -234,10 +234,10 @@ bool Suturo_Manipulation_Move_Robot::collisionOnLeft(){
 
 bool Suturo_Manipulation_Move_Robot::collisionOnRight(){
 
-  for (int position = getCollisions.size()-1; position > 0; position--){
+  for (int position = getCollisions().size()-1; position > 0; position--){
     // wenn auf der rechten seite des robos 270 grad ist
     // between 225 degrees and 315 degrees
-    if (getCollisions.at(position) > 3.93 && getCollisions.at(position) < 5.5){
+    if (getCollisions().at(position) > 3.93 && getCollisions().at(position) < 5.5){
       ROS_INFO("Collision on right side!");
       return true;
     }
