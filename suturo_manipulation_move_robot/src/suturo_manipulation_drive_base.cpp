@@ -245,10 +245,18 @@ bool Suturo_Manipulation_Move_Robot::collisionOnRight(){
   return false;
 }
 
+bool Suturo_Manipulation_Move_Robot::checkYVariation(){
+  double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
+  if (currentVariation <= yVariation_){
+    return true;
+  } else {
+    return false;
+  }
+}
+
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose){
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
-  // TODO: Falls Interpolator dass nicht macht: Wenn das x Ziel erreicht, aber y noch nicht, dann nurnoch in y Richtung starten und nicht in x etc
   
   base_cmd_.linear.x = 0;
   base_cmd_.linear.y = 0;
@@ -291,6 +299,8 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   bool moved = true;
 
+  yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
+
   while(nh_->ok() && moved){
     base_cmd_.linear.x = 0;
     base_cmd_.linear.y = 0;
@@ -304,9 +314,17 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     } 
 
     if (!yCoordArrived(targetPose_) && yTwist != 0){
-      base_cmd_.linear.y = yTwist;
-      ROS_INFO_STREAM("set linear y: " << yTwist);
-      moved = true;
+      if (checkYVariation()) {
+        base_cmd_.linear.y = yTwist;
+        ROS_INFO_STREAM("set linear y: " << yTwist);
+        moved = true;
+      } else {
+        yTwist = (yTwist *(-1));
+        base_cmd_.linear.y = yTwist;
+        ROS_INFO_STREAM("set linear y: " << yTwist);
+        moved = true;
+      }
+      
     }
 
     cmd_vel_pub_.publish(base_cmd_);

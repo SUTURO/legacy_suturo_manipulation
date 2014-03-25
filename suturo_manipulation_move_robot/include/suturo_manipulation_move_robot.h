@@ -12,6 +12,7 @@
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/LaserScan.h>
+#include <cmath>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -53,6 +54,9 @@ private:
 	int robotToHome_;
 	// Angle between robot quaternion and reverse home quaternion
 	int robotToHome180_;
+
+	// y Distance between target and robot pose at the beginning
+	double yVariation_;
 
 	/**
 	 * Sets robotPose_ with incoming data from the localization topic.
@@ -140,6 +144,16 @@ private:
 	*					false, if not
 	*/
 	bool collisionOnRight();
+
+	/**
+	* Checks the current variation on the y axis between
+	* the goal and the robot position and compares it with 
+	* yVariation_.
+	*
+	* @return true, if the robot is closer to the goal
+	*					false, if not
+	*/
+	bool checkYVariation();
 	
 public:
 
