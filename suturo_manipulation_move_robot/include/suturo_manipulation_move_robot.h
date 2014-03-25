@@ -44,8 +44,8 @@ private:
 	geometry_msgs::PoseStamped targetPose_;
 	// target pose in base_link frame
 	geometry_msgs::PoseStamped targetPoseBaseLink_;
-	// twist value for y roatation
-	double yTwist_;
+	// twist value for z roatation
+	double zTwist_;
 	// bool for collision, true if collision
 	std::vector<double> collisions_;
 
@@ -116,6 +116,30 @@ private:
 	*					false, otherwise
 	*/
 	bool calculateYTwist(tf::Quaternion* targetOrientation);
+
+	/**
+	* Checks if a collision is in front of the robot.
+	*
+	* @return true, if collsion
+	*					false, if not
+	*/
+	bool collisionInFront();
+
+	/**
+	* Checks if a collision is on the left side of the robot.
+	*
+	* @return true, if collsion
+	*					false, if not
+	*/
+	bool collisionOnLeft();
+
+	/**
+	* Checks if a collision is on the right side of the robot.
+	*
+	* @return true, if collsion
+	*					false, if not
+	*/
+	bool collisionOnRight();
 	
 public:
 
