@@ -114,12 +114,12 @@ private:
 	bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
 
 	/**
-	* Calculates the Y value for rotating the robot.
+	* Calculates the Z value for rotating the robot.
 	*
 	* @return true, if successfull
 	*					false, otherwise
 	*/
-	bool calculateYTwist(tf::Quaternion* targetOrientation);
+	bool calculateZTwist(tf::Quaternion* targetOrientation);
 
 	/**
 	* Checks if a collision is in front of the robot.

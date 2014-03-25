@@ -95,21 +95,18 @@ bool Suturo_Manipulation_Move_Robot::checkLocalization(){
 }
 
 bool Suturo_Manipulation_Move_Robot::xCoordArrived(geometry_msgs::PoseStamped targetPose){
-  // return !(robotPose_.pose.position.x > targetPose.pose.position.x+0.01 || robotPose_.pose.position.x < targetPose.pose.position.x-0.01);
   return (robotPose_.pose.position.x < targetPose.pose.position.x+0.01 && robotPose_.pose.position.x > targetPose.pose.position.x-0.01);
 }
 
 bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped targetPose){
-  // return !(robotPose_.pose.position.y > targetPose.pose.position.y+0.01 || robotPose_.pose.position.y < targetPose.pose.position.y-0.01);
   return (robotPose_.pose.position.y < targetPose.pose.position.y+0.01 && robotPose_.pose.position.y > targetPose.pose.position.y-0.01);
 }
 
 bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion* targetOrientation){
   return (targetOrientation->angle(robotOrientation) < 0.05) && (targetOrientation->angle(robotOrientation) > -0.05);
-  // return !((robotOrientation.angle(&targetOrientation) > 0.01) || (robotOrientation.angle(&targetOrientation) < -0.01));
 }
 
-bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuaternion){
+bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion* targetQuaternion){
   // TODO: Schöner machen
 
   zTwist_ = 0;
@@ -143,6 +140,7 @@ bool Suturo_Manipulation_Move_Robot::calculateYTwist(tf::Quaternion* targetQuate
     zTwist_ = -0.2;
     return true;
   }
+  ROS_ERROR_STREAM("Calculation of z twist failed, rotating and moving aborted!");
   return false;
 }
 
@@ -154,17 +152,20 @@ bool Suturo_Manipulation_Move_Robot::rotateBase(){
 
   ROS_INFO("Begin to rotate base");
 
-  if (calculateYTwist(targetQuaternion)){
-		//TODO:HEILE MACHEN
-    //~ while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && !getInCollision() && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
-    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_) && getCollisions().empty()) {
+  if (calculateZTwist(targetQuaternion)){
+    while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
+      
+      if (!getCollisions().empty()){
+        ROS_ERROR_STREAM("Detect collision, rotating and moving aborted!");
+        return false;
+      }
+      
       base_cmd_.angular.z = zTwist_;
       cmd_vel_pub_.publish(base_cmd_);
 
       targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
       ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
     }
-    // ROS_INFO("rotateBase done");
     return true;
   } else {
     return false;
@@ -258,6 +259,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
   // TODO: Bennys Interpolator nutzen, um bei geringerer Zielentferung eine geringere Geschwindigkeit zu nutzen
   
+  // reset values
   base_cmd_.linear.x = 0;
   base_cmd_.linear.y = 0;
   base_cmd_.angular.z = 0;
@@ -273,13 +275,15 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     // Wait for localization...
   }
    
-  transformToBaseLink(targetPose_, targetPoseBaseLink_);
-  ROS_INFO("transform drivebase");
-
+  if (!transformToBaseLink(targetPose_, targetPoseBaseLink_)) {
+    ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
+    return false;
+  }
+  
   if (rotateBase()) {
     ROS_INFO("rotateBase done");
   } else {
-    ROS_ERROR_STREAM("rotateBase failed!");
+    return false;
   }
   
   ROS_INFO("begin to move");
@@ -288,88 +292,51 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
   // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
   if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft()){
     yTwist = 0.1;
-    ROS_INFO_STREAM("set yTwist 1");
   } else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight()) {
     yTwist = (-0.1);
-    ROS_INFO_STREAM("set yTwist 2");
   } else {
     yTwist = 0;
-    ROS_INFO_STREAM("set yTwist 3");
   }
+  ROS_INFO_STREAM("yTwist: " << yTwist);
 
+  // true, if the robot moved, false if not
   bool moved = true;
 
+  // calculate current yVariation
   yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
   while(nh_->ok() && moved){
+    // reset all the values!!!!11elf
     base_cmd_.linear.x = 0;
     base_cmd_.linear.y = 0;
     base_cmd_.angular.z = 0;
     moved = false;
 
+    // set x twist
     if (!xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0 && !collisionInFront()){
       base_cmd_.linear.x = 0.1;
-      ROS_INFO("set linear x");
       moved = true;
     } 
 
+    // set y twist
     if (!yCoordArrived(targetPose_) && yTwist != 0){
       if (checkYVariation()) {
         base_cmd_.linear.y = yTwist;
-        ROS_INFO_STREAM("set linear y: " << yTwist);
         moved = true;
       } else {
         yTwist = (yTwist *(-1));
         base_cmd_.linear.y = yTwist;
-        ROS_INFO_STREAM("set linear y: " << yTwist);
         moved = true;
-      }
-      
+      }  
     }
-
+    // publish twists to move
     cmd_vel_pub_.publish(base_cmd_);
     transformToBaseLink(targetPose_, targetPoseBaseLink_);
   }
 
-  // ROS_INFO("begin to move vorward");
-  // // move vorward
-  // //TODO: HEILE MACHEN
-  // //~ while (nh_->ok() && !xCoordArrived(targetPose) && !getInCollision() && targetPoseBaseLink_.pose.position.x > 0){
-  // while (nh_->ok() && !xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0){
-  //   base_cmd_.linear.x = 0.1;
-  //   cmd_vel_pub_.publish(base_cmd_);
-
-  //   transformToBaseLink(targetPose_, targetPoseBaseLink_);
-  // }
-
-  // ROS_INFO("move forward done, begin to move sideward");
-  // bool check = false;
-  // // move sideward
-  // //TODO: HEILE MACHEN
-  // //~ while (nh_->ok() && !yCoordArrived(targetPose_) && !getInCollision()){
-  // while (nh_->ok() && !yCoordArrived(targetPose_)){
-
-  //   base_cmd_.linear.x = 0;
-
-  //   // check if goal is on the left or right side
-  //   if (0 < targetPoseBaseLink_.pose.position.y && !check){
-  //     base_cmd_.linear.y = 0.1;
-  //     check = true;
-  //   } else {
-  //     base_cmd_.linear.y = (-0.1);
-  //     check = true;
-  //   }
-    
-  //   cmd_vel_pub_.publish(base_cmd_);
-    
-  //   transformToBaseLink(targetPose_, targetPoseBaseLink_);
-  //   std::cout << "Transformed pose:" << targetPoseBaseLink_.pose.position.x << " ";
-  //   std::cout << targetPoseBaseLink_.pose.position.y << std::endl;
-  // }
-  // ROS_INFO("move sideward done, target should be arrived");
-
   ROS_INFO_STREAM(targetPose_);
   ROS_INFO_STREAM(robotPose_);
 
+  // Finish him!
   return true;   
 }
