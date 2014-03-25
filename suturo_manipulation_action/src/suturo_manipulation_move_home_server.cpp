@@ -160,7 +160,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 		}
 		
 		// set target pose
-		group->setNamedTarget(body_part);
+		group->setNamedTarget(body_part+"_home");
 		
 		//move bodypart
 		if (group->move()){
