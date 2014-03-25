@@ -133,7 +133,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 			
 			group = new move_group_interface::MoveGroup(both_arms_group);
 			
-		} else if (body_part==suturo_manipulation_msgs::RobotBodyPart::THINK){
+		} else if (body_part==suturo_manipulation_msgs::RobotBodyPart::ALL){
 			
 			group = new move_group_interface::MoveGroup(arms_head_group);
 			
