@@ -178,7 +178,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
     //transform pose to base_link
     listener_.transformPose("/base_link", pose, poseInBaseLink);
   }catch(...){
-    ROS_INFO("ERROR: Transformation failed.");
+    ROS_ERROR_STREAM("ERROR: Transformation failed.");
     return false;
   }
   return true;
@@ -197,9 +197,9 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
 			collisions_.push_back(alpha);
 		}
 	}
-	if (!collisions_.empty()){
-		ROS_ERROR_STREAM("COLLISION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111elf" );
-	}
+	// if (!collisions_.empty()){
+	// 	ROS_ERROR_STREAM("COLLISION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111elf" );
+	// }
 }
 
 std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions(){
@@ -211,21 +211,7 @@ bool Suturo_Manipulation_Move_Robot::collisionInFront(){
   for (int position = getCollisions().size()-1; position > 0; position--){
     // between 90 degrees and 270 degrees
     if (getCollisions().at(position) > 1.57 && getCollisions().at(position) < 4.71){
-      ROS_INFO("Collision in front!");
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool Suturo_Manipulation_Move_Robot::collisionOnLeft(){
-
-  for (int position = getCollisions().size()-1; position > 0; position--){
-    // wenn auf der linken seite des robos 90 grad ist
-    // between 45 degrees and 135 degrees
-    if (getCollisions().at(position) > 0.79 && getCollisions().at(position) < 2.36){
-      ROS_INFO("Collision on left side!");
+      ROS_ERROR_STREAM("Collision in front!");
       return true;
     }
   }
@@ -236,10 +222,24 @@ bool Suturo_Manipulation_Move_Robot::collisionOnLeft(){
 bool Suturo_Manipulation_Move_Robot::collisionOnRight(){
 
   for (int position = getCollisions().size()-1; position > 0; position--){
-    // wenn auf der rechten seite des robos 270 grad ist
+    // wenn auf der rechten seite des robos 90 grad ist
+    // between 45 degrees and 135 degrees
+    if (getCollisions().at(position) > 0.79 && getCollisions().at(position) < 2.36){
+      ROS_ERROR_STREAM("Collision on right side!");
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Suturo_Manipulation_Move_Robot::collisionOnLeft(){
+
+  for (int position = getCollisions().size()-1; position > 0; position--){
+    // wenn auf der linken seite des robos 270 grad ist
     // between 225 degrees and 315 degrees
     if (getCollisions().at(position) > 3.93 && getCollisions().at(position) < 5.5){
-      ROS_INFO("Collision on right side!");
+      ROS_ERROR_STREAM("Collision on left side!");
       return true;
     }
   }

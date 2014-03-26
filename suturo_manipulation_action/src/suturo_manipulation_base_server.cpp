@@ -33,7 +33,7 @@ void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstP
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
 		server_base->setSucceeded(r);
 	} else {
-		// Set Answer fot planning to success
+		// Set Answer fot planning to fail
 		r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
 		server_base->setAborted(r);
 	}
