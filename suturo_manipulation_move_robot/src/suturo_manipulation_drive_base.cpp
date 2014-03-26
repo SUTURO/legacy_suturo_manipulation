@@ -3,18 +3,19 @@
 using namespace std;
 
 //! ROS node initialization
-Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle *nodehandle)
-{
-    nh_ = nodehandle;
 
-    pi_ = new Suturo_Manipulation_Planning_Scene_Interface(nh_);
-
-    //set up the publisher for the cmd_vel topic
-    cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
-    // localisation subscriber
-    loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
-    collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
-    ros::WallDuration(1.0).sleep();
+Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* nodehandle){
+  nh_ = nodehandle;
+  
+  pi_ = new Suturo_Manipulation_Planning_Scene_Interface(nh_);
+  
+  //set up the publisher for the cmd_vel topic
+  cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
+  coll_ps_pub_ = nh_->advertise<moveit_msgs::PlanningScene>("/suturo/collision_ps", 10);
+  // localisation subscriber
+  loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+  collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
+  ros::WallDuration(1.0).sleep();
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot()
@@ -28,42 +29,49 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamp
     robotPose_.pose = robotPoseFB.pose;
 }
 
-bool Suturo_Manipulation_Move_Robot::checkFullCollision(double danger_zone)
+bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone)
 {
-    moveit_msgs::PlanningScene ps;
-    pi_->getPlanningScene(ps);
+	moveit_msgs::PlanningScene ps;
+	pi_->getPlanningScene(ps);
+	
+	//~ //increase collisionobject size
+	//~ for (int i = 0; i < ps.world.collision_objects.size(); i++){
+		//~ moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
+		//~ if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
+			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
+			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
+			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
+		//~ } else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
+			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
+			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
+		//~ }
+	//~ }
+	
+	ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
+	
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.y = robot_pose.pose.position.y;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.z = robot_pose.pose.position.z;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.x = robot_pose.pose.orientation.x;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.y = robot_pose.pose.orientation.y;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.z = robot_pose.pose.orientation.z;
+	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.w = robot_pose.pose.orientation.w;
 
-    //increase collisionobject size
-    for (int i = 0; i < ps.world.collision_objects.size(); i++)
-    {
-        moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
-        if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX)
-        {
-            co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
-            co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
-            co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
-        }
-        else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER)
-        {
-            co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
-            co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
-        }
-    }
-
-    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
-    planning_scene::PlanningScene planning_scene(kinematic_model);
-
-    planning_scene.setPlanningSceneMsg(ps);
-
-    collision_detection::CollisionRequest collision_request;
-    collision_detection::CollisionResult collision_result;
-
-    collision_result.clear();
-    planning_scene.checkCollision(collision_request, collision_result);
-
-
-    return collision_result.collision;
+	robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+  robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+  planning_scene::PlanningScene planning_scene(kinematic_model);
+	
+	planning_scene.setPlanningSceneMsg(ps);
+	
+	collision_detection::CollisionRequest collision_request;
+  collision_detection::CollisionResult collision_result;
+	
+	collision_result.clear();
+	planning_scene.checkCollision(collision_request, collision_result);
+	
+	coll_ps_pub_.publish(ps);
+	
+	return collision_result.collision;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose)

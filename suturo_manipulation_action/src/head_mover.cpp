@@ -128,7 +128,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].orientation.w = 1;
   pub_co.publish(co);
 
-  ros::WallDuration(2.0).sleep();
+  ros::WallDuration(1.0).sleep();
 }
 
 void openhand()
@@ -189,23 +189,23 @@ int main(int argc, char **argv)
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
 	
-	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-	moveit_msgs::PlanningScene ps;
-	ROS_INFO_STREAM(pi.getPlanningScene(ps));
-	ROS_INFO_STREAM(ps.robot_state.multi_dof_joint_state);
+	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	//~ moveit_msgs::PlanningScene ps;
+	//~ ROS_INFO_STREAM(pi.getPlanningScene(ps));
+	//~ ROS_INFO_STREAM(ps);
+	//~ ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = 1;
 	
 	
-	//~ 
-	//~ geometry_msgs::PoseStamped targetPose;
-	//~ targetPose.header.frame_id = "/table";
-	//~ targetPose.pose.position.x = atof(argv[1]);
-	//~ targetPose.pose.position.y = atof(argv[2]);
-	//~ targetPose.pose.position.z = atof(argv[3]);
-	//~ targetPose.pose.orientation.w = 1;
-	//~ 
-	//~ Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	geometry_msgs::PoseStamped targetPose;
+	targetPose.header.frame_id = "/odom_combined";
+	targetPose.pose.position.x = atof(argv[1]);
+	targetPose.pose.position.y = atof(argv[2]);
+	targetPose.pose.position.z = atof(argv[3]);
+	targetPose.pose.orientation.w = 1;
+	
+	Suturo_Manipulation_Move_Robot moveRobot(&nh);
 	//~ while(true){
-		//~ ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision()));
+		ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision(targetPose)));
 		//~ ros::WallDuration(0.5).sleep();
 	//~ }
 	
