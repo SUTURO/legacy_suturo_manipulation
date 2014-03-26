@@ -291,14 +291,8 @@ bool Suturo_Manipulation_Move_Robot::collisionOnLeft()
 bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
-    if (currentVariation <= yVariation_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+    return currentVariation <= yVariation_;
 }
 
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose)
