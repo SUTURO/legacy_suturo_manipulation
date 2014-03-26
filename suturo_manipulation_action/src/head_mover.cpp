@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
 	moveit_msgs::PlanningScene ps;
 	ROS_INFO_STREAM(pi.getPlanningScene(ps));
-	ROS_INFO_STREAM(ps);
+	ROS_INFO_STREAM(ps.robot_state.multi_dof_joint_state);
 	
 	
 	//~ 

@@ -213,25 +213,32 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
     return true;
 }
 
-void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan &scan)
-{
-    collisions_.clear();
-    for (int i = 0; i < scan.ranges.size(); i++)
-    {
-
-        //cosinussatz um abstand zu mittelpunkt zu berechnen
-        double alpha = scan.angle_increment * i + 0.872664626;
-        double b = scan.ranges[i];
-        double c = -0.275;//dist base_link to base_laser_link
-        double a = sqrt((b * b) + (c * c) + (2 * b * c * cos(alpha)));
-        if (a < footprint_radius)
-        {
-            collisions_.push_back(alpha);
-        }
-    }
-    // if (!collisions_.empty()){
-    //  ROS_ERROR_STREAM("COLLISION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111elf" );
-    // }
+void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan){
+	collisions_.clear();
+	for (int i = 0; i < scan.ranges.size(); i++){
+		
+		//cosinussatz um abstand zu mittelpunkt zu berechnen
+		double alpha = scan.angle_increment*i + 0.872664626;
+		double b = scan.ranges[i];
+		double c = -0.275;//dist base_link to base_laser_link
+		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
+		if (a < footprint_radius){
+			//angle relativ to baselink
+			//~ c = -c;
+			double beta = acos ( (b*b - a*a - c*c) / (2*a*c) );
+			if (alpha <= M_PI){
+				beta = M_PI - beta;
+			} else {
+				beta += M_PI;
+			}
+			collisions_.push_back(beta);
+			ROS_INFO_STREAM("alpha " << alpha);
+			ROS_INFO_STREAM("beta " << beta);
+		}
+	}
+	if (!collisions_.empty()){
+		ROS_ERROR_STREAM("COLLISIONelf" );
+	}
 }
 
 std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions()
