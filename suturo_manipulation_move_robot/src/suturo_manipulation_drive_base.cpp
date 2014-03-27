@@ -307,7 +307,7 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
-    return currentVariation <= yVariation_;
+    return (currentVariation+0.05) <= yVariation_;
 }
 
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose)
