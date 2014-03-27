@@ -22,6 +22,9 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/kinematic_constraints/utils.h>
 
+#include <boost/signals2/mutex.hpp>
+
+
 
 class Suturo_Manipulation_Move_Robot
 {
@@ -63,6 +66,8 @@ private:
 
 	// y Distance between target and robot pose at the beginning
 	double yVariation_;
+
+	boost::signals2::mutex mtx_;
 
 	/**
 	 * Sets robotPose_ with incoming data from the localization topic.
@@ -133,7 +138,7 @@ private:
 	* @return true, if collsion
 	*					false, if not
 	*/
-	bool collisionInFront();
+	bool collisionInFront(std::vector<double> collisionsList);
 
 	/**
 	* Checks if a collision is on the left side of the robot.
@@ -141,7 +146,7 @@ private:
 	* @return true, if collsion
 	*					false, if not
 	*/
-	bool collisionOnLeft();
+	bool collisionOnLeft(std::vector<double> collisionsList);
 
 	/**
 	* Checks if a collision is on the right side of the robot.
@@ -149,7 +154,7 @@ private:
 	* @return true, if collsion
 	*					false, if not
 	*/
-	bool collisionOnRight();
+	bool collisionOnRight(std::vector<double> collisionsList);
 
 	/**
 	* Checks the current variation on the y axis between

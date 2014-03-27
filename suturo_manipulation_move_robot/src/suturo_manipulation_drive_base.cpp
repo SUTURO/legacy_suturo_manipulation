@@ -4,18 +4,19 @@ using namespace std;
 
 //! ROS node initialization
 
-Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle* nodehandle){
-  nh_ = nodehandle;
-  
-  pi_ = new Suturo_Manipulation_Planning_Scene_Interface(nh_);
-  
-  //set up the publisher for the cmd_vel topic
-  cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
-  coll_ps_pub_ = nh_->advertise<moveit_msgs::PlanningScene>("/suturo/collision_ps", 10);
-  // localisation subscriber
-  loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
-  collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
-  ros::WallDuration(1.0).sleep();
+Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle *nodehandle)
+{
+    nh_ = nodehandle;
+
+    pi_ = new Suturo_Manipulation_Planning_Scene_Interface(nh_);
+
+    //set up the publisher for the cmd_vel topic
+    cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
+    coll_ps_pub_ = nh_->advertise<moveit_msgs::PlanningScene>("/suturo/collision_ps", 10);
+    // localisation subscriber
+    loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+    collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
+    ros::WallDuration(1.0).sleep();
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot()
@@ -31,47 +32,47 @@ void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamp
 
 bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone)
 {
-	moveit_msgs::PlanningScene ps;
-	pi_->getPlanningScene(ps);
-	
-	//~ //increase collisionobject size
-	//~ for (int i = 0; i < ps.world.collision_objects.size(); i++){
-		//~ moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
-		//~ if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
-			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
-			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
-			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
-		//~ } else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
-			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
-			//~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
-		//~ }
-	//~ }
-	
-	ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
-	
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.y = robot_pose.pose.position.y;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.z = robot_pose.pose.position.z;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.x = robot_pose.pose.orientation.x;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.y = robot_pose.pose.orientation.y;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.z = robot_pose.pose.orientation.z;
-	ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.w = robot_pose.pose.orientation.w;
+    moveit_msgs::PlanningScene ps;
+    pi_->getPlanningScene(ps);
 
-	robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-  robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
-  planning_scene::PlanningScene planning_scene(kinematic_model);
-	
-	planning_scene.setPlanningSceneMsg(ps);
-	
-	collision_detection::CollisionRequest collision_request;
-  collision_detection::CollisionResult collision_result;
-	
-	collision_result.clear();
-	planning_scene.checkCollision(collision_request, collision_result);
-	
-	coll_ps_pub_.publish(ps);
-	
-	return collision_result.collision;
+    //~ //increase collisionobject size
+    //~ for (int i = 0; i < ps.world.collision_objects.size(); i++){
+    //~ moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
+    //~ if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
+    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
+    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
+    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
+    //~ } else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
+    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
+    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
+    //~ }
+    //~ }
+
+    ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
+
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.y = robot_pose.pose.position.y;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.z = robot_pose.pose.position.z;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.x = robot_pose.pose.orientation.x;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.y = robot_pose.pose.orientation.y;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.z = robot_pose.pose.orientation.z;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.w = robot_pose.pose.orientation.w;
+
+    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    planning_scene::PlanningScene planning_scene(kinematic_model);
+
+    planning_scene.setPlanningSceneMsg(ps);
+
+    collision_detection::CollisionRequest collision_request;
+    collision_detection::CollisionResult collision_result;
+
+    collision_result.clear();
+    planning_scene.checkCollision(collision_request, collision_result);
+
+    coll_ps_pub_.publish(ps);
+
+    return collision_result.collision;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose)
@@ -221,32 +222,42 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
     return true;
 }
 
-void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan& scan){
-	collisions_.clear();
-	for (int i = 0; i < scan.ranges.size(); i++){
-		
-		//cosinussatz um abstand zu mittelpunkt zu berechnen
-		double alpha = scan.angle_increment*i + 0.872664626;
-		double b = scan.ranges[i];
-		double c = -0.275;//dist base_link to base_laser_link
-		double a = sqrt((b*b) + (c*c) + (2*b*c * cos(alpha)));
-		if (a < footprint_radius){
-			//angle relativ to baselink
-			//~ c = -c;
-			double beta = acos ( (b*b - a*a - c*c) / (2*a*c) );
-			if (alpha <= M_PI){
-				beta = M_PI - beta;
-			} else {
-				beta += M_PI;
-			}
-			collisions_.push_back(beta);
-			// ROS_INFO_STREAM("alpha " << alpha);
-			// ROS_INFO_STREAM("beta " << beta);
-		}
-	}
-	// if (!collisions_.empty()){
- //    ROS_ERROR_STREAM("COLLISIONelf" );
-	// }
+void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan &scan)
+{
+    std::vector<double> collisionsListTemp;
+
+    for (int i = 0; i < scan.ranges.size(); i++)
+    {
+
+        //cosinussatz um abstand zu mittelpunkt zu berechnen
+        double alpha = scan.angle_increment * i + 0.872664626;
+        double b = scan.ranges[i];
+        double c = -0.275;//dist base_link to base_laser_link
+        double a = sqrt((b * b) + (c * c) + (2 * b * c * cos(alpha)));
+        if (a < footprint_radius)
+        {
+            //angle relativ to baselink
+            //~ c = -c;
+            double beta = acos ( (b * b - a * a - c * c) / (2 * a * c) );
+            if (alpha <= M_PI)
+            {
+                beta = M_PI - beta;
+            }
+            else
+            {
+                beta += M_PI;
+            }
+            collisionsListTemp.push_back(beta);
+            // ROS_INFO_STREAM("alpha " << alpha);
+            // ROS_INFO_STREAM("beta " << beta);
+        }
+    }
+    mtx_.lock();
+    collisions_ = collisionsListTemp;
+    mtx_.unlock();
+    // if (!collisions_.empty()){
+    //    ROS_ERROR_STREAM("COLLISIONelf" );
+    // }
 }
 
 std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions()
@@ -254,13 +265,13 @@ std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions()
     return collisions_;
 }
 
-bool Suturo_Manipulation_Move_Robot::collisionInFront()
+bool Suturo_Manipulation_Move_Robot::collisionInFront(std::vector<double> collisionsList)
 {
 
-    for (int position = getCollisions().size() - 1; position > 0; position--)
+    for (int position = collisionsList.size() - 1; position >= 0; position--)
     {
         // between 90 degrees and 270 degrees
-        if (getCollisions().at(position) > 1.57 && getCollisions().at(position) < 4.71)
+        if (collisionsList.at(position) > 1.57 && collisionsList.at(position) < 4.71)
         {
             ROS_ERROR_STREAM("Collision in front!");
             return true;
@@ -270,14 +281,14 @@ bool Suturo_Manipulation_Move_Robot::collisionInFront()
     return false;
 }
 
-bool Suturo_Manipulation_Move_Robot::collisionOnRight()
+bool Suturo_Manipulation_Move_Robot::collisionOnRight(std::vector<double> collisionsList)
 {
 
-    for (int position = getCollisions().size() - 1; position > 0; position--)
+    for (int position = collisionsList.size() - 1; position >= 0; position--)
     {
         // wenn auf der rechten seite des robos 90 grad ist
         // between 45 degrees and 135 degrees
-        if (getCollisions().at(position) > 0.79 && getCollisions().at(position) < 2.36)
+        if (collisionsList.at(position) > 0.79 && collisionsList.at(position) < 2.36)
         {
             ROS_ERROR_STREAM("Collision on right side!");
             return true;
@@ -287,14 +298,14 @@ bool Suturo_Manipulation_Move_Robot::collisionOnRight()
     return false;
 }
 
-bool Suturo_Manipulation_Move_Robot::collisionOnLeft()
+bool Suturo_Manipulation_Move_Robot::collisionOnLeft(std::vector<double> collisionsList)
 {
 
-    for (int position = getCollisions().size() - 1; position > 0; position--)
+    for (int position = collisionsList.size() - 1; position >= 0; position--)
     {
         // wenn auf der linken seite des robos 270 grad ist
         // between 225 degrees and 315 degrees
-        if (getCollisions().at(position) > 3.93 && getCollisions().at(position) < 5.5)
+        if (collisionsList.at(position) > 3.93 && collisionsList.at(position) < 5.5)
         {
             ROS_ERROR_STREAM("Collision on left side!");
             return true;
@@ -307,7 +318,7 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
-    return (currentVariation+0.05) <= yVariation_;
+    return currentVariation <= (yVariation_ + 0.05);
 }
 
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose)
@@ -351,18 +362,33 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     ROS_INFO("begin to move");
 
     double yTwist;
+    bool moveLeft = false;
+    bool moveRight = false;
+    std::vector<double> collisionsList;
+
+    mtx_.lock();
+    collisionsList = getCollisions();
+    mtx_.unlock();
+
     // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
-    if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft())
+    // TODO: Referenzen an die Methoden uebergeben
+    if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList))
     {
         yTwist = 0.1;
+        moveLeft = true;
+        moveRight = false;
     }
-    else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight())
+    else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList))
     {
         yTwist = (-0.1);
+        moveRight = true;
+        moveLeft = false;
     }
     else
     {
         yTwist = 0;
+        moveLeft = false;
+        moveRight = false;
     }
     ROS_INFO_STREAM("yTwist: " << yTwist);
 
@@ -370,10 +396,15 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     bool moved = true;
 
     // calculate current yVariation
+    // TODO: Testen ob nen double kommt
     yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
+
 
     while (nh_->ok() && moved)
     {
+        mtx_.lock();
+        collisionsList = getCollisions();
+        mtx_.unlock();
         // reset all the values!!!!11elf
         base_cmd_.linear.x = 0;
         base_cmd_.linear.y = 0;
@@ -381,7 +412,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         moved = false;
 
         // set x twist
-        if (!xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0 && !collisionInFront())
+        if (!xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0 && !collisionInFront(collisionsList))
         {
             base_cmd_.linear.x = 0.1;
             moved = true;
@@ -392,14 +423,33 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         {
             if (checkYVariation())
             {
-                base_cmd_.linear.y = yTwist;
-                moved = true;
+                if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
+                {
+                    base_cmd_.linear.y = yTwist;
+                    moved = true;
+                }
+                else
+                {
+                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+                }
+
             }
+            // change y direction
             else
             {
-                yTwist = (yTwist * (-1));
-                base_cmd_.linear.y = yTwist;
-                moved = true;
+                if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
+                {
+                    yTwist = (yTwist * (-1));
+                    bool moveRightOld = moveRight;
+                    moveRight = moveLeft;
+                    moveLeft = moveRightOld;
+                    base_cmd_.linear.y = yTwist;
+                    moved = true;
+                }
+                else
+                {
+                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+                }
             }
         }
         // publish twists to move
