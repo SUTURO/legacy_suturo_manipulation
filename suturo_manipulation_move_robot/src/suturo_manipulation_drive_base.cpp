@@ -240,13 +240,13 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
 				beta += M_PI;
 			}
 			collisions_.push_back(beta);
-			ROS_INFO_STREAM("alpha " << alpha);
-			ROS_INFO_STREAM("beta " << beta);
+			// ROS_INFO_STREAM("alpha " << alpha);
+			// ROS_INFO_STREAM("beta " << beta);
 		}
 	}
-	if (!collisions_.empty()){
-		ROS_ERROR_STREAM("COLLISIONelf" );
-	}
+	// if (!collisions_.empty()){
+ //    ROS_ERROR_STREAM("COLLISIONelf" );
+	// }
 }
 
 std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions()

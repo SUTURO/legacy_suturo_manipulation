@@ -106,12 +106,12 @@ public:
   static const std::vector<std::string> get_l_gripper_links() {
     static std::vector<std::string> r2;
     r2.push_back("l_gripper_l_finger_link");
-		r2.push_back("l_gripper_l_finger_tip_link");
-		r2.push_back("l_gripper_motor_accelerometer_link");
-		r2.push_back("l_gripper_palm_link");
-		r2.push_back("l_gripper_r_finger_link");
-		r2.push_back("l_gripper_r_finger_tip_link");
-		static const std::vector<std::string> r = r2;
+	r2.push_back("l_gripper_l_finger_tip_link");
+	r2.push_back("l_gripper_motor_accelerometer_link");
+	r2.push_back("l_gripper_palm_link");
+	r2.push_back("l_gripper_r_finger_link");
+	r2.push_back("l_gripper_r_finger_tip_link");
+	static const std::vector<std::string> r = r2;
     return r;
   } 
   

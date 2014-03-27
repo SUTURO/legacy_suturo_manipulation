@@ -50,7 +50,7 @@ geometry_msgs::PoseStamped getCamPose(ros::NodeHandle n){
 	if (!n.getParam("/suturo_manipulation_tf_publisher/cam_z", cam_pose.pose.position.z)){
 		ROS_ERROR_STREAM("Failed to get z coordinate for Cam.");
 	}
-	ROS_INFO_STREAM(cam_pose);
+
 	return cam_pose;
 }
 

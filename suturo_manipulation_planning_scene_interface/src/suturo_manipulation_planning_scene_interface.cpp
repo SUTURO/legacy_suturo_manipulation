@@ -3,9 +3,16 @@
 Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle)
 {
 	nh_ = nodehandle;
+	
+	//publisher
 	attached_object_publisher_ = nh_->advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
 	collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);	
 	vis_pub_ = nh_->advertise<visualization_msgs::Marker>( "visualization_marker", 10 );
+	planning_scene_publisher = nh_->advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
+
+
+	//service clients
+	ps_service_client_ = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
 	
 	//wait because ros
 	ros::WallDuration(0.5).sleep();
@@ -16,6 +23,32 @@ Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scen
 
 }
 
+int Suturo_Manipulation_Planning_Scene_Interface::allowCollision(std::string object1, std::string object2)
+{
+	moveit_msgs::PlanningScene ps;
+	if (!getPlanningScene(ps)) return 0;
+	
+	collision_detection::AllowedCollisionMatrix acm(ps.allowed_collision_matrix);  
+	
+	acm.setEntry(object1, object2, true);
+	
+	acm.getMessage(ps.allowed_collision_matrix);
+	
+	planning_scene_publisher.publish(ps);	
+
+	// collision_detection::AllowedCollisionMatrix acm = planning_scene.getAllowedCollisionMatrix();  
+	// robot_state::RobotState copied_state = planning_scene.getCurrentState();   
+	// for(collision_detection::CollisionResult::ContactMap::const_iterator it = collision_result.contacts.begin(); 
+	// 		it != collision_result.contacts.end(); 
+	// 		++it)
+	// {
+	// 	acm.setEntry(it->first.first, it->first.second, true);    
+	// }
+	// collision_result.clear();
+	// planning_scene.checkSelfCollision(collision_request, collision_result, copied_state, acm);
+	// ROS_INFO_STREAM("Test 5: Current state is " << (collision_result.collision ? "in" : "not in") << " self collision");  
+}
+
 int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::PlanningScene &ps)
 {
 	//create msg to get Objectnames and Objectgeometry from planningscene
@@ -23,9 +56,9 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
 	msg.request.components.components = 1023;
 	
 	//get planningscene
-	ros::ServiceClient client = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
-	client.call(msg);
-	if (client.call(msg))
+	
+	ps_service_client_.call(msg);
+	if (ps_service_client_.call(msg))
 	{
 		ps = msg.response.scene;
 	}

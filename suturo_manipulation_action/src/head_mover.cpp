@@ -184,31 +184,40 @@ int main(int argc, char **argv)
 	//~ p.pose.position.y = 0;
 	//~ p.pose.position.z = 0.625;
 	//~ p.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);
-	
 
-	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	putObjects(pub_co);
+	// ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+	// putObjects(pub_co);
 	
-	//~ Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-	//~ moveit_msgs::PlanningScene ps;
-	//~ ROS_INFO_STREAM(pi.getPlanningScene(ps));
-	//~ ROS_INFO_STREAM(ps);
-	//~ ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = 1;
+	Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+	pi.allowCollision("r_gripper_l_finger_link", "corny");
+	pi.allowCollision("r_gripper_l_finger_tip_link", "corny");
+	pi.allowCollision("r_gripper_motor_accelerometer_link", "corny");
+	pi.allowCollision("r_gripper_palm_link", "corny");
+	pi.allowCollision("r_gripper_r_finger_link", "corny");
+	pi.allowCollision("r_gripper_r_finger_tip_link", "corny");
+
+	pi.allowCollision("l_gripper_l_finger_link", "cafetfilter");
+	pi.allowCollision("l_gripper_l_finger_tip_link", "cafetfilter");
+	pi.allowCollision("l_gripper_motor_accelerometer_link", "cafetfilter");
+	pi.allowCollision("l_gripper_palm_link", "cafetfilter");
+	pi.allowCollision("l_gripper_r_finger_link", "cafetfilter");
+	pi.allowCollision("l_gripper_r_finger_tip_link", "cafetfilter");
+
+	// moveit_msgs::PlanningScene ps;
+	// ROS_INFO_STREAM(pi.getPlanningScene(ps));
+	// ROS_INFO_STREAM(ps);
+	// ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = 1;
 	
+	// geometry_msgs::PoseStamped targetPose;
+	// targetPose.header.frame_id = "/odom_combined";
+	// targetPose.pose.position.x = atof(argv[1]);
+	// targetPose.pose.position.y = atof(argv[2]);
+	// targetPose.pose.position.z = atof(argv[3]);
+	// targetPose.pose.orientation.w = 1;
 	
-	geometry_msgs::PoseStamped targetPose;
-	targetPose.header.frame_id = "/odom_combined";
-	targetPose.pose.position.x = atof(argv[1]);
-	targetPose.pose.position.y = atof(argv[2]);
-	targetPose.pose.position.z = atof(argv[3]);
-	targetPose.pose.orientation.w = 1;
-	
-	Suturo_Manipulation_Move_Robot moveRobot(&nh);
-	//~ while(true){
-		ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision(targetPose)));
-		//~ ros::WallDuration(0.5).sleep();
-	//~ }
-	
+	// Suturo_Manipulation_Move_Robot moveRobot(&nh);
+	// ROS_INFO_STREAM("collision: " << (moveRobot.checkFullCollision(targetPose)));
+
 	//~ ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	//~ putObjects(pub_co);
 	//~ 

@@ -4,19 +4,22 @@
 #include <iostream>
 
 #include <ros/ros.h>
+
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
+
 #include <suturo_manipulation_planning_scene_interface.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/LaserScan.h>
+
 #include <cmath>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
-
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/kinematic_constraints/utils.h>
 
 

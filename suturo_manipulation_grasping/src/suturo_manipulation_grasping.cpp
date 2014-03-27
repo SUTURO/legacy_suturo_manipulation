@@ -265,19 +265,19 @@ int Grasping::updateGraspedBoxPose(moveit_msgs::CollisionObject &co, int graspab
 	//ultra ugly shit:
 	//if the x side can be grasped and the first 4 id's are positions for this side, etc
 	
-	if (graspable_sides % x_side_graspable == 0 && pos_id <= 3){
-		//x axis has been grasped
-		ROS_DEBUG_STREAM("x axis has been grasped");
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_state - noise;
-	} else if (graspable_sides % y_side_graspable == 0 && (pos_id <= 3 || graspable_sides % 2 == 0 && (pos_id >= 4	&& pos_id <= 7))){
-		//y axis has been grasped
-		ROS_DEBUG_STREAM("y axis has been grasped");
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_state - noise;
-	} else {
-		//z axis has been grasped
-		ROS_DEBUG_STREAM("z axis has been grasped");
-		co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = gripper_state - noise;
-	}
+	// if (graspable_sides % x_side_graspable == 0 && pos_id <= 3){
+	// 	//x axis has been grasped
+	// 	ROS_DEBUG_STREAM("x axis has been grasped");
+	// 	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = gripper_state - noise;
+	// } else if (graspable_sides % y_side_graspable == 0 && (pos_id <= 3 || graspable_sides % 2 == 0 && (pos_id >= 4	&& pos_id <= 7))){
+	// 	//y axis has been grasped
+	// 	ROS_DEBUG_STREAM("y axis has been grasped");
+	// 	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = gripper_state - noise;
+	// } else {
+	// 	//z axis has been grasped
+	// 	ROS_DEBUG_STREAM("z axis has been grasped");
+	// 	co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = gripper_state - noise;
+	// }
 	
 	return 1;
 }
@@ -383,14 +383,25 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 			//close gripper
 			if (arm == RIGHT_ARM){
 				gripper_state = gripper_->close_r_gripper(force);
+				std::vector<std::string> links = gripper_->get_r_gripper_links();
+				for (int i = 0; i < links.size(); i++)
+				{
+					pi_->allowCollision(links.at(i), object_name);
+				}
 			}else{
 				gripper_state = gripper_->close_l_gripper(force);
+				std::vector<std::string> links = gripper_->get_l_gripper_links();
+				for (int i = 0; i < links.size(); i++)
+				{
+					pi_->allowCollision(links.at(i), object_name);
+				}
 			}
 			
 			//update object sizes to avoid selfkollisions
-			ROS_DEBUG_STREAM("update objectposition in planningscene.");
-			updateGraspedBoxPose(co, graspable_sides, pos_id, gripper_state);
-			updateGraspedCylinderPose(co, move_group->getCurrentPose(), gripper_state);
+			// ROS_DEBUG_STREAM("update objectposition in planningscene.");
+
+			// updateGraspedBoxPose(co, graspable_sides, pos_id, gripper_state);
+			// updateGraspedCylinderPose(co, move_group->getCurrentPose(), gripper_state);
 			
 			//update collisionobject in planningscene
 			if (!pi_->addObject(co)) 
