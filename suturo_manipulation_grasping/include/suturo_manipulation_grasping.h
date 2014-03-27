@@ -117,6 +117,8 @@ private:
 				std::vector<geometry_msgs::PoseStamped> &pre_poses);
 				
 	int lookAt(geometry_msgs::PoseStamped pose);
+
+	
 	
 public:
 	

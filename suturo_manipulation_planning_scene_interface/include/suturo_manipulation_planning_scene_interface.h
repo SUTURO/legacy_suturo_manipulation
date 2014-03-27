@@ -111,6 +111,8 @@ public:
 	int isAnObjectAttachedToArm(std::string link_name);
 	
 	int allowCollision(std::string object1, std::string object2);
+
+	int denyCollision(std::string object1, std::string object2);
 	
 	/**
 	 * Publish a Marker for rviz at the given pose.

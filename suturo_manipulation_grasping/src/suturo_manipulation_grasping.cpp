@@ -383,18 +383,8 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 			//close gripper
 			if (arm == RIGHT_ARM){
 				gripper_state = gripper_->close_r_gripper(force);
-				std::vector<std::string> links = gripper_->get_r_gripper_links();
-				for (int i = 0; i < links.size(); i++)
-				{
-					pi_->allowCollision(links.at(i), object_name);
-				}
 			}else{
 				gripper_state = gripper_->close_l_gripper(force);
-				std::vector<std::string> links = gripper_->get_l_gripper_links();
-				for (int i = 0; i < links.size(); i++)
-				{
-					pi_->allowCollision(links.at(i), object_name);
-				}
 			}
 			
 			//update object sizes to avoid selfkollisions
@@ -409,8 +399,13 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 			
 			//attach object
 			ROS_INFO_STREAM("attach object");
-			if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_r_gripper_links())) 
+			if (arm == RIGHT_ARM){
+				if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_r_gripper_links())) 
 				return 0;
+			}else{
+				if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(), Gripper::get_l_gripper_links())) 
+				return 0;
+			}
 				
 			ROS_INFO_STREAM("\n\n Picking finished \n");
 			return 1;

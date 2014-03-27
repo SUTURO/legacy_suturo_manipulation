@@ -35,18 +35,22 @@ int Suturo_Manipulation_Planning_Scene_Interface::allowCollision(std::string obj
 	acm.getMessage(ps.allowed_collision_matrix);
 	
 	planning_scene_publisher.publish(ps);	
+	return 1;
+}
 
-	// collision_detection::AllowedCollisionMatrix acm = planning_scene.getAllowedCollisionMatrix();  
-	// robot_state::RobotState copied_state = planning_scene.getCurrentState();   
-	// for(collision_detection::CollisionResult::ContactMap::const_iterator it = collision_result.contacts.begin(); 
-	// 		it != collision_result.contacts.end(); 
-	// 		++it)
-	// {
-	// 	acm.setEntry(it->first.first, it->first.second, true);    
-	// }
-	// collision_result.clear();
-	// planning_scene.checkSelfCollision(collision_request, collision_result, copied_state, acm);
-	// ROS_INFO_STREAM("Test 5: Current state is " << (collision_result.collision ? "in" : "not in") << " self collision");  
+int Suturo_Manipulation_Planning_Scene_Interface::denyCollision(std::string object1, std::string object2)
+{
+	moveit_msgs::PlanningScene ps;
+	if (!getPlanningScene(ps)) return 0;
+	
+	collision_detection::AllowedCollisionMatrix acm(ps.allowed_collision_matrix);  
+	
+	acm.setEntry(object1, object2, false);
+	
+	acm.getMessage(ps.allowed_collision_matrix);
+	
+	planning_scene_publisher.publish(ps);	
+	return 1; 
 }
 
 int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::PlanningScene &ps)
@@ -110,6 +114,11 @@ int Suturo_Manipulation_Planning_Scene_Interface::attachObject(std::string objec
 	//tell the planningscene that the object is attached
 	attached_object_publisher_.publish(attached_object);
 	
+	// for (int i = 0; i < gripper_links.size(); i++)
+	// {
+	// 	pi_->allowCollision(gripper_links.at(i), object_name);
+	// }
+
 	//wait because ros
 	ros::WallDuration(1.0).sleep();
 	ROS_DEBUG_STREAM("Attached " << object_name << " to " << link_name << ".");
@@ -225,6 +234,12 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	//detach it
 	attached_object_publisher_.publish(detached_object); 
 	
+	//deny collision
+	// for (int i = 0; i < gripper_links.size(); i++)
+	// {
+	// 	pi_->denyCollision(gripper_links.at(i), object_name);
+	// }
+
 	//wait because ros
 	ros::WallDuration(1.0).sleep();
 	ROS_INFO_STREAM(object_name << " detached.");
