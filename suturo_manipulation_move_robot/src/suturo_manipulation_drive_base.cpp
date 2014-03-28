@@ -117,12 +117,12 @@ bool Suturo_Manipulation_Move_Robot::checkLocalization()
 
 bool Suturo_Manipulation_Move_Robot::xCoordArrived(geometry_msgs::PoseStamped targetPose)
 {
-    return (robotPose_.pose.position.x < targetPose.pose.position.x + 0.01 && robotPose_.pose.position.x > targetPose.pose.position.x - 0.01);
+    return (robotPose_.pose.position.x < targetPose.pose.position.x + 0.02 && robotPose_.pose.position.x > targetPose.pose.position.x - 0.02);
 }
 
 bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped targetPose)
 {
-    return (robotPose_.pose.position.y < targetPose.pose.position.y + 0.01 && robotPose_.pose.position.y > targetPose.pose.position.y - 0.01);
+    return (robotPose_.pose.position.y < targetPose.pose.position.y + 0.02 && robotPose_.pose.position.y > targetPose.pose.position.y - 0.02);
 }
 
 bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion *targetOrientation)
@@ -179,17 +179,28 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
     tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
     tf::Quaternion robotOrientation(0, 0, 0, 1);
 
+    std::vector<double> collisionsListRotation;
+
     ROS_INFO("Begin to rotate base");
 
     if (calculateZTwist(targetQuaternion))
     {
         while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_))
-        {
+        {   
 
-            if (!getCollisions().empty())
+            mtx_.lock();
+            collisionsListRotation = getCollisions();
+            mtx_.unlock();
+
+            if (collisionInFront(collisionsListRotation))
             {
-                ROS_ERROR_STREAM("Detect collision, rotating and moving aborted!");
-                return false;
+                ROS_INFO_STREAM("Detect collision, move back!");
+
+                base_cmd_.linear.x=(-0.1);
+
+                cmd_vel_pub_.publish(base_cmd_);
+                base_cmd_.linear.x=0;
+                continue;
             }
 
             base_cmd_.angular.z = zTwist_;
@@ -318,6 +329,8 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
+    ROS_INFO_STREAM("yVariation: " << yVariation_ << " & currentVariation: " << currentVariation);
+
     return currentVariation <= (yVariation_ + 0.05);
 }
 
@@ -372,13 +385,13 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
     // TODO: Referenzen an die Methoden uebergeben
-    if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList))
+    if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList) && !yCoordArrived(targetPose_))
     {
         yTwist = 0.1;
         moveLeft = true;
         moveRight = false;
     }
-    else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList))
+    else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList) && !yCoordArrived(targetPose_))
     {
         yTwist = (-0.1);
         moveRight = true;
