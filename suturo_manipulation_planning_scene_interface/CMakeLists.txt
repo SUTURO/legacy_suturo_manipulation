@@ -8,6 +8,8 @@ project(suturo_manipulation_planning_scene_interface)
 
 
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  tf
   actionlib
   roscpp
   moveit_ros_planning_interface
@@ -99,8 +101,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+	include
+	${catkin_INCLUDE_DIRS}
+ 	${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -117,17 +120,17 @@ add_library(suturo_manipulation_planning_scene_interface
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_gripper_controller_node suturo_manipulation_gripper_controller_generate_messages_cpp)
 
-#add_dependencies(suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_gripper_controller_node
 #   ${catkin_LIBRARIES}
 # )
 
-#target_link_libraries(
-#  suturo_manipulation_gripper_controller 
-#  ${catkin_LIBRARIES}
-#)
+target_link_libraries(
+  suturo_manipulation_planning_scene_interface 
+  ${catkin_LIBRARIES}
+)
 
 
 

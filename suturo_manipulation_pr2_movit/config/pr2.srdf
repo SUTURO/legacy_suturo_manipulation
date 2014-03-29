@@ -151,6 +151,15 @@
         <joint name="l_wrist_flex_joint" value="-0.1" />
         <joint name="l_wrist_roll_joint" value="1.5" />
     </group_state>
+    <group_state name="left_arm_cam_pose_home" group="left_arm">
+        <joint name="l_elbow_flex_joint" value="-1.6" />
+        <joint name="l_forearm_roll_joint" value="0" />
+        <joint name="l_shoulder_lift_joint" value="0" />
+        <joint name="l_shoulder_pan_joint" value="1.5" />
+        <joint name="l_upper_arm_roll_joint" value="0" />
+        <joint name="l_wrist_flex_joint" value="-0.1" />
+        <joint name="l_wrist_roll_joint" value="1.5" />
+    </group_state>
     <group_state name="both_arms_home" group="both_arms">
         <joint name="l_elbow_flex_joint" value="-1.6" />
         <joint name="l_forearm_roll_joint" value="0" />
@@ -167,7 +176,11 @@
         <joint name="r_wrist_flex_joint" value="-0.1" />
         <joint name="r_wrist_roll_joint" value="1.5" />
     </group_state>
+<<<<<<< HEAD
     <group_state name="thinking" group="arms_head">
+=======
+    <group_state name="thinking_home" group="arms_head">
+>>>>>>> devel
         <joint name="head_pan_joint" value="0" />
         <joint name="head_tilt_joint" value="-0.2868" />
         <joint name="l_elbow_flex_joint" value="-1.49" />

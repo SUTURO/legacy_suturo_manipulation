@@ -199,6 +199,7 @@ int main(int argc, char** argv)
 	ros::Publisher head_publisher = n.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 	
 	// create the action server
+
 	Server server_arm(n, "suturo_man_move_arm_server", boost::bind(&moveArm, _1, &n, &head_publisher, &server_arm), false);
 
 	// start the server

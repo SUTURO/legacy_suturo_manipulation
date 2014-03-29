@@ -8,6 +8,10 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/kinematic_constraints/utils.h>
+
 #include <visualization_msgs/Marker.h>
 
 class Suturo_Manipulation_Planning_Scene_Interface{
@@ -16,6 +20,9 @@ private:
 	ros::Publisher attached_object_publisher_;
 	ros::Publisher collision_object_publisher_;
 	ros::Publisher vis_pub_;
+	ros::Publisher planning_scene_publisher;
+	
+	ros::ServiceClient ps_service_client_;
 
 public:
 	Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle);
@@ -102,6 +109,10 @@ public:
 	 * 					0, otherwise
 	 */	
 	int isAnObjectAttachedToArm(std::string link_name);
+	
+	int allowCollision(std::string object1, std::string object2);
+
+	int denyCollision(std::string object1, std::string object2);
 	
 	/**
 	 * Publish a Marker for rviz at the given pose.

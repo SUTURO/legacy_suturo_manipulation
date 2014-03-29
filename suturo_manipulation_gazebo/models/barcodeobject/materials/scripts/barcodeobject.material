@@ -1,0 +1,15 @@
+material barcodeobject/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture barcodeobject.jpg
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}
