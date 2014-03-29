@@ -452,12 +452,14 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
             {
                 if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
                 {
+                    yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
                     yTwist = (yTwist * (-1));
                     bool moveRightOld = moveRight;
                     moveRight = moveLeft;
                     moveLeft = moveRightOld;
                     base_cmd_.linear.y = yTwist;
                     moved = true;
+                    ROS_INFO_STREAM("Changed yTwist to: " << yTwist);
                 }
                 else
                 {

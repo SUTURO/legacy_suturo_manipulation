@@ -1,7 +1,7 @@
 <launch>
 
 <param name="/suturo_manipulation_tf_publisher/cam_frame" type="string" value="/laser_tilt_mount_link" />
-<param name="/suturo_manipulation_tf_publisher/cam_x" type="double" value="-0.02" />
+<param name="/suturo_manipulation_tf_publisher/cam_x" type="double" value="-0.04" />
 <param name="/suturo_manipulation_tf_publisher/cam_y" type="double" value="-0.26" />
 <param name="/suturo_manipulation_tf_publisher/cam_z" type="double" value="0.0" />
 
