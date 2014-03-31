@@ -111,6 +111,8 @@ int main(int argc, char** argv){
 
   gripper.findTwoContacts();
   gripper.hold(10.0);   // hold with 10 N of force
+  //ros::waitForShutdown();
+  gripper.open();
 
   return 0;
 }
