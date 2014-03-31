@@ -105,6 +105,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  hack_for_groovy
 #  ${EIGEN_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
@@ -118,8 +119,9 @@ add_library(suturo_manipulation_grasping
 
 
 ## Declare a cpp executable
-# add_executable(suturo_manipulation_gripper_controller src/suturo_manipulation_gripper_controller.cpp)
-
+add_executable(suturo_manipulation_reactive_grasping src/suturo_manipulation_reactive_grasping.cpp)
+add_dependencies(suturo_manipulation_reactive_grasping ${catkin_EXPORTED_TARGETS})
+target_link_libraries(suturo_manipulation_reactive_grasping ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -134,6 +136,7 @@ add_dependencies(suturo_manipulation_grasping suturo_manipulation_gripper_contro
 
 target_link_libraries(
   suturo_manipulation_grasping
+  # suturo_manipulation_reactive_grasping
   suturo_manipulation_gripper_controller 
   suturo_manipulation_planning_scene_interface
   ${catkin_LIBRARIES}
