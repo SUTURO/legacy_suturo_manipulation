@@ -13,28 +13,22 @@
 
 #include <visualization_msgs/Marker.h>
 
-#include <visualization_msgs/Marker.h>
-
 
 class Grasping
 {
-private:
+protected:
 
 	const static std::string LEFT_ARM;
 	const static std::string RIGHT_ARM;
 	
 	const static double cylinder_safty_dist = 0.08;//m
-	
-	const static int x_side_graspable = 2;
-	const static int y_side_graspable = 3;
-	const static int z_side_graspable = 5;
 
 
 	move_group_interface::MoveGroup* group_r_arm_;
 	move_group_interface::MoveGroup* group_l_arm_;
 	Gripper* gripper_;
 	Suturo_Manipulation_Planning_Scene_Interface* pi_;
-  ros::Publisher* head_publisher_;
+	ros::Publisher* head_publisher_;
 
 	/**
 	 * Updated a Collisionobject with box shape depending on the gripper position.
@@ -82,7 +76,7 @@ private:
 	 */		
 	int pick(moveit_msgs::CollisionObject co, std::string arm, 
 				std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses, 
-				double force, int graspable_sides);
+				double force);
 
 	/**
 	 * Calculates grasp und pregrasp position for a box or cylinder.
@@ -118,6 +112,7 @@ private:
 				
 	int lookAt(geometry_msgs::PoseStamped pose);
 
+	int move(move_group_interface::MoveGroup* move_group, geometry_msgs::PoseStamped desired_pose);
 	
 	
 public:
