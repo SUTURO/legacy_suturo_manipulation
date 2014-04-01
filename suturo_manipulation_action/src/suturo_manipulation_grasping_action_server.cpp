@@ -4,39 +4,38 @@
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
+
 #include <suturo_manipulation_msgs/suturo_manipulation_graspingAction.h>
 #include <suturo_manipulation_msgs/GraspingAndDrop.h>
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
 #include <suturo_manipulation_grasping.h>
 #include <suturo_manipulation_planning_scene_interface.h>
+
 #include <shape_tools/solid_primitive_dims.h>
 #include <control_msgs/PointHeadActionGoal.h>
 #include <pr2_controllers_msgs/PointHeadActionResult.h>
+
+#include <suturo_manipulation_grasping_reactive.h>
 
 
 using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_graspingAction> Server;
 
+Grasping* grasper;
+
 /**
 * This method grasps or drops a object!
 */
-void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, ros::Publisher* publisher, ros::NodeHandle* nh, Server* server_grasp)
+void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr& graspGoal, Server* server_grasp)
 {	
   suturo_manipulation_msgs::suturo_manipulation_graspingResult r;	
 
   // Set header
   r.succ.header.stamp = ros::Time();
   // Set Answer for planning to undefined
-  r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
-
-  // set Planning Interface and Grasper
-  ROS_INFO("Create Planning Scene Interface...");
-  Suturo_Manipulation_Planning_Scene_Interface pi(nh);
-  ROS_INFO("Done. Create Grasper...")	;
-  Grasping grasper(&pi, publisher);
-  ROS_INFO("Done.");
+  r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;  
 
   string picking_arm = graspGoal->goal.bodypart.bodyPart;
   string action = graspGoal->goal.action.action;
@@ -58,7 +57,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     if(action == suturo_manipulation_msgs::GraspingAndDrop::GRASP){
       ROS_INFO("Begin to pick object...");
       // Grasp the object
-      if (grasper.pick(obj_name, picking_arm, newton))
+      if (grasper->pick(obj_name, picking_arm, newton))
       {
         ROS_INFO("Object picked...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -71,7 +70,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
     } else if (action == suturo_manipulation_msgs::GraspingAndDrop::DROP_OBJECT) {
       ROS_INFO("Begin to drop object...");
       // Drop the object
-      if (grasper.dropObject(obj_name))
+      if (grasper->dropObject(obj_name))
       {
         ROS_INFO("Object droped...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -82,7 +81,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
         server_grasp->setAborted(r);
       }
     } else if (action == suturo_manipulation_msgs::GraspingAndDrop::OPEN_GRIPPER){
-      if (grasper.drop(picking_arm))
+      if (grasper->drop(picking_arm))
       {
         ROS_INFO("Opened gripper...\n");
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
@@ -105,10 +104,24 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "suturo_manipulation_grasp_server");
 	ros::NodeHandle nh;
 	
+  Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+
   // Publish a topic for the ros intern head controller
   ros::Publisher head_publisher = nh.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
+  
+  bool reactive = false;
 
-	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &head_publisher, &nh, &server_grasp), false);
+  if (nh.getParam("/suturo_manipulation_grasping_action_server/reactive", reactive) && reactive){
+    //reactive
+    ROS_WARN_STREAM("reactive grasping");
+    grasper = new Grasping_reactive(&pi, &head_publisher);
+  } else {
+    //non reactive
+    ROS_WARN_STREAM("non reactive grasping");
+    grasper = new Grasping(&pi, &head_publisher);
+  }
+
+	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &server_grasp), false);
 	server_grasp.start();
 	
 

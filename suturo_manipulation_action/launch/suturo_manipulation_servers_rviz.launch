@@ -1,7 +1,0 @@
-<launch>
-
-  <include file="$(find suturo_manipulation_action)/launch/suturo_manipulation_servers_ros.launch" />
-
-  <include file="$(find suturo_manipulation_pr2_movit)/launch/moveit_rviz.launch"/>
-
-</launch>
