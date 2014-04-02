@@ -246,7 +246,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::detachObject(std::string objec
 	return 1;
 }
 
-int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::string link_name)
+int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::string link_name, moveit_msgs::AttachedCollisionObject &aco)
 {
 	
 	std::vector<moveit_msgs::AttachedCollisionObject> acos;
@@ -255,6 +255,7 @@ int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::s
 	for (std::vector<moveit_msgs::AttachedCollisionObject>::iterator it = acos.begin(); it != acos.end(); ++it){
 		if (it->link_name == link_name){
 			//if the link names are the same, the object is attached to it
+			aco = *it;
 			return 1;
 		} 
 	}

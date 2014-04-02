@@ -108,7 +108,7 @@ public:
 	 * @return 1, if the object is attached
 	 * 					0, otherwise
 	 */	
-	int isAnObjectAttachedToArm(std::string link_name);
+	int isAnObjectAttachedToArm(std::string link_name, moveit_msgs::AttachedCollisionObject &aco);
 	
 	int allowCollision(std::string object1, std::string object2);
 

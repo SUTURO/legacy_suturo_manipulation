@@ -380,8 +380,8 @@ int Grasping::pick(std::string object_name, std::string arm, double force)
 	moveit_msgs::CollisionObject co;
 	
 	//check if there is an object attached to this arm.
-	if (arm == LEFT_ARM && pi_->isAnObjectAttachedToArm(group_l_arm_->getEndEffectorLink())
-			|| arm == RIGHT_ARM && pi_->isAnObjectAttachedToArm(group_r_arm_->getEndEffectorLink()))
+	if (arm == LEFT_ARM && pi_->isAnObjectAttachedToArm(group_l_arm_->getEndEffectorLink(), aco)
+			|| arm == RIGHT_ARM && pi_->isAnObjectAttachedToArm(group_r_arm_->getEndEffectorLink(), aco))
 	{
 		ROS_WARN_STREAM(co.id << " already attached to this arm.");
 		return 1;

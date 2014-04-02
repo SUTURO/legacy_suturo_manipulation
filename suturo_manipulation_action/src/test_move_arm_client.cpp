@@ -7,6 +7,7 @@
 #include <suturo_manipulation_msgs/ActionAnswer.h>
 #include <suturo_manipulation_msgs/suturo_manipulation_moveAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <tf/transform_listener.h>
 
 typedef actionlib::SimpleActionClient<suturo_manipulation_msgs::suturo_manipulation_moveAction> Client;
 
@@ -16,9 +17,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc != 10)
+	if (argc != 9)
 	{
-		ROS_INFO("arguments: x y z; x y z w frame arm");
+		ROS_INFO("arguments: x y z raw pitch yaw frame arm");
 		return 1;
 	}
 	// create goal
@@ -34,25 +35,15 @@ int main(int argc, char** argv)
 			
 	// set goal data
 	goal.ps.pose.position.x = atof(argv[1]);
-	ROS_INFO("set x done!");
 	goal.ps.pose.position.y = atof(argv[2]);
-	ROS_INFO("set y done!");
 	goal.ps.pose.position.z = atof(argv[3]);
-	ROS_INFO("set z done!");
 	
-	goal.ps.pose.orientation.x = atof(argv[4]);
-	ROS_INFO("set orientation x done!");
-	goal.ps.pose.orientation.y = atof(argv[5]);
-	ROS_INFO("set orientation y done!");
-	goal.ps.pose.orientation.z = atof(argv[6]);
-	ROS_INFO("set orientation z done!");
-	goal.ps.pose.orientation.w = atof(argv[7]);
-	ROS_INFO("set orientation w done!");
+	goal.ps.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(atof(argv[4]), atof(argv[5]), atof(argv[6]));;
 
-	goal.ps.header.frame_id = argv[8];
-	ROS_INFO("set frame done!");
-	goal.bodypart.bodyPart = argv[9];
-	ROS_INFO("set arm done!");
+	goal.ps.header.frame_id = argv[7];
+	goal.bodypart.bodyPart = argv[8];
+
+	ROS_INFO_STREAM("Move to: " << goal.ps);
 
 	// send goal
 	client.sendGoal(goal);
