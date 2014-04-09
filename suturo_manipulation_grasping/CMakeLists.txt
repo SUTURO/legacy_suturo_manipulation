@@ -90,7 +90,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
+   INCLUDE_DIRS include hack_for_groovy
 #   LIBRARIES suturo_manipulation_gripper_controller
 	#suturo_manipulation_grasping
 #  CATKIN_DEPENDS actionlib pr2_controllers_msgs roscpp
@@ -119,11 +119,12 @@ add_library(suturo_manipulation_grasping
 
 add_library(suturo_manipulation_grasping_reactive
    src/suturo_manipulation_grasping_reactive.cpp
+   src/suturo_manipulation_grasping.cpp
+   src/suturo_manipulation_collision_checker.cpp
 )
 
-
 ## Declare a cpp executable
-add_executable(suturo_manipulation_reactive_grasping src/suturo_manipulation_reactive_grasping.cpp)
+#add_executable(suturo_manipulation_reactive_grasping src/suturo_manipulation_reactive_grasping.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -132,7 +133,7 @@ add_executable(suturo_manipulation_reactive_grasping src/suturo_manipulation_rea
 add_dependencies(suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface 
 suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(suturo_manipulation_reactive_grasping ${catkin_EXPORTED_TARGETS})
+#add_dependencies(suturo_manipulation_reactive_grasping ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(suturo_manipulation_grasping_reactive suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
@@ -143,26 +144,17 @@ add_dependencies(suturo_manipulation_grasping_reactive suturo_manipulation_grasp
 
 target_link_libraries(
   suturo_manipulation_grasping
-  # suturo_manipulation_reactive_grasping
   suturo_manipulation_gripper_controller 
   suturo_manipulation_planning_scene_interface
   ${catkin_LIBRARIES}
-)
-
-target_link_libraries(
-  suturo_manipulation_reactive_grasping 
-  ${catkin_LIBRARIES} 
 )
 
 target_link_libraries(
   suturo_manipulation_grasping_reactive
-  suturo_manipulation_grasping
   suturo_manipulation_gripper_controller 
   suturo_manipulation_planning_scene_interface
   ${catkin_LIBRARIES}
 )
-
-
 
 #############
 ## Install ##

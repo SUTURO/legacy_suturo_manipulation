@@ -14,6 +14,8 @@
 // #include <control_msgs/PointHeadActionGoal.h>
 
 // #include <visualization_msgs/Marker.h>
+#include <suturo_manipulation_collision_checker.h>
+
 using namespace std;
 
 class Grasping_reactive : public Grasping
