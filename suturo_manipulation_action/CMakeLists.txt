@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   suturo_manipulation_grasping
   suturo_manipulation_planning_scene_interface
   suturo_manipulation_gripper_controller
+  suturo_manipulation_tools
 )
 
 ## System dependencies are found with CMake's conventions
@@ -146,7 +147,11 @@ add_dependencies(suturo_manipulation_grasping_action_server suturo_manipulation_
 add_dependencies(test_move_home_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_move_arm_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_grasping_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
-add_dependencies(head_mover suturo_manipulation_move_robot suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_grasping suturo_manipulation_grasping_reactive ${catkin_EXPORTED_TARGETS})
+
+
+add_dependencies(head_mover suturo_manipulation_move_robot suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_mesh_loader suturo_manipulation_grasping suturo_manipulation_grasping_reactive ${catkin_EXPORTED_TARGETS})
+
+
 add_dependencies(suturo_manipulation_move_head_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(suturo_manipulation_move_head_server_ros suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_head_client suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
@@ -252,6 +257,7 @@ target_link_libraries(
   suturo_manipulation_grasping
   suturo_manipulation_move_robot
   suturo_manipulation_grasping_reactive
+  suturo_manipulation_mesh_loader
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
 )

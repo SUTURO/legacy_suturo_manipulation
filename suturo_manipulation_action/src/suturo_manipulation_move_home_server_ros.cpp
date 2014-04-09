@@ -218,7 +218,8 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
             group = new move_group_interface::MoveGroup(right_arm_group);
 
         }
-        else if (body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS)
+        else if (body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS
+                || body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS_MOVE)
         {
 
             group = new move_group_interface::MoveGroup(both_arms_group);

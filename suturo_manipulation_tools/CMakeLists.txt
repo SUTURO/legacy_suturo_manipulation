@@ -87,7 +87,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES suturo_manipulation_tools
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -100,11 +100,15 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(
+  include 
+  ${catkin_INCLUDE_DIRS} 
+  ${Boost_INCLUDE_DIRS}
+)
 ## Declare a cpp library
-# add_library(suturo_manipulation_tools
-#   src/${PROJECT_NAME}/suturo_manipulation_tools.cpp
-# )
+add_library(suturo_manipulation_mesh_loader
+  src/suturo_manipulation_mesh_loader.cpp
+)
 
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_tools_node src/suturo_manipulation_tools_node.cpp)
@@ -120,6 +124,8 @@ add_dependencies(publish_objects_from_perception suturo_perception_msgs suturo_m
 
 add_dependencies(publish_objects_tf_frames suturo_manipulation_msgs suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
 
+add_dependencies(suturo_manipulation_mesh_loader ${catkin_EXPORTED_TARGETS})
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_tools_node
 #   ${catkin_LIBRARIES}
@@ -128,6 +134,11 @@ add_dependencies(publish_objects_tf_frames suturo_manipulation_msgs suturo_manip
 target_link_libraries(
   publish_objects_from_perception
   suturo_manipulation_planning_scene_interface
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  suturo_manipulation_mesh_loader
   ${catkin_LIBRARIES}
 )
 

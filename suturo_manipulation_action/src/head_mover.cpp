@@ -11,6 +11,7 @@
 #include <suturo_manipulation_move_robot.h>
 #include <sensor_msgs/LaserScan.h>
 #include <suturo_manipulation_grasping_reactive.h>
+#include <suturo_manipulation_mesh_loader.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -171,11 +172,33 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh;
 
-    Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
-    Grasping* g = new Grasping_reactive(&pi);
-    g->drop("asd");
+    Mesh_loader ml;
+    ROS_INFO_STREAM(ml.load_corny());
+    ROS_INFO_STREAM("\n\n");
+    // ROS_INFO_STREAM(ml.load_pringles());
 
-    // ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+    // Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+    // Grasping* g = new Grasping_reactive(&pi);
+    // g->drop("asd");
+
+//     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+// ros::WallDuration(1.0).sleep();
+//     moveit_msgs::CollisionObject co;
+//     co.header.stamp = ros::Time::now();
+//     co.header.frame_id = "/base_footprint";
+//     co.id = "corny";
+//     co.operation = moveit_msgs::CollisionObject::ADD;
+
+//     co.meshes.resize(1);
+//     co.meshes[0] = ml.load_pringles();
+//     co.mesh_poses.resize(1);
+//     co.mesh_poses[0].position.x = 2;
+//     co.mesh_poses[0].position.y = 1;
+//     co.mesh_poses[0].position.z = 2;
+//     co.mesh_poses[0].orientation.w = 1;
+//     ros::WallDuration(1.0).sleep();
+//     pub_co.publish(co);
+//     ros::WallDuration(1.0).sleep();
     // putObjects(pub_co);
 
     // Gripper g;
