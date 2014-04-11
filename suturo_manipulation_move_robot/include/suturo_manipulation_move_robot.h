@@ -196,9 +196,7 @@ public:
 	 * 
 	 * @return true, if successfull
 	 * 					false, otherwise
-	 */
-	bool checkCollision(geometry_msgs::PoseStamped targetPose);
-	
+	 */	
 	bool checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone=0.05);
 
 	/**

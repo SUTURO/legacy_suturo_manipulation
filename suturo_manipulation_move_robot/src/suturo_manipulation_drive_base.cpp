@@ -35,19 +35,6 @@ bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamp
     moveit_msgs::PlanningScene ps;
     pi_->getPlanningScene(ps);
 
-    //~ //increase collisionobject size
-    //~ for (int i = 0; i < ps.world.collision_objects.size(); i++){
-    //~ moveit_msgs::CollisionObject &co = ps.world.collision_objects[i];
-    //~ if (co.primitives[0].type != shape_msgs::SolidPrimitive::BOX){
-    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] += danger_zone;
-    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] += danger_zone;
-    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] += danger_zone;
-    //~ } else if (co.primitives[0].type != shape_msgs::SolidPrimitive::CYLINDER){
-    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS] += danger_zone;
-    //~ co.primitives[0].dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT] += danger_zone;
-    //~ }
-    //~ }
-
     ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
 
     ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
@@ -73,41 +60,6 @@ bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamp
     coll_ps_pub_.publish(ps);
 
     return collision_result.collision;
-}
-
-bool Suturo_Manipulation_Move_Robot::checkCollision(geometry_msgs::PoseStamped targetPose)
-{
-    //get all collisionobjects
-    std::vector<moveit_msgs::CollisionObject> cos;
-
-    if (!pi_->getObjects(cos)) return true;
-    for (std::vector<moveit_msgs::CollisionObject>::iterator co = cos.begin(); co != cos.end(); ++co)
-    {
-        if (co->primitive_poses[0].orientation.x == 0 &&
-                co->primitive_poses[0].orientation.y == 0 &&
-                co->primitive_poses[0].orientation.z == 0 &&
-                co->primitive_poses[0].orientation.w == 1 )
-        {
-            //andere orientierung ist zu schwer ;(
-            //aber alle gegenstände von knowledge werden mit dieser orientierung gepublisht
-            //todo? Höhe das Objekte beachten?
-
-            //transform goalpose into objectframe
-            listener_.transformPose(co->header.frame_id, targetPose, targetPose);
-
-            //check dist
-            if (co->primitives[0].type == shape_msgs::SolidPrimitive::BOX)
-            {
-                double x_size = co->primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X];
-                double y_size = co->primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y];
-                double d_x = abs(co->primitive_poses[0].position.x - targetPose.pose.position.x);
-                double d_y = abs(co->primitive_poses[0].position.y - targetPose.pose.position.y);
-                if (d_x <= footprint_radius + x_size / 2 && d_y <= footprint_radius + y_size / 2) return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 bool Suturo_Manipulation_Move_Robot::checkLocalization()
@@ -346,7 +298,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     targetPose_ = targetPose;
 
-    if (checkCollision(targetPose_))
+    if (checkFullCollision(targetPose_))
     {
         ROS_ERROR_STREAM("targetpose in collision!");
         return false;
