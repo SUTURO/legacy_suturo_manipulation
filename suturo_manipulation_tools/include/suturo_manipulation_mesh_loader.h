@@ -14,12 +14,20 @@
 // #include <shapes.h>
 
 class Mesh_loader{
+
+protected:
+	const static std::string CORNY_PATH;
+	const static std::string PRINGLES_PATH;
+
 public:
-	shape_msgs::Mesh load_mesh(std::string resource);
+	shape_msgs::Mesh load_mesh_msg(std::string resource);
+	shapes::Mesh* load_mesh(std::string resource);
 
-	shape_msgs::Mesh load_corny();	
+	shape_msgs::Mesh load_corny_msg();	
+	shapes::Mesh* load_corny();	
 
-	shape_msgs::Mesh load_pringles();	
+	shape_msgs::Mesh load_pringles_msg();	
+	shapes::Mesh* load_pringles();
 
 };
 

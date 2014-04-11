@@ -173,7 +173,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     Mesh_loader ml;
-    ROS_INFO_STREAM(ml.load_corny());
+    ROS_INFO_STREAM(ml.load_corny_msg());
     ROS_INFO_STREAM("\n\n");
     // ROS_INFO_STREAM(ml.load_pringles());
 
