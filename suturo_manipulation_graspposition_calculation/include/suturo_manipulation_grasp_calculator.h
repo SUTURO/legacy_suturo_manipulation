@@ -37,7 +37,8 @@ protected:
      *                  0, otherwise
      */
     int calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
-                             std::vector<geometry_msgs::PoseStamped> &pre_poses);
+                             std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                             double gripper_depth);
 
     /**
      * Calculates grasp und pregrasp position for a cylinder.
@@ -46,57 +47,31 @@ protected:
      *                  0, otherwise
      */
     int calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
-                                  std::vector<geometry_msgs::PoseStamped> &pre_poses);
+                                  std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                                  double gripper_depth);
 
     /**
      * Adds Grasppositions possible from above and below, to the vactors.
      */
     void addGraspPositionsZ(double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses,
-                            std::vector<geometry_msgs::PoseStamped> &pre_poses);
+                            std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                            double gripper_depth);
 
     /**
      * Adds Grasppositions possible from the front and behind, to the vactors.
      */
-    void addGraspPositionsX(double h, double d, double rotation, std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses,
-                            std::vector<geometry_msgs::PoseStamped> &pre_poses);
+    void addGraspPositionsX(double h, double d, double rotation, std::string frame_id,
+                            std::vector<geometry_msgs::PoseStamped> &poses,
+                            std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                            double gripper_depth);
 
     /**
      * Adds Grasppositions possible from left and right, to the vactors.
      */
     void addGraspPositionsY(double h, double d, double rotation, std::string frame_id,
                             std::vector<geometry_msgs::PoseStamped> &poses,
-                            std::vector<geometry_msgs::PoseStamped> &pre_poses);
-
-    static const bool sort_base_link_poses(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2)
-    {
-        geometry_msgs::Quaternion reference_q = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, 0);
-        tf::Quaternion reference_orientation(reference_q.x,
-                                             reference_q.y,
-                                             reference_q.z,
-                                             reference_q.w);
-        // ROS_INFO_STREAM("reference " << reference_orientation.getAxis().getX() << " " <<
-        //     reference_orientation.getAxis().getY() << " " <<
-        //     reference_orientation.getAxis().getZ());
-
-        tf::Quaternion tf_pose1(pose1.pose.orientation.x,
-                                pose1.pose.orientation.y,
-                                pose1.pose.orientation.z,
-                                pose1.pose.orientation.w);
-        // ROS_INFO_STREAM("pose1 " << tf_pose1.getAxis().getX() << " " <<
-        //     tf_pose1.getAxis().getY() << "" <<
-        //     tf_pose1.getAxis().getZ());
-        tf::Quaternion tf_pose2(pose2.pose.orientation.x,
-                                pose2.pose.orientation.y,
-                                pose2.pose.orientation.z,
-                                pose2.pose.orientation.w);
-        // ROS_INFO_STREAM("pose2 " << tf_pose2.getAxis().getX() << " " <<
-        //     tf_pose2.getAxis().getY() << "" <<
-        //     tf_pose2.getAxis().getZ());
-        double angle1 = reference_orientation.angle(tf_pose1);
-        double angle2 = reference_orientation.angle(tf_pose2);
-        // ROS_INFO_STREAM("angle1 " << angle1 << " angle2 " << angle2);
-        return angle1 < angle2;
-    }
+                            std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                            double gripper_depth);
 
     void transform_poses(std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses);
 
@@ -113,7 +88,8 @@ public:
      *                  0, otherwise
      */
     int calcGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
-                          std::vector<geometry_msgs::PoseStamped> &pre_poses);
+                          std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                          double gripper_depth);
 
     static const double scalarproduct(geometry_msgs::Point p1, geometry_msgs::Point p2)
     {

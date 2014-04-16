@@ -26,7 +26,8 @@ protected:
 
     move_group_interface::MoveGroup *group_r_arm_;
     move_group_interface::MoveGroup *group_l_arm_;
-    Gripper *gripper_;
+    Gripper *r_gripper_;
+    Gripper *l_gripper_;
     Grasp_Calculator *grasp_calculator_;
     Suturo_Manipulation_Planning_Scene_Interface *pi_;
     ros::Publisher *head_publisher_;
@@ -51,13 +52,10 @@ protected:
 
     virtual int move(move_group_interface::MoveGroup *move_group, geometry_msgs::PoseStamped desired_pose);
 
-    void transform_poses(std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses);
-
     int get_attached_object(std::string arm, std::string object_name, moveit_msgs::CollisionObject &co);
 
     bool get_move_group(std::string arm, move_group_interface::MoveGroup *&move_group);
-
-    double get_angle(geometry_msgs::Quaternion q1, geometry_msgs::Quaternion q2);
+    bool get_gripper(std::string arm, Gripper *&gripper_);
 
 
 

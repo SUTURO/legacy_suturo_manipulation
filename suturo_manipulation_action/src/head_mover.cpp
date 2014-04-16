@@ -133,14 +133,6 @@ void putObjects(ros::Publisher pub_co)
     ros::WallDuration(1.0).sleep();
 }
 
-void openhand()
-{
-
-    Gripper g;
-    g.open_l_gripper();
-    g.close_l_gripper();
-}
-
 void subscriberCb(const sensor_msgs::LaserScan &scan)
 {
     //~ sensor_msgs::LaserScan base_scan;

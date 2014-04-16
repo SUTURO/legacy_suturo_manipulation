@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   moveit_ros_planning_interface
   rospy
+  suturo_manipulation_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -120,7 +121,7 @@ add_executable(suturo_manipulation_gripper_sensor_controller
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_gripper_controller_node suturo_manipulation_gripper_controller_generate_messages_cpp)
-#add_dependencies(suturo_manipulation_gripper_controller ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_gripper_controller suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_gripper_controller_node
 #   ${catkin_LIBRARIES}

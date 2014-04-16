@@ -15,7 +15,8 @@ Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface *pi, ros::Publis
     group_l_arm_->setPlanningTime(5.0);
 
     head_publisher_ = head_publisher;
-    gripper_ = new Gripper();
+    r_gripper_ = new Gripper(RIGHT_ARM);
+    l_gripper_ = new Gripper(LEFT_ARM);
 
     //pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
     pi_ = pi;
@@ -113,6 +114,24 @@ bool Grasping::get_move_group(std::string arm, move_group_interface::MoveGroup *
     return true;
 }
 
+bool Grasping::get_gripper(std::string arm, Gripper *&gripper)
+{
+    if (arm == RIGHT_ARM)
+    {
+        gripper = r_gripper_;
+    }
+    else if (arm == LEFT_ARM)
+    {
+        gripper = l_gripper_;
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Arm value not valide.");
+        return false;
+    }
+    return true;
+}
+
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
                    std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses,
                    double force, double tolerance)
@@ -121,7 +140,8 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 
     //select movegroup depending on arm
     move_group_interface::MoveGroup *move_group;
-    if (!get_move_group(arm, move_group)) return 0;
+    Gripper *gripper;
+    if (!get_move_group(arm, move_group) || !get_gripper(arm, gripper)) return 0;
 
     //search for valid pregraspposition and move there
     int pos_id = 0;
@@ -135,15 +155,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         }
 
         //open gripper
-        double gripper_state;
-        if (arm == RIGHT_ARM)
-        {
-            gripper_state = gripper_->open_r_gripper();
-        }
-        else
-        {
-            gripper_state = gripper_->open_l_gripper();
-        }
+        gripper->open_gripper(force);
 
         //move Arm to goalpose
         ROS_INFO_STREAM("move to goalpose");
@@ -156,14 +168,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         else
         {
             //close gripper
-            if (arm == RIGHT_ARM)
-            {
-                gripper_state = gripper_->close_r_gripper(force);
-            }
-            else
-            {
-                gripper_state = gripper_->close_l_gripper(force);
-            }
+            gripper->close_gripper(force);
 
             //update collisionobject in planningscene
             if (!pi_->addObject(co))
@@ -171,18 +176,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 
             //attach object
             ROS_INFO_STREAM("attach object");
-            if (arm == RIGHT_ARM)
-            {
-                if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(),
-                                       Gripper::get_r_gripper_links()))
-                    return 0;
-            }
-            else
-            {
-                if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(),
-                                       Gripper::get_l_gripper_links()))
-                    return 0;
-            }
+            if (!pi_->attachObject(object_name, move_group->getEndEffectorLink(),
+                                   gripper->get_gripper_links()))
+                return 0;
 
             ROS_INFO_STREAM("\n\n Picking finished \n");
             return 1;
@@ -201,12 +197,6 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
 
 int Grasping::pick(std::string object_name, std::string arm, double force)
 {
-    if (!gripper_->is_connected_to_controller())
-    {
-        ROS_ERROR_STREAM("not connected to grippercontroller");
-        return 0;
-    }
-
     //check if there is an object attached to this arm.
     moveit_msgs::CollisionObject co;
     if (int r = get_attached_object(arm, object_name, co) != 2)
@@ -218,22 +208,20 @@ int Grasping::pick(std::string object_name, std::string arm, double force)
     std::vector<geometry_msgs::PoseStamped> pre_poses(0);
 
     //calculate graspposition(s)
-    if (!grasp_calculator_->calcGraspPosition(co, poses, pre_poses))
-    {
-        return 0;
-    }
+    Gripper *gripper;
 
-    return pick(co, arm, poses, pre_poses, force);
+    // if (!get_gripper(arm, gripper) &&
+    //         !grasp_calculator_->calcGraspPosition(co, poses, pre_poses, gripper->get_gripper_depth()))
+    // {
+    //     return 0;
+    // }
+
+    return get_gripper(arm, gripper) && grasp_calculator_->calcGraspPosition(co, poses, pre_poses, gripper->get_gripper_depth()) ?
+           pick(co, arm, poses, pre_poses, force) : 0;
 }
 
 int Grasping::pick_above(std::string object_name, std::string arm, double tolerance, double force)
 {
-    if (!gripper_->is_connected_to_controller())
-    {
-        ROS_ERROR_STREAM("not connected to grippercontroller");
-        return 0;
-    }
-
     //check if there is an object attached to this arm.
     moveit_msgs::CollisionObject co;
     if (int r = get_attached_object(arm, object_name, co) != 2)
@@ -245,7 +233,8 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
     std::vector<geometry_msgs::PoseStamped> pre_poses_tmp(0);
 
     //calculate graspposition(s)
-    if (!grasp_calculator_->calcGraspPosition(co, poses_tmp, pre_poses_tmp))
+    Gripper *gripper;
+    if (!get_gripper(arm, gripper) || !grasp_calculator_->calcGraspPosition(co, poses_tmp, pre_poses_tmp, gripper->get_gripper_depth()))
     {
         return 0;
     }
@@ -265,6 +254,7 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
 
     }
 
+    
     return pick(co, arm, poses, pre_poses, force);
 }
 
@@ -292,12 +282,6 @@ int Grasping::get_attached_object(std::string arm, std::string object_name, move
 
 int Grasping::dropObject(string object_name)
 {
-    if (!gripper_->is_connected_to_controller())
-    {
-        ROS_ERROR_STREAM("Not connected to grippercontroller.");
-        return 0;
-    }
-
     //get object from planningscene
     moveit_msgs::AttachedCollisionObject aco;
     if (!pi_->getAttachedObject(object_name, aco))
@@ -308,11 +292,11 @@ int Grasping::dropObject(string object_name)
 
     if (aco.link_name == group_r_arm_->getEndEffectorLink())
     {
-        gripper_->open_r_gripper();
+        r_gripper_->open_gripper();
     }
     else if (aco.link_name == group_l_arm_->getEndEffectorLink())
     {
-        gripper_->open_l_gripper();
+        l_gripper_->open_gripper();
     }
 
     //detach object
@@ -323,32 +307,13 @@ int Grasping::dropObject(string object_name)
 
 int Grasping::drop(string arm)
 {
-    if (!gripper_->is_connected_to_controller())
-    {
-        ROS_ERROR_STREAM("Not connected to grippercontroller.");
-        return 0;
-    }
+    move_group_interface::MoveGroup *move_group;
+    Gripper *gripper;
+    if (!get_move_group(arm, move_group) || !get_gripper(arm, gripper)) return 0;
 
     //choose endeffector depending on arm
-    move_group_interface::MoveGroup *move_group;
-    std::string eof;
-    if (arm == RIGHT_ARM)
-    {
-        eof = group_r_arm_->getEndEffectorLink();
-        gripper_->open_r_gripper();
-
-    }
-    else if (arm == LEFT_ARM)
-    {
-        eof = group_l_arm_->getEndEffectorLink();
-        gripper_->open_l_gripper();
-
-    }
-    else
-    {
-        ROS_ERROR_STREAM("Arm value not valide.");
-        return 0;
-    }
+    std::string eof = move_group->getEndEffectorLink();
+    gripper->open_gripper();
 
     //detach any attached objects
     std::vector<moveit_msgs::AttachedCollisionObject> acos;
@@ -365,36 +330,3 @@ int Grasping::drop(string arm)
     return 1;
 }
 
-void Grasping::transform_poses(std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses)
-{
-    try
-    {
-        //transform pose to base_link
-        for (int i = 0; i < poses.size(); i++)
-        {
-            listener_.transformPose(frame_id, poses[i], poses[i]);
-
-        }
-    }
-    catch (...)
-    {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
-    }
-}
-
-double Grasping::get_angle(geometry_msgs::Quaternion q1, geometry_msgs::Quaternion q2)
-{
-
-    tf::Quaternion tf_pose1(q1.x,
-                            q1.y,
-                            q1.z,
-                            q1.w);
-
-    tf::Quaternion tf_pose2(q2.x,
-                            q2.y,
-                            q2.z,
-                            q2.w);
-    ROS_INFO_STREAM(tf_pose1.angleShortestPath(tf_pose2));
-    ROS_INFO_STREAM(tf_pose1.angle(tf_pose2));
-    return tf_pose1.angleShortestPath(tf_pose2);
-}
