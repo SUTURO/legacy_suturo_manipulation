@@ -1,8 +1,8 @@
 moveit_setup_assistant_config:
   URDF:
     package: ""
-    relative_path: /home/thocar/uni/suturo/suturo/src/suturo_manipulation/suturo_manipulation_pr2_movit/config/pr2.urdf
+    relative_path: /home/ichumuh/Downloads/pr2.urdf
   SRDF:
     relative_path: config/pr2.srdf
   CONFIG:
-    generated_timestamp: 1385130412
+    generated_timestamp: 1397649670
