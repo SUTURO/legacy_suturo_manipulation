@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   suturo_manipulation_planning_scene_interface
   suturo_manipulation_gripper_controller
   suturo_manipulation_tools
+  suturo_manipulation_graspposition_calculation
 )
 
 ## System dependencies are found with CMake's conventions

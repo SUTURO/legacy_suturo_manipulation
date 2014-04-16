@@ -172,9 +172,17 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nh;
 
-    Mesh_loader ml;
-    ROS_INFO_STREAM(ml.load_corny_msg());
-    ROS_INFO_STREAM("\n\n");
+    // Mesh_loader ml;
+    // ROS_INFO_STREAM(ml.load_corny_msg());
+    // ROS_INFO_STREAM("\n\n");
+
+    geometry_msgs::Quaternion q = tf::createQuaternionMsgFromRollPitchYaw(atof(argv[1]), atof(argv[2]), atof(argv[3]));
+     tf::Quaternion reference_orientation(q.x, q.y, q.z, q.w);
+    // (atof(argv[1]),atof(argv[2]),atof(argv[3]),atof(argv[4]));
+    ROS_INFO_STREAM("reference " << reference_orientation.getAxis().getX() << " " << 
+            reference_orientation.getAxis().getY() << " " <<
+            reference_orientation.getAxis().getZ() << " " <<
+            reference_orientation.getAngle());
     // ROS_INFO_STREAM(ml.load_pringles());
 
     // Suturo_Manipulation_Planning_Scene_Interface pi(&nh);

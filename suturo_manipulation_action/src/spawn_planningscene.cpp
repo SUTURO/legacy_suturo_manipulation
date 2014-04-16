@@ -2,8 +2,6 @@
 
 // MoveIt!
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <suturo_manipulation_gripper_controller.h>
-#include <suturo_manipulation_grasping.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <shape_tools/solid_primitive_dims.h>
 #include <suturo_manipulation_planning_scene_interface.h>

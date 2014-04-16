@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   suturo_manipulation_gripper_controller
   suturo_manipulation_planning_scene_interface
   suturo_manipulation_msgs
+  suturo_manipulation_graspposition_calculation
 )
 
 #find_package(Eigen REQUIRED)
@@ -131,11 +132,11 @@ add_library(suturo_manipulation_grasping_reactive
 # add_dependencies(suturo_manipulation_gripper_controller_node suturo_manipulation_gripper_controller_generate_messages_cpp)
 
 add_dependencies(suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface 
-suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+suturo_manipulation_msgs suturo_manipulation_grasp_calculator ${catkin_EXPORTED_TARGETS})
 
 #add_dependencies(suturo_manipulation_reactive_grasping ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(suturo_manipulation_grasping_reactive suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_grasping_reactive suturo_manipulation_grasping suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_msgs suturo_manipulation_grasp_calculator ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(suturo_manipulation_gripper_controller_node
@@ -146,6 +147,7 @@ target_link_libraries(
   suturo_manipulation_grasping
   suturo_manipulation_gripper_controller 
   suturo_manipulation_planning_scene_interface
+  suturo_manipulation_grasp_calculator  
   ${catkin_LIBRARIES}
 )
 
@@ -153,6 +155,7 @@ target_link_libraries(
   suturo_manipulation_grasping_reactive
   suturo_manipulation_gripper_controller 
   suturo_manipulation_planning_scene_interface
+  suturo_manipulation_grasp_calculator
   ${catkin_LIBRARIES}
 )
 

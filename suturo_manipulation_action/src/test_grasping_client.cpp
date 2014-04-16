@@ -15,9 +15,9 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	
-	if (argc != 5)
+	if (argc != 5 && argc != 6)
 	{
-		ROS_INFO("arguments: dlink/corny/cafetfilter newton right_arm/left_arm drop_object/open_gripper/grasp");
+		ROS_INFO("arguments: objectID newton right_arm/left_arm drop_object/open_gripper/grasp/grasp_above tolerance(bei grasp_above)");
 		return 1;
 	}
 		
@@ -36,9 +36,10 @@ int main(int argc, char** argv)
 	goal.goal.header.stamp = ros::Time();
 	goal.goal.header.frame_id = "/base_footprint";
 	goal.goal.objectName = argv[1];
-	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.newton = atof(argv[2]);
+	goal.goal.bodypart.bodyPart = argv[3];
 	goal.goal.action.action = argv[4];
+	if (argc == 6) goal.goal.action.tolerance = atof(argv[5]);
 
 	// send the goal to server
 	client.sendGoal(goal);
