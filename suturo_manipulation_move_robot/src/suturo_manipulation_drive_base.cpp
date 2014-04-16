@@ -298,11 +298,11 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     targetPose_ = targetPose;
 
-    if (checkFullCollision(targetPose_))
-    {
-        ROS_ERROR_STREAM("targetpose in collision!");
-        return false;
-    }
+//    if (checkCollision(targetPose_))
+//    {
+//        ROS_ERROR_STREAM("targetpose in collision!");
+//        return false;
+//    }
 
     while (!checkLocalization())
     {
