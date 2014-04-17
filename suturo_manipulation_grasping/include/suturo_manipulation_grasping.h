@@ -33,16 +33,6 @@ protected:
     ros::Publisher *head_publisher_;
     tf::TransformListener listener_;
 
-     /**
-     * Picks an object.
-     *
-     * @return 1, if succesfull
-     *                  0, otherwise
-     */
-    int pick(moveit_msgs::CollisionObject co, std::string arm,
-             std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses,
-             double force, double tolerance = M_2_PI);
-
     /**
      * Publishes/updates a tf frame inside the collisionobject
      */
@@ -74,6 +64,16 @@ public:
     int pick(std::string objectName, std::string arm, double force = 50.0);
 
     int pick_above(std::string objectName, std::string arm, double tolerance, double force = 50.0);
+
+    /**
+    * Picks an object.
+    *
+    * @return 1, if succesfull
+    *                  0, otherwise
+    */
+    int pick(moveit_msgs::CollisionObject co, std::string arm,
+             std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses,
+             double force);
 
     /**
      * Drops an object.

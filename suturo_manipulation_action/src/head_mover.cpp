@@ -133,29 +133,6 @@ void putObjects(ros::Publisher pub_co)
     ros::WallDuration(1.0).sleep();
 }
 
-void subscriberCb(const sensor_msgs::LaserScan &scan)
-{
-    //~ sensor_msgs::LaserScan base_scan;
-    //~ listener_.transformPose("/base_link", scan, base_scan);
-    for (int i = 0; i < scan.ranges.size(); i++)
-    {
-
-
-        double alpha = scan.angle_increment * i + 0.872664626;
-        double b = scan.ranges[i];
-        double c = -0.275;//dist base_link to base_laser_link
-        double a = sqrt((b * b) + (c * c) + (2 * b * c * cos(alpha)));
-        //~ ROS_INFO_STREAM((alpha * 180 / M_PI) << " a: " << a << " b: " << b);
-        if (a < 0.5)
-        {
-            ROS_WARN_STREAM(i << "zu nah!!!!");
-            //~ inCollision_ = true;
-            return;
-        }
-    }
-
-}
-
 int main(int argc, char **argv)
 {
     ros::init (argc, argv, "right_arm_pick_place");
@@ -168,37 +145,54 @@ int main(int argc, char **argv)
     // ROS_INFO_STREAM(ml.load_corny_msg());
     // ROS_INFO_STREAM("\n\n");
 
-    geometry_msgs::Quaternion q = tf::createQuaternionMsgFromRollPitchYaw(atof(argv[1]), atof(argv[2]), atof(argv[3]));
-     tf::Quaternion reference_orientation(q.x, q.y, q.z, q.w);
-    // (atof(argv[1]),atof(argv[2]),atof(argv[3]),atof(argv[4]));
-    ROS_INFO_STREAM("reference " << reference_orientation.getAxis().getX() << " " << 
-            reference_orientation.getAxis().getY() << " " <<
-            reference_orientation.getAxis().getZ() << " " <<
-            reference_orientation.getAngle());
+    std::vector<geometry_msgs::PoseStamped> poses;
+    std::vector<geometry_msgs::PoseStamped> pre_poses;
+
+    geometry_msgs::PoseStamped grasp_pose;
+
+    Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+    moveit_msgs::CollisionObject co;
+    pi.getObject("pancake", co);
+    Grasping g(&pi);
+
+
+    grasp_pose.header.frame_id = co.id;
+    grasp_pose.pose.position = co.mesh_poses[0].position;
+
+    grasp_pose.pose.position.z += 0.105; //objecthohe
+    grasp_pose.pose.position.z += 0.205; // gripperhohe
+
+    grasp_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, 0);
+    pi.publishMarker(grasp_pose);
+    
+    poses.push_back(grasp_pose);
+    pre_poses.push_back(grasp_pose);
+
+    // g.pick(co, "right_arm", poses, pre_poses, 15);
+
     // ROS_INFO_STREAM(ml.load_pringles());
 
-    // Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
     // Grasping* g = new Grasping_reactive(&pi);
     // g->drop("asd");
 
-//     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-// ros::WallDuration(1.0).sleep();
-//     moveit_msgs::CollisionObject co;
-//     co.header.stamp = ros::Time::now();
-//     co.header.frame_id = "/base_footprint";
-//     co.id = "corny";
-//     co.operation = moveit_msgs::CollisionObject::ADD;
+    //     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+    // ros::WallDuration(1.0).sleep();
+    //     moveit_msgs::CollisionObject co;
+    //     co.header.stamp = ros::Time::now();
+    //     co.header.frame_id = "/base_footprint";
+    //     co.id = "corny";
+    //     co.operation = moveit_msgs::CollisionObject::ADD;
 
-//     co.meshes.resize(1);
-//     co.meshes[0] = ml.load_pringles();
-//     co.mesh_poses.resize(1);
-//     co.mesh_poses[0].position.x = 2;
-//     co.mesh_poses[0].position.y = 1;
-//     co.mesh_poses[0].position.z = 2;
-//     co.mesh_poses[0].orientation.w = 1;
-//     ros::WallDuration(1.0).sleep();
-//     pub_co.publish(co);
-//     ros::WallDuration(1.0).sleep();
+    //     co.meshes.resize(1);
+    //     co.meshes[0] = ml.load_pringles();
+    //     co.mesh_poses.resize(1);
+    //     co.mesh_poses[0].position.x = 2;
+    //     co.mesh_poses[0].position.y = 1;
+    //     co.mesh_poses[0].position.z = 2;
+    //     co.mesh_poses[0].orientation.w = 1;
+    //     ros::WallDuration(1.0).sleep();
+    //     pub_co.publish(co);
+    //     ros::WallDuration(1.0).sleep();
     // putObjects(pub_co);
 
     // Gripper g;

@@ -133,8 +133,9 @@ bool Grasping::get_gripper(std::string arm, Gripper *&gripper)
 }
 
 int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
-                   std::vector<geometry_msgs::PoseStamped> &poses, std::vector<geometry_msgs::PoseStamped> &pre_poses,
-                   double force, double tolerance)
+                   std::vector<geometry_msgs::PoseStamped> &poses,
+                   std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                   double force)
 {
     string object_name = co.id;
 
@@ -254,7 +255,7 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
 
     }
 
-    
+
     return pick(co, arm, poses, pre_poses, force);
 }
 
