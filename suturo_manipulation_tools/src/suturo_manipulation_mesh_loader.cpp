@@ -2,6 +2,7 @@
 
 const std::string Mesh_loader::CORNY_PATH = "package://suturo_perception_cad_recognition/test_data/corny.ply";
 const std::string Mesh_loader::PRINGLES_PATH = "package://suturo_perception_cad_recognition/test_data/pringles.ply";
+const std::string Mesh_loader::PANCAKE_MODEL_PATH = "package://suturo_perception_cad_recognition/test_data/pancake_mix.stl";
 
 
 shape_msgs::Mesh Mesh_loader::load_mesh_msg(std::string resource)
@@ -13,9 +14,9 @@ shape_msgs::Mesh Mesh_loader::load_mesh_msg(std::string resource)
     return mesh_msg;
 }
 
-shapes::Mesh* Mesh_loader::load_mesh(std::string resource)
+shapes::Mesh *Mesh_loader::load_mesh(std::string resource)
 {
-	return shapes::createMeshFromResource(resource);
+    return shapes::createMeshFromResource(resource);
 }
 
 shape_msgs::Mesh Mesh_loader::load_corny_msg()
@@ -23,9 +24,9 @@ shape_msgs::Mesh Mesh_loader::load_corny_msg()
     return load_mesh_msg(CORNY_PATH);
 }
 
-shapes::Mesh* Mesh_loader::load_corny()
+shapes::Mesh *Mesh_loader::load_corny()
 {
-	return shapes::createMeshFromResource(CORNY_PATH);
+    return shapes::createMeshFromResource(CORNY_PATH);
 }
 
 shape_msgs::Mesh Mesh_loader::load_pringles_msg()
@@ -33,9 +34,19 @@ shape_msgs::Mesh Mesh_loader::load_pringles_msg()
     return load_mesh_msg(PRINGLES_PATH);
 }
 
-shapes::Mesh* Mesh_loader::load_pringles()
+shapes::Mesh *Mesh_loader::load_pringles()
 {
-	return shapes::createMeshFromResource(PRINGLES_PATH);
+    return shapes::createMeshFromResource(PRINGLES_PATH);
+}
+
+shape_msgs::Mesh Mesh_loader::load_pancake_msg()
+{
+    return load_mesh_msg(PANCAKE_MODEL_PATH);
+}
+
+shapes::Mesh *Mesh_loader::load_pancake()
+{
+    return shapes::createMeshFromResource(PANCAKE_MODEL_PATH);
 }
 
 

@@ -133,6 +133,29 @@ void putObjects(ros::Publisher pub_co)
     ros::WallDuration(1.0).sleep();
 }
 
+// void muh(ros::NodeHandle &nh)
+// {
+//     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+//     ros::WallDuration(1.0).sleep();
+//     moveit_msgs::CollisionObject co;
+//     co.header.stamp = ros::Time::now();
+//     co.header.frame_id = "/base_footprint";
+//     co.id = "pancake_mix";
+//     co.operation = moveit_msgs::CollisionObject::ADD;
+
+//     co.meshes.resize(1);
+//     Mesh_loader ml;
+//     co.meshes[0] = ml.load_pancake();
+//     co.mesh_poses.resize(1);
+//     co.mesh_poses[0].position.x = 0.67;
+//     co.mesh_poses[0].position.y = 0;
+//     co.mesh_poses[0].position.z = tischposiZ + 0.03 + 0.126;
+//     co.mesh_poses[0].orientation.w = 1;
+//     ros::WallDuration(1.0).sleep();
+//     pub_co.publish(co);
+//     ros::WallDuration(1.0).sleep();
+// }
+
 int main(int argc, char **argv)
 {
     ros::init (argc, argv, "right_arm_pick_place");
@@ -140,7 +163,7 @@ int main(int argc, char **argv)
     spinner.start();
 
     ros::NodeHandle nh;
-
+    // muh(nh);
     // Mesh_loader ml;
     // ROS_INFO_STREAM(ml.load_corny_msg());
     // ROS_INFO_STREAM("\n\n");
@@ -152,23 +175,24 @@ int main(int argc, char **argv)
 
     Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
     moveit_msgs::CollisionObject co;
-    pi.getObject("pancake", co);
+    pi.getObject("pancake_mix", co);
     Grasping g(&pi);
 
 
     grasp_pose.header.frame_id = co.id;
-    grasp_pose.pose.position = co.mesh_poses[0].position;
+    // grasp_pose.pose.position = ;
 
     grasp_pose.pose.position.z += 0.105; //objecthohe
-    grasp_pose.pose.position.z += 0.205; // gripperhohe
+    grasp_pose.pose.position.z += 0.18; // gripperhohe
 
     grasp_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, M_PI_2, 0);
     pi.publishMarker(grasp_pose);
-    
+
     poses.push_back(grasp_pose);
+    grasp_pose.pose.position.z += 0.05; // gripperhohe
     pre_poses.push_back(grasp_pose);
 
-    // g.pick(co, "right_arm", poses, pre_poses, 15);
+    g.pick(co, "right_arm", poses, pre_poses, 15);
 
     // ROS_INFO_STREAM(ml.load_pringles());
 
@@ -176,7 +200,7 @@ int main(int argc, char **argv)
     // g->drop("asd");
 
     //     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-    // ros::WallDuration(1.0).sleep();
+    //      ros::WallDuration(1.0).sleep();
     //     moveit_msgs::CollisionObject co;
     //     co.header.stamp = ros::Time::now();
     //     co.header.frame_id = "/base_footprint";

@@ -6,6 +6,7 @@
 #include <shape_tools/solid_primitive_dims.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <tf/transform_broadcaster.h>
+#include <suturo_manipulation_mesh_loader.h>
 
 static const std::string ROBOT_DESCRIPTION="robot_description";
 
@@ -116,6 +117,33 @@ void putObjects(ros::Publisher pub_co)
   ros::WallDuration(2.0).sleep();
 }
 
+void muh(ros::NodeHandle &nh)
+{
+    ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+    ros::WallDuration(1.0).sleep();
+    moveit_msgs::CollisionObject co;
+    co.header.stamp = ros::Time::now();
+    co.header.frame_id = "/base_footprint";
+    co.id = "pancake_mix";
+    co.operation = moveit_msgs::CollisionObject::ADD;
+
+    Mesh_loader ml;
+    co.meshes.resize(1);
+    co.meshes[0] = ml.load_pancake_msg();
+    co.mesh_poses.resize(1);
+    co.mesh_poses[0].position.x = 0.67;
+    co.mesh_poses[0].position.y = 0;
+    co.mesh_poses[0].position.z = tischposiZ + 0.03 + 0.126;
+    co.mesh_poses[0].orientation.w = 1;
+    ros::WallDuration(1.0).sleep();
+    co.operation = moveit_msgs::CollisionObject::REMOVE;
+    pub_co.publish(co);
+    ros::WallDuration(1.0).sleep();
+    co.operation = moveit_msgs::CollisionObject::ADD;
+    pub_co.publish(co);
+    ros::WallDuration(1.0).sleep();
+}
+
 int main(int argc, char **argv)
 {
 	ros::init (argc, argv, "right_arm_pick_place");
@@ -125,7 +153,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	putObjects(pub_co);
+	// putObjects(pub_co);
+  muh(nh);
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();

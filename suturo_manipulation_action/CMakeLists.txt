@@ -159,7 +159,7 @@ add_dependencies(test_head_client suturo_manipulation_msgs ${catkin_EXPORTED_TAR
 add_dependencies(test_move_base_client suturo_manipulation_msgs suturo_manipulation_move_robot ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_head_subscriber suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(spawn_planningscene suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
-add_dependencies(spawn_planningscene_gazebo suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(spawn_planningscene_gazebo suturo_manipulation_mesh_loader suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against
@@ -197,6 +197,7 @@ target_link_libraries(
 
 target_link_libraries(
   spawn_planningscene_gazebo
+suturo_manipulation_mesh_loader
   ${catkin_LIBRARIES}
 )
 

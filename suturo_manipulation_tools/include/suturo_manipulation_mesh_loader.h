@@ -18,6 +18,7 @@ class Mesh_loader{
 protected:
 	const static std::string CORNY_PATH;
 	const static std::string PRINGLES_PATH;
+	const static std::string PANCAKE_MODEL_PATH;
 
 public:
 	shape_msgs::Mesh load_mesh_msg(std::string resource);
@@ -28,6 +29,9 @@ public:
 
 	shape_msgs::Mesh load_pringles_msg();	
 	shapes::Mesh* load_pringles();
+
+	shape_msgs::Mesh load_pancake_msg();	
+	shapes::Mesh* load_pancake();	
 
 };
 
