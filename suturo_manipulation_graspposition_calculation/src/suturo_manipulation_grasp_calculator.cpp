@@ -44,7 +44,7 @@ void Grasp_Calculator::addGraspPositionsZ(double d, double rotation, std::string
     pose.pose.position.y = 0;
     pose.pose.position.z = gripper_depth + d;
     pre_pose = pose;
-    pre_pose.pose.position.z += gripper_depth - 0.05;
+    pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH - 0.05;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -55,7 +55,7 @@ void Grasp_Calculator::addGraspPositionsZ(double d, double rotation, std::string
 
     pose.pose.position.z = 0 - gripper_depth - d;
     pre_pose = pose;
-    pre_pose.pose.position.z -= gripper_depth - 0.05;
+    pre_pose.pose.position.z -= Gripper::GRIPPER_DEPTH - 0.05;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -78,7 +78,7 @@ void Grasp_Calculator::addGraspPositionsX(double h, double d, double rotation, s
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, 0);
 
     pre_pose = pose;
-    pre_pose.pose.position.x -= gripper_depth;
+    pre_pose.pose.position.x -= Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -88,7 +88,7 @@ void Grasp_Calculator::addGraspPositionsX(double h, double d, double rotation, s
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI);
 
     pre_pose = pose;
-    pre_pose.pose.position.x += gripper_depth;
+    pre_pose.pose.position.x += Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -111,7 +111,7 @@ void Grasp_Calculator::addGraspPositionsY(double h, double d, double rotation, s
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, -M_PI_2);
 
     pre_pose = pose;
-    pre_pose.pose.position.y += gripper_depth;
+    pre_pose.pose.position.y += Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -121,7 +121,7 @@ void Grasp_Calculator::addGraspPositionsY(double h, double d, double rotation, s
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI_2);
 
     pre_pose = pose;
-    pre_pose.pose.position.y -= gripper_depth;
+    pre_pose.pose.position.y -= Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -255,7 +255,7 @@ int Grasp_Calculator::calcCylinderGraspPosition(moveit_msgs::CollisionObject co,
 
 int Grasp_Calculator::calcGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
                                         std::vector<geometry_msgs::PoseStamped> &pre_poses,
-        double gripper_depth)
+                                        double gripper_depth)
 {
     //choose the right grasppositoncalculationfunction
     switch (co.primitives[0].type)
@@ -293,4 +293,169 @@ void Grasp_Calculator::transform_poses(std::string frame_id, std::vector<geometr
     {
         ROS_ERROR_STREAM("ERROR: Transformation failed.");
     }
+}
+
+void Grasp_Calculator::build_cluster(shapes::Mesh *mesh, std::vector<Cluster> &clusters)
+{
+    double threshold = 0.25;
+
+    //create better useable datatypes
+    std::vector<geometry_msgs::Point> mesh_vertices;
+    for (int i = 0; i < mesh->vertex_count; i++)
+    {
+        geometry_msgs::Point p;
+        p.x = mesh->vertices[3 * i];
+        p.y = mesh->vertices[(3 * i) + 1];
+        p.z = mesh->vertices[(3 * i) + 2];
+        mesh_vertices.push_back(p);
+    }
+
+    std::vector<Triangle> mesh_triangles;
+    mesh->computeTriangleNormals();
+    for (int i = 0; i < mesh->triangle_count; i++)
+    {
+        Triangle t;
+        t.triangle.push_back(mesh->triangles[(i * 3)]);
+        t.triangle.push_back(mesh->triangles[(i * 3) + 1]);
+        t.triangle.push_back(mesh->triangles[(i * 3) + 2]);
+        //sort for later intersection
+        sort(t.triangle.begin(), t.triangle.end());
+        t.normal.x = mesh->triangle_normals[i * 3];
+        t.normal.y = mesh->triangle_normals[(i * 3) + 1];
+        t.normal.z = mesh->triangle_normals[(i * 3) + 2];
+        mesh_triangles.push_back(t);
+    }
+    while (mesh_triangles.size() > 0)
+    {
+        // ROS_INFO_STREAM(mesh_triangles.size());
+        Cluster c;
+        c.triangles.push_back(mesh_triangles[0]);
+        mesh_triangles.erase(mesh_triangles.begin());
+        c.vertices = &mesh_vertices;
+        c.normal = c.triangles[0].normal;
+        for (int i = 0; i < mesh_triangles.size();)
+        {
+            //has the triangle a similar normal?
+            double a = get_angle(c.normal, mesh_triangles[i].normal);
+            if (a < threshold)
+            {
+                //check for two connections
+                std::vector<unsigned int> v3;
+                for (int j = 0; j < c.triangles.size(); j++)
+                {
+                    std::set_intersection(c.triangles[j].triangle.begin(), c.triangles[j].triangle.end(), mesh_triangles[i].triangle.begin(),
+                                          mesh_triangles[i].triangle.end(), back_inserter(v3));
+                    if (v3.size() >= 2)
+                        break;
+                }
+                //is the triangle connected to another triangle of the cluster?
+                if (v3.size() >= 2)
+                {
+                    c.triangles.push_back(mesh_triangles[i]);
+                    mesh_triangles.erase(mesh_triangles.begin() + i);
+                    //start over, because new triangles could be connected
+                    i = 0;
+                }
+                else i++;
+            }
+            else i++;
+        }
+        clusters.push_back(c);
+    }
+}
+
+void Grasp_Calculator::search_for_opposte_cluster(std::vector<Cluster> clusters, std::vector< std::pair<Cluster, Cluster> > &opposite_cluster)
+{
+    double threshold = 0.2;
+    for (int i = 0; i < clusters.size(); i++)
+    {
+        for (int j = i + 1; j < clusters.size(); j++)
+        {
+            if (M_PI - get_angle(clusters[i].normal, clusters[j].normal) < threshold)
+            {
+                std::pair<Cluster, Cluster> c_pair(clusters[i], clusters[j]);
+                opposite_cluster.push_back(c_pair);
+            }
+        }
+    }
+}
+
+Grasp_Calculator::Plane Grasp_Calculator::create_plane(geometry_msgs::Point normal, geometry_msgs::Point normal2)
+{
+    geometry_msgs::Point plane_normal;
+    plane_normal.x = normal.x - normal2.x;
+    plane_normal.y = normal.y - normal2.y;
+    plane_normal.z = normal.z - normal2.z;
+
+    geometry_msgs::Point p1;
+    geometry_msgs::Point p2;
+    if (plane_normal.x == 0 && plane_normal.y == 0)
+    {
+        p1.x = -plane_normal.z;
+        p1.y = 0;
+        p1.z = plane_normal.x;
+
+        p2.x = 0;
+        p2.y = -plane_normal.z;
+        p2.z = plane_normal.y;
+
+    }
+    else if (plane_normal.z == 0 && plane_normal.y == 0)
+    {
+        p1.x = -plane_normal.z;
+        p1.y = 0;
+        p1.z = plane_normal.x;
+
+        p2.x = -plane_normal.y;
+        p2.y = plane_normal.x;
+        p2.z = 0;
+    }
+    else
+    {
+        p1.x = 0;
+        p1.y = -plane_normal.z;
+        p1.z = plane_normal.y;
+
+        p2.x = -plane_normal.y;
+        p2.y = plane_normal.x;
+        p2.z = 0;
+    }
+
+    Grasp_Calculator::Plane_parameter pp(p1, p2);
+    Grasp_Calculator::Plane plane;
+    plane.pp = pp;
+    plane.normal = plane_normal;
+
+    return plane;
+}
+
+void Grasp_Calculator::calcMeshGraspPosition(shapes::Mesh *mesh)
+{
+    // 1. build simple polygon cluster - O(|Triangle|²)?
+    // 1.1. take random triangle
+    // 1.2. search for triangle with similar normal and with >=2 contacts
+    // (1.2.1 update representative triangle)
+    // 1.3. repeat until no new trianlge added
+    // (1.4 remove small clusters)
+    std::vector<Cluster> clusters;
+    build_cluster(mesh, clusters);
+
+    // 2. search for cluster with opposite normal - O(|Cluster|²)
+    std::vector< std::pair<Cluster, Cluster> > opposite_cluster;
+    search_for_opposte_cluster(clusters, opposite_cluster);
+
+    for (int i = 0; i < opposite_cluster.size(); i++)
+    {
+        // 3. project both cluster on a plain - o(|vertices|)?
+        Grasp_Calculator::Plane plane = create_plane(opposite_cluster[i].first.normal, opposite_cluster[i].second.normal);
+        
+        // 4. calc polygon intersection with vatti - O(|vertices|²)?
+        //     http://www.integis.ch/documents/ISem_Opprecht_Overlay_2002-02-28.pdf
+        //     http://www.cs.man.ac.uk/~toby/alan/software/gpc.html
+        // 5. calc centriod - O(|vertices|)
+        // 6. add grasppose pointing towards centriod with differen angles - const
+        // 7. use moveit to test poses - O(much)???
+    }
+
+
 }

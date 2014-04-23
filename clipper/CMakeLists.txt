@@ -1,20 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(suturo_manipulation_tools)
+project(clipper)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  moveit_ros_planning_interface
   roscpp
   rospy
-  suturo_manipulation_msgs
-  actionlib 
-  actionlib_msgs
-  tf
-  suturo_manipulation_planning_scene_interface
-  suturo_perception_msgs
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -88,7 +81,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES clipper  suturo_manipulation_mesh_loader
+#  LIBRARIES clipper
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -101,53 +94,31 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  include 
-  ${catkin_INCLUDE_DIRS} 
+  include
+  ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
+
 ## Declare a cpp library
-add_library(suturo_manipulation_mesh_loader
-  src/suturo_manipulation_mesh_loader.cpp
-)
+# add_library(clipper
+#   src/${PROJECT_NAME}/clipper.cpp
+# )
+
+add_library(polyclipping src/clipper.cpp)
 
 ## Declare a cpp executable
-# add_executable(suturo_manipulation_tools_node src/suturo_manipulation_tools_node.cpp)
-
-add_executable(publish_objects_from_perception src/publish_objects_from_perception.cpp)
-add_executable(publish_objects_tf_frames src/publish_objects_tf_frames.cpp)
+# add_executable(clipper_node src/clipper_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(suturo_manipulation_tools_node suturo_manipulation_tools_generate_messages_cpp)
+# add_dependencies(polyclipping clipper_generate_messages_cpp)
 
-add_dependencies(publish_objects_from_perception suturo_perception_msgs suturo_manipulation_msgs suturo_perception_lib suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
-
-add_dependencies(publish_objects_tf_frames suturo_manipulation_msgs suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
-
-add_dependencies(suturo_manipulation_mesh_loader ${catkin_EXPORTED_TARGETS})
-
+add_dependencies(polyclipping ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(suturo_manipulation_tools_node
-#   ${catkin_LIBRARIES}
-# )
-
-target_link_libraries(
-  publish_objects_from_perception
-  suturo_manipulation_planning_scene_interface
-  ${catkin_LIBRARIES}
-)
-
-target_link_libraries(
-  suturo_manipulation_mesh_loader
-  ${catkin_LIBRARIES}
-)
-
-target_link_libraries(
-  publish_objects_tf_frames
-  suturo_manipulation_planning_scene_interface
-  ${catkin_LIBRARIES}
-)
+ target_link_libraries(polyclipping
+   ${catkin_LIBRARIES}
+ )
 
 #############
 ## Install ##
@@ -164,7 +135,7 @@ target_link_libraries(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS suturo_manipulation_tools suturo_manipulation_tools_node
+# install(TARGETS clipper clipper_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -189,7 +160,7 @@ target_link_libraries(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_suturo_manipulation_tools.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_clipper.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

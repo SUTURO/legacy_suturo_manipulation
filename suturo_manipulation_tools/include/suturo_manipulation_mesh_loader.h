@@ -3,6 +3,8 @@
 
 #include <ros/ros.h>
 
+// #include <clipper.h>
+
 #include <suturo_manipulation_planning_scene_interface.h>
 
 #include <moveit/move_group_interface/move_group.h>

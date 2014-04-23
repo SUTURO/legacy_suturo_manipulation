@@ -37,8 +37,10 @@ public:
     static const double GRIPPER_MAX_POSITION = 0.09;
     static const double GRIPPER_MIN_POSITION = 0.0;
 
-    static const double R_GRIPPER_DEPTH = 0.14;
-    static const double L_GRIPPER_DEPTH = 0.175;
+    static const double GRIPPER_DEPTH = 0.12;
+
+    static const double R_GRIPPER_PALM_LENGTH = 0.14;
+    static const double L_GRIPPER_PALM_LENGTH = 0.175;
 
     Gripper(std::string arm);
 
@@ -69,7 +71,7 @@ public:
      */
     double open_gripper(double force = 20);
 
-    double get_gripper_depth();
+    double get_gripper_palm_length();
 
     std::vector<std::string> get_gripper_links();
 

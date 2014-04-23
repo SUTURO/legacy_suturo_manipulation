@@ -8,12 +8,15 @@
 #include <suturo_manipulation_gripper_controller.h>
 #include <suturo_manipulation_planning_scene_interface.h>
 #include <suturo_manipulation_msgs/RobotBodyPart.h>
+
+// #include <suturo_manipulation_mesh_loader.h>
 #include <pr2_controllers_msgs/PointHeadActionResult.h>
 #include <control_msgs/PointHeadActionGoal.h>
 
 #include <visualization_msgs/Marker.h>
 
 #include <algorithm>
+#include <clipper.h>
 
 
 class Grasp_Calculator
@@ -77,6 +80,27 @@ protected:
 
 public:
 
+    struct Triangle
+    {
+        std::vector<unsigned int> triangle;
+        geometry_msgs::Point normal;
+    };
+
+    struct Cluster
+    {
+        std::vector<Triangle> triangles;
+        std::vector<geometry_msgs::Point> *vertices;
+        geometry_msgs::Point normal;
+    };
+
+    typedef std::pair< geometry_msgs::Point, geometry_msgs::Point > Plane_parameter;
+
+    struct Plane
+    {
+        Plane_parameter pp;
+        geometry_msgs::Point normal;
+    };
+
     Grasp_Calculator(Suturo_Manipulation_Planning_Scene_Interface *pi);
 
     ~Grasp_Calculator();
@@ -105,6 +129,14 @@ public:
     }
 
     geometry_msgs::PointStamped get_point_above_object(std::string object_id);
+
+    void calcMeshGraspPosition(shapes::Mesh *mesh);
+
+    void build_cluster(shapes::Mesh *mesh, std::vector<Cluster> &clusters);
+
+    void search_for_opposte_cluster(std::vector<Cluster> clusters, std::vector< std::pair<Cluster, Cluster> > &opposite_cluster);
+
+    Plane create_plane(geometry_msgs::Point normal, geometry_msgs::Point normal2);
 };
 
 #endif

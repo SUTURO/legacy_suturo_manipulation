@@ -133,40 +133,8 @@ void putObjects(ros::Publisher pub_co)
     ros::WallDuration(1.0).sleep();
 }
 
-// void muh(ros::NodeHandle &nh)
-// {
-//     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-//     ros::WallDuration(1.0).sleep();
-//     moveit_msgs::CollisionObject co;
-//     co.header.stamp = ros::Time::now();
-//     co.header.frame_id = "/base_footprint";
-//     co.id = "pancake_mix";
-//     co.operation = moveit_msgs::CollisionObject::ADD;
-
-//     co.meshes.resize(1);
-//     Mesh_loader ml;
-//     co.meshes[0] = ml.load_pancake();
-//     co.mesh_poses.resize(1);
-//     co.mesh_poses[0].position.x = 0.67;
-//     co.mesh_poses[0].position.y = 0;
-//     co.mesh_poses[0].position.z = tischposiZ + 0.03 + 0.126;
-//     co.mesh_poses[0].orientation.w = 1;
-//     ros::WallDuration(1.0).sleep();
-//     pub_co.publish(co);
-//     ros::WallDuration(1.0).sleep();
-// }
-
-int main(int argc, char **argv)
+void muh(ros::NodeHandle &nh)
 {
-    ros::init (argc, argv, "right_arm_pick_place");
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
-
-    ros::NodeHandle nh;
-    // muh(nh);
-    // Mesh_loader ml;
-    // ROS_INFO_STREAM(ml.load_corny_msg());
-    // ROS_INFO_STREAM("\n\n");
 
     std::vector<geometry_msgs::PoseStamped> poses;
     std::vector<geometry_msgs::PoseStamped> pre_poses;
@@ -193,31 +161,49 @@ int main(int argc, char **argv)
     pre_poses.push_back(grasp_pose);
 
     g.pick(co, "right_arm", poses, pre_poses, 15);
+}
 
-    // ROS_INFO_STREAM(ml.load_pringles());
+int main(int argc, char **argv)
+{
+    ros::init (argc, argv, "right_arm_pick_place");
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
 
-    // Grasping* g = new Grasping_reactive(&pi);
-    // g->drop("asd");
+    ros::NodeHandle nh;
 
-    //     ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-    //      ros::WallDuration(1.0).sleep();
-    //     moveit_msgs::CollisionObject co;
-    //     co.header.stamp = ros::Time::now();
-    //     co.header.frame_id = "/base_footprint";
-    //     co.id = "corny";
-    //     co.operation = moveit_msgs::CollisionObject::ADD;
+    Mesh_loader ml;
 
-    //     co.meshes.resize(1);
-    //     co.meshes[0] = ml.load_pringles();
-    //     co.mesh_poses.resize(1);
-    //     co.mesh_poses[0].position.x = 2;
-    //     co.mesh_poses[0].position.y = 1;
-    //     co.mesh_poses[0].position.z = 2;
-    //     co.mesh_poses[0].orientation.w = 1;
-    //     ros::WallDuration(1.0).sleep();
-    //     pub_co.publish(co);
-    //     ros::WallDuration(1.0).sleep();
-    // putObjects(pub_co);
+    ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
+    ros::WallDuration(1.0).sleep();
+    moveit_msgs::CollisionObject co;
+    co.header.stamp = ros::Time::now();
+    co.header.frame_id = "/base_footprint";
+    co.id = "corny";
+
+
+    co.meshes.resize(1);
+    co.meshes[0] = ml.load_corny_msg();
+    co.mesh_poses.resize(1);
+    co.mesh_poses[0].position.x = 2;
+    co.mesh_poses[0].position.y = 0;
+    co.mesh_poses[0].position.z = 2;
+    co.mesh_poses[0].orientation.w = 1;
+    co.operation = moveit_msgs::CollisionObject::REMOVE;
+    pub_co.publish(co);
+    ros::WallDuration(1.0).sleep();
+    co.operation = moveit_msgs::CollisionObject::ADD;
+    pub_co.publish(co);
+    ros::WallDuration(1.0).sleep();
+
+    shapes::Mesh *corny = ml.load_corny();
+    corny->computeTriangleNormals();
+    for (int i = 0; corny->triangle_count > i; i++){
+        ROS_INFO_STREAM(" ");
+        ROS_INFO_STREAM(corny->triangle_normals[i*3]);
+        ROS_INFO_STREAM(corny->triangle_normals[(i*3) + 1]);
+        ROS_INFO_STREAM(corny->triangle_normals[(i*3) + 2]);
+        
+    }
 
     // Gripper g;
 

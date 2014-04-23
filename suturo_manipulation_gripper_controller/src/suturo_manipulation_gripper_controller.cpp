@@ -96,10 +96,10 @@ double Gripper::close_gripper(double force)
     return gripper_state_;
 }
 
-double Gripper::get_gripper_depth()
+double Gripper::get_gripper_palm_length()
 {
-	double r = Gripper::R_GRIPPER_DEPTH;
-	double l = Gripper::L_GRIPPER_DEPTH;
+	double r = Gripper::R_GRIPPER_PALM_LENGTH;
+	double l = Gripper::L_GRIPPER_PALM_LENGTH;
     return arm_ == RIGHT_ARM ? r : l;
 }
 

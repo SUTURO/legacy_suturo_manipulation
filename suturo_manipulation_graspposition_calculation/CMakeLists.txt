@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   suturo_manipulation_planning_scene_interface
   suturo_manipulation_tools
   suturo_manipulation_gripper_controller
+  clipper
 )
 
 ## System dependencies are found with CMake's conventions
@@ -86,8 +87,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES suturo_manipulation_graspposition_calculation
-#  CATKIN_DEPENDS suturo_manipulation_planning_scene_interface suturo_manipulation_tools
+#  LIBRARIES suturo_manipulation_grasp_calculator
+  CATKIN_DEPENDS suturo_manipulation_planning_scene_interface suturo_manipulation_tools clipper
 #  DEPENDS system_lib
 )
 
@@ -110,18 +111,31 @@ add_library(suturo_manipulation_grasp_calculator
 )
 
 ## Declare a cpp executable
-# add_executable(suturo_manipulation_graspposition_calculation_node src/suturo_manipulation_graspposition_calculation_node.cpp)
+add_executable(test_mesh_calculation src/test_mesh_calculation.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(suturo_manipulation_grasp_calculator suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface 
-suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
+suturo_manipulation_msgs polyclipping ${catkin_EXPORTED_TARGETS})
+
+add_dependencies(test_mesh_calculation  suturo_manipulation_planning_scene_interface 
+suturo_manipulation_grasp_calculator suturo_manipulation_mesh_loader polyclipping ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
   suturo_manipulation_grasp_calculator
   suturo_manipulation_gripper_controller
   suturo_manipulation_planning_scene_interface
+  polyclipping
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  test_mesh_calculation
+  suturo_manipulation_grasp_calculator
+  suturo_manipulation_planning_scene_interface
+  suturo_manipulation_mesh_loader
+  polyclipping
   ${catkin_LIBRARIES}
 )
 

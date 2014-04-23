@@ -193,7 +193,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         return 0;
     }
 
-    return 1;
+    return 0;
 }
 
 int Grasping::pick(std::string object_name, std::string arm, double force)
@@ -208,16 +208,10 @@ int Grasping::pick(std::string object_name, std::string arm, double force)
     std::vector<geometry_msgs::PoseStamped> poses(0);
     std::vector<geometry_msgs::PoseStamped> pre_poses(0);
 
-    //calculate graspposition(s)
     Gripper *gripper;
 
-    // if (!get_gripper(arm, gripper) &&
-    //         !grasp_calculator_->calcGraspPosition(co, poses, pre_poses, gripper->get_gripper_depth()))
-    // {
-    //     return 0;
-    // }
-
-    return get_gripper(arm, gripper) && grasp_calculator_->calcGraspPosition(co, poses, pre_poses, gripper->get_gripper_depth()) ?
+    //calculate graspposition(s)
+    return get_gripper(arm, gripper) && grasp_calculator_->calcGraspPosition(co, poses, pre_poses, gripper->get_gripper_palm_length()) ?
            pick(co, arm, poses, pre_poses, force) : 0;
 }
 
@@ -235,7 +229,7 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
 
     //calculate graspposition(s)
     Gripper *gripper;
-    if (!get_gripper(arm, gripper) || !grasp_calculator_->calcGraspPosition(co, poses_tmp, pre_poses_tmp, gripper->get_gripper_depth()))
+    if (!get_gripper(arm, gripper) || !grasp_calculator_->calcGraspPosition(co, poses_tmp, pre_poses_tmp, gripper->get_gripper_palm_length()))
     {
         return 0;
     }

@@ -153,8 +153,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	// putObjects(pub_co);
-  muh(nh);
+	putObjects(pub_co);
+  // muh(nh);
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();
