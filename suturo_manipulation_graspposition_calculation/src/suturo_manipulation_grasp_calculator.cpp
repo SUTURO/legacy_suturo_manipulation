@@ -429,6 +429,11 @@ Grasp_Calculator::Plane Grasp_Calculator::create_plane(geometry_msgs::Point norm
     return plane;
 }
 
+void Grasp_Calculator::create_polygon(Cluster c, Double_path, Muh muh)
+{
+
+}
+
 void Grasp_Calculator::calcMeshGraspPosition(shapes::Mesh *mesh)
 {
     // 1. build simple polygon cluster - O(|Triangle|²)?
@@ -437,25 +442,47 @@ void Grasp_Calculator::calcMeshGraspPosition(shapes::Mesh *mesh)
     // (1.2.1 update representative triangle)
     // 1.3. repeat until no new trianlge added
     // (1.4 remove small clusters)
-    std::vector<Cluster> clusters;
-    build_cluster(mesh, clusters);
+    // std::vector<Cluster> clusters;
+    // Muh muh;
+    // build_cluster(mesh, clusters, muh);
 
-    // 2. search for cluster with opposite normal - O(|Cluster|²)
-    std::vector< std::pair<Cluster, Cluster> > opposite_cluster;
-    search_for_opposte_cluster(clusters, opposite_cluster);
+    // // 2. search for cluster with opposite normal - O(|Cluster|²)
+    // std::vector< std::pair<uint, uint> > opposite_cluster;
+    // search_for_opposte_cluster(clusters, opposite_cluster);
 
-    for (int i = 0; i < opposite_cluster.size(); i++)
-    {
-        // 3. project both cluster on a plain - o(|vertices|)?
-        Grasp_Calculator::Plane plane = create_plane(opposite_cluster[i].first.normal, opposite_cluster[i].second.normal);
+    // for (int i = 0; i < opposite_cluster.size(); i++)
+    // {
+    //     // 3. project both cluster on a plain - o(|vertices|)?
+    //     Grasp_Calculator::Plane plane = create_plane(opposite_cluster[i].first, opposite_cluster[i].second, clusters);
         
-        // 4. calc polygon intersection with vatti - O(|vertices|²)?
-        //     http://www.integis.ch/documents/ISem_Opprecht_Overlay_2002-02-28.pdf
-        //     http://www.cs.man.ac.uk/~toby/alan/software/gpc.html
-        // 5. calc centriod - O(|vertices|)
-        // 6. add grasppose pointing towards centriod with differen angles - const
-        // 7. use moveit to test poses - O(much)???
-    }
+    //     std::vector<uint> p1;
+    //     std::vector<uint> p2;
+    //     create_polygon(opposite_cluster[i].first, p1, muh, clusters);
+    //     create_polygon(opposite_cluster[i].second, p2, muh, clusters);
+
+    //     project_polygon_to_plane(plane, p1);
+    //     project_polygon_to_plane(plane, p2);
+
+    //     ClipperLib::Paths polygon1(1);
+    //     ClipperLib::Paths polygon2(1);
+    //     double_polygon_to_path(p1, polygon1);
+    //     double_polygon_to_path(p2, polygon2);
+
+
+    //     // // 4. calc polygon intersection - O(|vertices|²)?
+    //     //     http://www.integis.ch/documents/ISem_Opprecht_Overlay_2002-02-28.pdf
+    //     //     http://www.cs.man.ac.uk/~toby/alan/software/gpc.html
+    //     ClipperLib::Clipper clpr;
+    //     clpr.AddPaths(polygon1, ClipperLib::ptSubject, true);
+    //     clpr.AddPaths(polygon2, ClipperLib::ptClip, true);
+    //     ClipperLib::Paths solution;
+    //     clpr.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+
+    //     // 5. calc centriod - O(|vertices|)
+    //     // 6. add grasppose pointing towards centriod with differen angles - const
+    //     // 7. use moveit to test poses - O(much)???
+    // }
 
 
 }

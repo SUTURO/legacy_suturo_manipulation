@@ -82,7 +82,7 @@ public:
 
     struct Triangle
     {
-        std::vector<unsigned int> triangle;
+        std::vector<uint> triangle;
         geometry_msgs::Point normal;
     };
 
@@ -94,11 +94,19 @@ public:
     };
 
     typedef std::pair< geometry_msgs::Point, geometry_msgs::Point > Plane_parameter;
+    typedef std::vector<double> Double_path;
 
     struct Plane
     {
         Plane_parameter pp;
         geometry_msgs::Point normal;
+    };
+
+    struct Muh
+    {
+        uint vertex_id;
+        std::vector<Cluster> in_cluster;
+        std::vector<uint> connected_vertices;
     };
 
     Grasp_Calculator(Suturo_Manipulation_Planning_Scene_Interface *pi);
@@ -137,6 +145,8 @@ public:
     void search_for_opposte_cluster(std::vector<Cluster> clusters, std::vector< std::pair<Cluster, Cluster> > &opposite_cluster);
 
     Plane create_plane(geometry_msgs::Point normal, geometry_msgs::Point normal2);
+
+    void create_polygon(Cluster c, Double_path, Muh muh);
 };
 
 #endif
