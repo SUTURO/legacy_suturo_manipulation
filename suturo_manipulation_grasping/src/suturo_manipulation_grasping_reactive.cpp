@@ -8,7 +8,9 @@ Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh, Suturo_Manipulation_Pl
   moveSucces_ = false;
 }
 
-int Grasping_reactive::move(move_group_interface::MoveGroup* move_group, geometry_msgs::PoseStamped desired_pose)
+int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 
+        geometry_msgs::PoseStamped desired_pose,
+        moveit_msgs::CollisionObject co)
 {
   ROS_INFO("Grasping_reactive::move called");
   // this->Grasping::move(move_group, desired_pose);

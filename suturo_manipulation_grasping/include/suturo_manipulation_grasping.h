@@ -41,7 +41,9 @@ protected:
 
     int lookAt(geometry_msgs::PoseStamped pose);
 
-    virtual int move(move_group_interface::MoveGroup *move_group, geometry_msgs::PoseStamped desired_pose);
+    virtual int move(move_group_interface::MoveGroup *move_group, 
+        geometry_msgs::PoseStamped desired_pose,
+        moveit_msgs::CollisionObject co);
 
     int get_attached_object(std::string arm, std::string object_name, moveit_msgs::CollisionObject &co);
 

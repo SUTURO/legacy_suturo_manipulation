@@ -22,7 +22,9 @@ class Grasping_reactive : public Grasping
 {
 
 protected:
-  int move(move_group_interface::MoveGroup* move_group, geometry_msgs::PoseStamped desired_pose);
+  int move(move_group_interface::MoveGroup *move_group, 
+        geometry_msgs::PoseStamped desired_pose,
+        moveit_msgs::CollisionObject co);
   void threaded_move(move_group_interface::MoveGroup* move_group);
   Collision_Checker* cc_;
   bool moveSucces_;

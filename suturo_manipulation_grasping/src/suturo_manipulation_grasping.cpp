@@ -5,28 +5,28 @@ using namespace std;
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
-Grasping::Grasping(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher)
+Grasping::Grasping(ros::NodeHandle *nh, Suturo_Manipulation_Planning_Scene_Interface *pi, ros::Publisher *head_publisher)
 {
-  //initialize private variables
-  group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
-  group_r_arm_->setPlanningTime(5.0);
+    //initialize private variables
+    group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
+    group_r_arm_->setPlanningTime(5.0);
 
 
-  group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
-  group_l_arm_->setPlanningTime(5.0);
+    group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
+    group_l_arm_->setPlanningTime(5.0);
 
-  head_publisher_ = head_publisher;
-  r_gripper_ = new Gripper(RIGHT_ARM);
-  l_gripper_ = new Gripper(LEFT_ARM);
+    head_publisher_ = head_publisher;
+    r_gripper_ = new Gripper(RIGHT_ARM);
+    l_gripper_ = new Gripper(LEFT_ARM);
 
-  //pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
-  pi_ = pi;
-  nh_ = nh;
+    //pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
+    pi_ = pi;
+    nh_ = nh;
 
-  grasp_calculator_ = new Grasp_Calculator(pi);
+    grasp_calculator_ = new Grasp_Calculator(pi);
 
-  //wait because ros
-  ros::WallDuration(0.5).sleep();
+    //wait because ros
+    ros::WallDuration(0.5).sleep();
 }
 
 Grasping::~Grasping()
@@ -86,7 +86,9 @@ int Grasping::lookAt(geometry_msgs::PoseStamped pose)
     return 1;
 }
 
-int Grasping::move(move_group_interface::MoveGroup *move_group, geometry_msgs::PoseStamped desired_pose)
+int Grasping::move(move_group_interface::MoveGroup *move_group,
+                   geometry_msgs::PoseStamped desired_pose,
+                   moveit_msgs::CollisionObject co)
 {
     //look
     lookAt(desired_pose);
@@ -151,7 +153,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
     while (pos_id < pre_poses.size())
     {
         ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
-        if (!move(move_group, pre_poses.at(pos_id)))
+        if (!move(move_group, pre_poses.at(pos_id), co))
         {
             pos_id++;
             continue;
@@ -163,7 +165,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         //move Arm to goalpose
         ROS_INFO_STREAM("move to goalpose");
 
-        if (!move(move_group, poses.at(pos_id)))
+        if (!move(move_group, poses.at(pos_id), co))
         {
             pos_id++;
             continue;
