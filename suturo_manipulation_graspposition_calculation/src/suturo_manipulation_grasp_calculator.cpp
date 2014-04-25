@@ -42,9 +42,9 @@ void Grasp_Calculator::addGraspPositionsZ(double d, double rotation, std::string
 
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
-    pose.pose.position.z = gripper_depth + d;
+    pose.pose.position.z = (gripper_depth + Gripper::GRIPPER_DEPTH) + d;
     pre_pose = pose;
-    pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH - 0.05;
+    pre_pose.pose.position.z += Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -53,9 +53,9 @@ void Grasp_Calculator::addGraspPositionsZ(double d, double rotation, std::string
     //grasp from below
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, -M_PI_2, rotation);
 
-    pose.pose.position.z = 0 - gripper_depth - d;
+    pose.pose.position.z = 0 - (gripper_depth + Gripper::GRIPPER_DEPTH) - d;
     pre_pose = pose;
-    pre_pose.pose.position.z -= Gripper::GRIPPER_DEPTH - 0.05;
+    pre_pose.pose.position.z -= Gripper::GRIPPER_DEPTH;
 
     poses.push_back(pose);
     pre_poses.push_back(pre_pose);
@@ -72,7 +72,7 @@ void Grasp_Calculator::addGraspPositionsX(double h, double d, double rotation, s
     pre_pose.header.frame_id = frame_id;
 
     //grasp from the front
-    pose.pose.position.x = 0 - gripper_depth - d - 0.005;
+    pose.pose.position.x = 0 - (gripper_depth + Gripper::GRIPPER_DEPTH) - d - 0.005;
     pose.pose.position.y = 0;
     pose.pose.position.z = h;
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, 0);
@@ -84,7 +84,7 @@ void Grasp_Calculator::addGraspPositionsX(double h, double d, double rotation, s
     pre_poses.push_back(pre_pose);
 
     //grasp from behind
-    pose.pose.position.x = gripper_depth + d + 0.005;
+    pose.pose.position.x = (gripper_depth + Gripper::GRIPPER_DEPTH) + d + 0.005;
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI);
 
     pre_pose = pose;
@@ -106,7 +106,7 @@ void Grasp_Calculator::addGraspPositionsY(double h, double d, double rotation, s
 
     //grasp from the left
     pose.pose.position.x = 0;
-    pose.pose.position.y = gripper_depth + d + 0.005;
+    pose.pose.position.y = (gripper_depth + Gripper::GRIPPER_DEPTH) + d + 0.005;
     pose.pose.position.z = h;
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, -M_PI_2);
 
@@ -117,7 +117,7 @@ void Grasp_Calculator::addGraspPositionsY(double h, double d, double rotation, s
     pre_poses.push_back(pre_pose);
 
     //grasp from right
-    pose.pose.position.y = 0 - gripper_depth - d - 0.005;
+    pose.pose.position.y = 0 - (gripper_depth + Gripper::GRIPPER_DEPTH) - d - 0.005;
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(rotation, 0, M_PI_2);
 
     pre_pose = pose;

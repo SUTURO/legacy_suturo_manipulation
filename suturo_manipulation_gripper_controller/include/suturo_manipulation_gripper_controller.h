@@ -37,10 +37,10 @@ public:
     static const double GRIPPER_MAX_POSITION = 0.09;
     static const double GRIPPER_MIN_POSITION = 0.0;
 
-    static const double GRIPPER_DEPTH = 0.12;
+    static const double GRIPPER_DEPTH = 0.05;
 
-    static const double R_GRIPPER_PALM_LENGTH = 0.14;
-    static const double L_GRIPPER_PALM_LENGTH = 0.175;
+    static const double R_GRIPPER_PALM_LENGTH = 0.12;
+    static const double L_GRIPPER_PALM_LENGTH = 0.17;
 
     Gripper(std::string arm);
 
