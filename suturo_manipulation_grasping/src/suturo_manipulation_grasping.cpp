@@ -5,26 +5,28 @@ using namespace std;
 const string Grasping::RIGHT_ARM = suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM;
 const string Grasping::LEFT_ARM = suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM;
 
-Grasping::Grasping(Suturo_Manipulation_Planning_Scene_Interface *pi, ros::Publisher *head_publisher)
+Grasping::Grasping(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher)
 {
-    //initialize private variables
-    group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
-    group_r_arm_->setPlanningTime(5.0);
+  //initialize private variables
+  group_r_arm_ = new move_group_interface::MoveGroup(RIGHT_ARM);
+  group_r_arm_->setPlanningTime(5.0);
 
-    group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
-    group_l_arm_->setPlanningTime(5.0);
 
-    head_publisher_ = head_publisher;
-    r_gripper_ = new Gripper(RIGHT_ARM);
-    l_gripper_ = new Gripper(LEFT_ARM);
+  group_l_arm_ = new move_group_interface::MoveGroup(LEFT_ARM);
+  group_l_arm_->setPlanningTime(5.0);
 
-    //pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
-    pi_ = pi;
+  head_publisher_ = head_publisher;
+  r_gripper_ = new Gripper(RIGHT_ARM);
+  l_gripper_ = new Gripper(LEFT_ARM);
 
-    grasp_calculator_ = new Grasp_Calculator(pi);
+  //pi nicht selbst erstellen, weil das Weiterreichen des nodehandle über 2 Klassen rumbugt :(
+  pi_ = pi;
+  nh_ = nh;
 
-    //wait because ros
-    ros::WallDuration(0.5).sleep();
+  grasp_calculator_ = new Grasp_Calculator(pi);
+
+  //wait because ros
+  ros::WallDuration(0.5).sleep();
 }
 
 Grasping::~Grasping()

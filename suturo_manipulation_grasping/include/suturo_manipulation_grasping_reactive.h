@@ -22,10 +22,13 @@ class Grasping_reactive : public Grasping
 {
 
 protected:
-	int move(move_group_interface::MoveGroup* move_group, geometry_msgs::PoseStamped desired_pose);
+  int move(move_group_interface::MoveGroup* move_group, geometry_msgs::PoseStamped desired_pose);
+  void threaded_move(move_group_interface::MoveGroup* move_group);
+  Collision_Checker* cc_;
+  bool moveSucces_;
 
 public:
-	Grasping_reactive(Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher=NULL);
+	Grasping_reactive(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher=NULL);
 	
 };
      

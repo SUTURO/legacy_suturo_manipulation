@@ -1,0 +1,6 @@
+
+<launch>
+
+    <node pkg="rqt_plot" type="rqt_plot" args="/pressure/r_gripper_motor/r_finger_tip[3]:r_finger_tip[4]:l_finger_tip[3]:l_finger_tip[4]" name="rqt_plot" />
+
+</launch>

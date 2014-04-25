@@ -32,6 +32,7 @@ protected:
     Suturo_Manipulation_Planning_Scene_Interface *pi_;
     ros::Publisher *head_publisher_;
     tf::TransformListener listener_;
+    ros::NodeHandle* nh_;
 
     /**
      * Publishes/updates a tf frame inside the collisionobject
@@ -51,7 +52,7 @@ protected:
 
 public:
 
-    Grasping(Suturo_Manipulation_Planning_Scene_Interface *pi, ros::Publisher *head_publisher = NULL);
+    Grasping(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher=NULL);
 
     ~Grasping();
 

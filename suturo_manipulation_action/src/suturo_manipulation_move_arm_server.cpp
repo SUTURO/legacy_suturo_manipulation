@@ -115,6 +115,7 @@ void moveArm(const suturo_manipulation_msgs::suturo_manipulation_moveGoalConstPt
     // set Planning Interface and Grasper
     ROS_INFO("Create Planning Scene Interface...");
     Suturo_Manipulation_Planning_Scene_Interface pi(nh);
+    ROS_INFO("Done.");
 
     // Set arm which should be moved
     string arm = goal->bodypart.bodyPart;
