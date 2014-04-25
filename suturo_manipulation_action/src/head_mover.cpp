@@ -177,7 +177,7 @@ int main(int argc, char **argv)
   while(ros::ok())
   {
     ros::spinOnce;
-    if(i<150 && cc.updated_)
+    if(cc.updated_)
     {
       if (i==0)
       {
