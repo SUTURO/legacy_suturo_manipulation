@@ -105,5 +105,5 @@ double Gripper::get_gripper_palm_length()
 
 std::vector<std::string> Gripper::get_gripper_links()
 {
-    return arm_ == RIGHT_ARM ? Gripper::get_r_gripper_links() : Gripper::get_r_gripper_links();
+    return arm_ == RIGHT_ARM ? Gripper::get_r_gripper_links() : Gripper::get_l_gripper_links();
 }

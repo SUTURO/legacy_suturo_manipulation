@@ -119,6 +119,52 @@ int move_object_to_cam(move_group_interface::MoveGroup *move_group)
     // return 0;
 }
 
+int move_arm_in_front_of_robot(move_group_interface::MoveGroup *move_group, double y_oofset)
+{
+    //look
+    // lookAt(desired_pose);
+
+
+    //calc pose depending on objectposition
+    tf::TransformListener listener;
+    ros::WallDuration(1.0).sleep();
+    geometry_msgs::PoseStamped desired_pose;
+    desired_pose.header.frame_id = "/torso_lift_link";
+    desired_pose.pose.position.x = 0.45;
+    desired_pose.pose.position.y = y_oofset;
+    desired_pose.pose.position.z = 0;
+    desired_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI_2);
+
+    // try
+    // {
+    //     //transform pose from s to base_link and save it in pose again
+    //     // ROS_INFO_STREAM(aco_in_wrist_frame);
+    //     listener.transformPose("/" + move_group->getEndEffectorLink(), aco_in_wrist_frame, aco_in_wrist_frame);
+    //     // ROS_INFO_STREAM(aco_in_wrist_frame);
+    // }
+    // catch (...)
+    // {
+    //     ROS_INFO("ERROR: Transformation failed.");
+    //     return 0;
+    // }
+
+    // geometry_msgs::PoseStamped desired_pose;
+    // desired_pose.header.frame_id = "/webcam";
+    // desired_pose.pose.position.x = 0.23;
+    // desired_pose.pose.position.y = aco_in_wrist_frame.pose.position.x;
+    // desired_pose.pose.position.z = 0;
+    // desired_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_2);
+
+
+    //set marker
+    pi_->publishMarker(desired_pose);
+    //set goal
+    move_group->setPoseTarget(desired_pose);
+    //move
+    return move_group->move() ? 1 : 0;
+    // return 0;
+}
+
 /**
 * This method moves the given bodypart to the homeposition.
 */
@@ -199,6 +245,32 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
             server_home->setAborted(r);
         }
     }
+    else if ((body_part == suturo_manipulation_msgs::RobotBodyPart::RIGHT_ARM_PASS_OVER))
+    {
+        if (move_arm_in_front_of_robot(new move_group_interface::MoveGroup(right_arm_group), -0.15))
+        {
+            r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+            server_home->setSucceeded(r);
+        }
+        else
+        {
+            r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+            server_home->setAborted(r);
+        }        
+    }
+    else if ((body_part == suturo_manipulation_msgs::RobotBodyPart::LEFT_ARM_PASS_OVER))
+    {
+        if (move_arm_in_front_of_robot(new move_group_interface::MoveGroup(left_arm_group), 0.15))
+        {
+            r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;
+            server_home->setSucceeded(r);
+        }
+        else
+        {
+            r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
+            server_home->setAborted(r);
+        }        
+    }    
     else
     {
 
@@ -219,7 +291,7 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
 
         }
         else if (body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS
-                || body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS_MOVE)
+                 || body_part == suturo_manipulation_msgs::RobotBodyPart::BOTH_ARMS_MOVE)
         {
 
             group = new move_group_interface::MoveGroup(both_arms_group);

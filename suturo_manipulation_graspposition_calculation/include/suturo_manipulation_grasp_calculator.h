@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <clipper.h>
 
+#include <suturo_manipulation_mesh.h>
+
+// using namespace suturo_manipulation;
 
 class Grasp_Calculator
 {
@@ -80,34 +83,13 @@ protected:
 
 public:
 
-    struct Triangle
+    struct DoublePoint2D
     {
-        std::vector<uint> triangle;
-        geometry_msgs::Point normal;
+        double x;
+        double y;
     };
 
-    struct Cluster
-    {
-        std::vector<Triangle> triangles;
-        std::vector<geometry_msgs::Point> *vertices;
-        geometry_msgs::Point normal;
-    };
-
-    typedef std::pair< geometry_msgs::Point, geometry_msgs::Point > Plane_parameter;
-    typedef std::vector<double> Double_path;
-
-    struct Plane
-    {
-        Plane_parameter pp;
-        geometry_msgs::Point normal;
-    };
-
-    struct Muh
-    {
-        uint vertex_id;
-        std::vector<Cluster> in_cluster;
-        std::vector<uint> connected_vertices;
-    };
+    typedef std::vector<DoublePoint2D> DPolygon2D;
 
     Grasp_Calculator(Suturo_Manipulation_Planning_Scene_Interface *pi);
 
@@ -140,13 +122,13 @@ public:
 
     void calcMeshGraspPosition(shapes::Mesh *mesh);
 
-    void build_cluster(shapes::Mesh *mesh, std::vector<Cluster> &clusters);
+    DPolygon2D project_polygon_to_plane(suturo_manipulation::Plane plane, std::vector<geometry_msgs::Point> polygon);
 
-    void search_for_opposte_cluster(std::vector<Cluster> clusters, std::vector< std::pair<Cluster, Cluster> > &opposite_cluster);
+    void double_polygon_to_path(DPolygon2D double_polygon, ClipperLib::Paths &int_polygon);
 
-    Plane create_plane(geometry_msgs::Point normal, geometry_msgs::Point normal2);
+    geometry_msgs::Point get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point p);
 
-    void create_polygon(Cluster c, Double_path, Muh muh);
 };
+
 
 #endif

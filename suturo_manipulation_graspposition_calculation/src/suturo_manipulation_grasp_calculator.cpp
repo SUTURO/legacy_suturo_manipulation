@@ -295,143 +295,90 @@ void Grasp_Calculator::transform_poses(std::string frame_id, std::vector<geometr
     }
 }
 
-void Grasp_Calculator::build_cluster(shapes::Mesh *mesh, std::vector<Cluster> &clusters)
+geometry_msgs::Point Grasp_Calculator::get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point p)
 {
-    double threshold = 0.25;
+    geometry_msgs::Point r;
+    geometry_msgs::Point n = plane.normal;
 
-    //create better useable datatypes
-    std::vector<geometry_msgs::Point> mesh_vertices;
-    for (int i = 0; i < mesh->vertex_count; i++)
-    {
-        geometry_msgs::Point p;
-        p.x = mesh->vertices[3 * i];
-        p.y = mesh->vertices[(3 * i) + 1];
-        p.z = mesh->vertices[(3 * i) + 2];
-        mesh_vertices.push_back(p);
-    }
+    double lamda = (- (p.x * n.x + p.y * n.y + p.z * n.z) /
+                    (n.x * n.x + n.y * n.y + n.z * n.z));
 
-    std::vector<Triangle> mesh_triangles;
-    mesh->computeTriangleNormals();
-    for (int i = 0; i < mesh->triangle_count; i++)
-    {
-        Triangle t;
-        t.triangle.push_back(mesh->triangles[(i * 3)]);
-        t.triangle.push_back(mesh->triangles[(i * 3) + 1]);
-        t.triangle.push_back(mesh->triangles[(i * 3) + 2]);
-        //sort for later intersection
-        sort(t.triangle.begin(), t.triangle.end());
-        t.normal.x = mesh->triangle_normals[i * 3];
-        t.normal.y = mesh->triangle_normals[(i * 3) + 1];
-        t.normal.z = mesh->triangle_normals[(i * 3) + 2];
-        mesh_triangles.push_back(t);
-    }
-    while (mesh_triangles.size() > 0)
-    {
-        // ROS_INFO_STREAM(mesh_triangles.size());
-        Cluster c;
-        c.triangles.push_back(mesh_triangles[0]);
-        mesh_triangles.erase(mesh_triangles.begin());
-        c.vertices = &mesh_vertices;
-        c.normal = c.triangles[0].normal;
-        for (int i = 0; i < mesh_triangles.size();)
-        {
-            //has the triangle a similar normal?
-            double a = get_angle(c.normal, mesh_triangles[i].normal);
-            if (a < threshold)
-            {
-                //check for two connections
-                std::vector<unsigned int> v3;
-                for (int j = 0; j < c.triangles.size(); j++)
-                {
-                    std::set_intersection(c.triangles[j].triangle.begin(), c.triangles[j].triangle.end(), mesh_triangles[i].triangle.begin(),
-                                          mesh_triangles[i].triangle.end(), back_inserter(v3));
-                    if (v3.size() >= 2)
-                        break;
-                }
-                //is the triangle connected to another triangle of the cluster?
-                if (v3.size() >= 2)
-                {
-                    c.triangles.push_back(mesh_triangles[i]);
-                    mesh_triangles.erase(mesh_triangles.begin() + i);
-                    //start over, because new triangles could be connected
-                    i = 0;
-                }
-                else i++;
-            }
-            else i++;
-        }
-        clusters.push_back(c);
-    }
+    r.x = p.x + lamda * n.x;
+    r.y = p.y + lamda * n.y;
+    r.z = p.z + lamda * n.z;
+    return r;
 }
 
-void Grasp_Calculator::search_for_opposte_cluster(std::vector<Cluster> clusters, std::vector< std::pair<Cluster, Cluster> > &opposite_cluster)
+double get_b(double x_n, double q_n, double p_n, double a)
 {
-    double threshold = 0.2;
-    for (int i = 0; i < clusters.size(); i++)
-    {
-        for (int j = i + 1; j < clusters.size(); j++)
-        {
-            if (M_PI - get_angle(clusters[i].normal, clusters[j].normal) < threshold)
-            {
-                std::pair<Cluster, Cluster> c_pair(clusters[i], clusters[j]);
-                opposite_cluster.push_back(c_pair);
-            }
-        }
-    }
+    double b = (x_n - a * p_n) / q_n;
+    return b;
 }
 
-Grasp_Calculator::Plane Grasp_Calculator::create_plane(geometry_msgs::Point normal, geometry_msgs::Point normal2)
+double get_a(double x_m, double x_n, double q_m, double q_n, double p_m, double p_n)
 {
-    geometry_msgs::Point plane_normal;
-    plane_normal.x = normal.x - normal2.x;
-    plane_normal.y = normal.y - normal2.y;
-    plane_normal.z = normal.z - normal2.z;
-
-    geometry_msgs::Point p1;
-    geometry_msgs::Point p2;
-    if (plane_normal.x == 0 && plane_normal.y == 0)
-    {
-        p1.x = -plane_normal.z;
-        p1.y = 0;
-        p1.z = plane_normal.x;
-
-        p2.x = 0;
-        p2.y = -plane_normal.z;
-        p2.z = plane_normal.y;
-
-    }
-    else if (plane_normal.z == 0 && plane_normal.y == 0)
-    {
-        p1.x = -plane_normal.z;
-        p1.y = 0;
-        p1.z = plane_normal.x;
-
-        p2.x = -plane_normal.y;
-        p2.y = plane_normal.x;
-        p2.z = 0;
-    }
-    else
-    {
-        p1.x = 0;
-        p1.y = -plane_normal.z;
-        p1.z = plane_normal.y;
-
-        p2.x = -plane_normal.y;
-        p2.y = plane_normal.x;
-        p2.z = 0;
-    }
-
-    Grasp_Calculator::Plane_parameter pp(p1, p2);
-    Grasp_Calculator::Plane plane;
-    plane.pp = pp;
-    plane.normal = plane_normal;
-
-    return plane;
+    double a = (x_m * q_n - q_m * x_n) /
+               (p_m * q_n - p_n * q_m);
+               return a;
 }
 
-void Grasp_Calculator::create_polygon(Cluster c, Double_path, Muh muh)
+Grasp_Calculator::DPolygon2D Grasp_Calculator::project_polygon_to_plane(suturo_manipulation::Plane plane, std::vector<geometry_msgs::Point> polygon)
 {
+    std::vector<geometry_msgs::Point> plane_poly;
+    for (std::vector<geometry_msgs::Point>::iterator p = polygon.begin(); p != polygon.end(); ++p)
+    {
+        plane_poly.push_back(get_point_of_intersection(plane, *p));
+    }
+    for (int i = 0; i < plane_poly.size(); ++i)
+    {
+        ROS_INFO_STREAM(plane_poly[i]);
+    }
 
+
+    DPolygon2D r;
+    geometry_msgs::Point p = plane.parameter_form.first;
+    geometry_msgs::Point q = plane.parameter_form.second;
+    // ROS_INFO_STREAM("planeparameter1  x= " << a.x << " y= " << a.y << " z= " << a.z);
+    // ROS_INFO_STREAM("planeparameter2  x= " << b.x << " y= " << b.y << " z= " << b.z);
+    for (std::vector<geometry_msgs::Point>::iterator x = plane_poly.begin(); x != plane_poly.end(); ++x)
+    {
+        DoublePoint2D p2d;
+
+        // if (a.x == 0)
+
+        // if (a.z == 0 && b.z == 0)
+        // {
+        //     p2d.y = (p->y * a.x - a.y * p->x) /
+        //             (a.x * b.y - a.y * b.x);
+
+        //     p2d.x = (p->x - p2d.y * b.x) / a.x;
+
+        // }
+        // else if (a.x == 0 && b.x == 0)
+        // {
+        //     p2d.y = (p->y * a.z - a.y * p->z) /
+        //             (a.z * b.y - a.y * b.z);
+
+        //     p2d.x = (p->z - p2d.y * b.z) / a.z;
+
+        // }
+        // else
+        // {
+        //     p2d.y = (p->z * a.x - a.z * p->x) /
+        //             (a.x * b.z - a.z * b.x);
+
+        //     p2d.x = (p->x - p2d.y * b.x) / a.x;
+        // }
+        // ROS_INFO_STREAM("a = " << p2d.x << " b= " << p2d.y);
+        r.push_back(p2d);
+    }
+
+    return r;
+}
+
+void Grasp_Calculator::double_polygon_to_path(DPolygon2D double_polygon, ClipperLib::Paths &int_polygon)
+{
+    //magic
 }
 
 void Grasp_Calculator::calcMeshGraspPosition(shapes::Mesh *mesh)
@@ -442,47 +389,42 @@ void Grasp_Calculator::calcMeshGraspPosition(shapes::Mesh *mesh)
     // (1.2.1 update representative triangle)
     // 1.3. repeat until no new trianlge added
     // (1.4 remove small clusters)
-    // std::vector<Cluster> clusters;
-    // Muh muh;
-    // build_cluster(mesh, clusters, muh);
+    suturo_manipulation::Mesh meshi(mesh);
 
-    // // 2. search for cluster with opposite normal - O(|Cluster|²)
-    // std::vector< std::pair<uint, uint> > opposite_cluster;
-    // search_for_opposte_cluster(clusters, opposite_cluster);
+    // 2. search for cluster with opposite normal - O(|Cluster|²)
+    std::vector< std::pair<uint, uint> > opposite_cluster = meshi.get_opposite_cluster();
 
-    // for (int i = 0; i < opposite_cluster.size(); i++)
-    // {
-    //     // 3. project both cluster on a plain - o(|vertices|)?
-    //     Grasp_Calculator::Plane plane = create_plane(opposite_cluster[i].first, opposite_cluster[i].second, clusters);
-        
-    //     std::vector<uint> p1;
-    //     std::vector<uint> p2;
-    //     create_polygon(opposite_cluster[i].first, p1, muh, clusters);
-    //     create_polygon(opposite_cluster[i].second, p2, muh, clusters);
+    for (int i = 0; i < opposite_cluster.size(); i++)
+    {
+        // 3. project both cluster on a plain - o(|vertices|)?
+        suturo_manipulation::Plane plane = meshi.get_plane(opposite_cluster[i].first, opposite_cluster[i].second);
 
-    //     project_polygon_to_plane(plane, p1);
-    //     project_polygon_to_plane(plane, p2);
+        std::vector<geometry_msgs::Point> p1 = meshi.create_polygon(opposite_cluster[i].first);
+        std::vector<geometry_msgs::Point> p2 = meshi.create_polygon(opposite_cluster[i].second);
 
-    //     ClipperLib::Paths polygon1(1);
-    //     ClipperLib::Paths polygon2(1);
-    //     double_polygon_to_path(p1, polygon1);
-    //     double_polygon_to_path(p2, polygon2);
+        DPolygon2D dpolygon1 = project_polygon_to_plane(plane, p1);
+        DPolygon2D dpolygon2 = project_polygon_to_plane(plane, p2);
+
+        ClipperLib::Paths polygon1(1);
+        ClipperLib::Paths polygon2(1);
+        double_polygon_to_path(dpolygon1, polygon1);
+        double_polygon_to_path(dpolygon2, polygon2);
 
 
-    //     // // 4. calc polygon intersection - O(|vertices|²)?
-    //     //     http://www.integis.ch/documents/ISem_Opprecht_Overlay_2002-02-28.pdf
-    //     //     http://www.cs.man.ac.uk/~toby/alan/software/gpc.html
-    //     ClipperLib::Clipper clpr;
-    //     clpr.AddPaths(polygon1, ClipperLib::ptSubject, true);
-    //     clpr.AddPaths(polygon2, ClipperLib::ptClip, true);
-    //     ClipperLib::Paths solution;
-    //     clpr.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        // 4. calc polygon intersection - O(|vertices|²)?
+        //     http://www.integis.ch/documents/ISem_Opprecht_Overlay_2002-02-28.pdf
+        //     http://www.cs.man.ac.uk/~toby/alan/software/gpc.html
+        ClipperLib::Clipper clpr;
+        clpr.AddPaths(polygon1, ClipperLib::ptSubject, true);
+        clpr.AddPaths(polygon2, ClipperLib::ptClip, true);
+        ClipperLib::Paths solution;
+        clpr.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
 
 
-    //     // 5. calc centriod - O(|vertices|)
-    //     // 6. add grasppose pointing towards centriod with differen angles - const
-    //     // 7. use moveit to test poses - O(much)???
-    // }
+        // 5. calc centriod - O(|vertices|)
+        // 6. add grasppose pointing towards centriod with differen angles - const
+        // 7. use moveit to test poses - O(much)???
+    }
 
 
 }

@@ -38,7 +38,7 @@ void putObjects(ros::Publisher pub_co)
 
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.035 ;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.05 ;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.24;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.169;
   co.primitive_poses[0].position.x = 0.6;

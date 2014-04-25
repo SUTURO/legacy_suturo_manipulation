@@ -103,6 +103,8 @@ public:
         r2.push_back("l_gripper_palm_link");
         r2.push_back("l_gripper_r_finger_link");
         r2.push_back("l_gripper_r_finger_tip_link");
+        r2.push_back("l_force_torque_adapter_link");
+        r2.push_back("l_force_torque_link");
         static const std::vector<std::string> r = r2;
         return r;
     }

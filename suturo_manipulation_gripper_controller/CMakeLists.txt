@@ -87,7 +87,7 @@ catkin_package(
    INCLUDE_DIRS include
 #   LIBRARIES suturo_manipulation_gripper_controller
 	#suturo_manipulation_grasping
-#  CATKIN_DEPENDS actionlib pr2_controllers_msgs roscpp
+  CATKIN_DEPENDS suturo_manipulation_msgs
 #  DEPENDS system_lib
 )
 

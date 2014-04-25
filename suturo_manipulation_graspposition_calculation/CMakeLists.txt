@@ -110,16 +110,20 @@ add_library(suturo_manipulation_grasp_calculator
   src/suturo_manipulation_grasp_calculator.cpp
 )
 
+add_library(suturo_manipulation_mesh
+  src/suturo_manipulation_mesh.cpp
+)
+
 ## Declare a cpp executable
 add_executable(test_mesh_calculation src/test_mesh_calculation.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(suturo_manipulation_grasp_calculator suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface 
-suturo_manipulation_msgs polyclipping ${catkin_EXPORTED_TARGETS})
+suturo_manipulation_msgs polyclipping suturo_manipulation_mesh ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(test_mesh_calculation  suturo_manipulation_planning_scene_interface 
-suturo_manipulation_grasp_calculator suturo_manipulation_mesh_loader polyclipping ${catkin_EXPORTED_TARGETS})
+suturo_manipulation_grasp_calculator suturo_manipulation_mesh_loader polyclipping suturo_manipulation_mesh ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
@@ -127,6 +131,7 @@ target_link_libraries(
   suturo_manipulation_gripper_controller
   suturo_manipulation_planning_scene_interface
   polyclipping
+  suturo_manipulation_mesh
   ${catkin_LIBRARIES}
 )
 
@@ -136,6 +141,7 @@ target_link_libraries(
   suturo_manipulation_planning_scene_interface
   suturo_manipulation_mesh_loader
   polyclipping
+  suturo_manipulation_mesh
   ${catkin_LIBRARIES}
 )
 
