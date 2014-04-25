@@ -132,6 +132,7 @@ add_executable(test_head_client src/test_head_client.cpp)
 add_executable(test_move_base_client src/test_move_base_client.cpp)
 add_executable(test_head_subscriber src/test_head_subscriber.cpp)
 add_executable(head_mover src/head_mover.cpp)
+add_executable(collision_tester src/collision_tester.cpp)
 add_executable(spawn_planningscene src/spawn_planningscene.cpp)
 add_executable(spawn_planningscene_gazebo src/spawn_planningscene_gazebo.cpp)
 
@@ -152,6 +153,7 @@ add_dependencies(test_grasping_client suturo_manipulation_msgs ${catkin_EXPORTED
 
 add_dependencies(head_mover suturo_manipulation_move_robot suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_mesh_loader suturo_manipulation_grasping suturo_manipulation_grasping_reactive ${catkin_EXPORTED_TARGETS})
 
+add_dependencies(collision_tester suturo_manipulation_move_robot suturo_manipulation_msgs suturo_manipulation_gripper_controller suturo_manipulation_planning_scene_interface suturo_manipulation_mesh_loader suturo_manipulation_grasping suturo_manipulation_grasping_reactive ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(suturo_manipulation_move_head_server suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
 add_dependencies(suturo_manipulation_move_head_server_ros suturo_manipulation_msgs ${catkin_EXPORTED_TARGETS})
@@ -264,7 +266,19 @@ target_link_libraries(
   ${Boost_LIBRARIES}
 )
 
-#############
+target_link_libraries(
+  collision_tester
+  suturo_manipulation_gripper_controller
+  suturo_manipulation_planning_scene_interface
+  suturo_manipulation_grasping
+  suturo_manipulation_move_robot
+  suturo_manipulation_grasping_reactive
+  suturo_manipulation_mesh_loader
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+
+############
 ## Install ##
 #############
 
