@@ -24,16 +24,16 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   //set goal
   move_group->setPoseTarget(desired_pose);
   
-  while(!cc_->updated_) 
-  {
-    ROS_INFO("Waiting for fingertippressuredata");
-    ros::Duration(0.1).sleep();
-  }
+  // while(!cc_->updated_) 
+  // {
+  //   ROS_INFO("Waiting for fingertippressuredata");
+  //   ros::Duration(0.1).sleep();
+  // }
   // set tara for pressurevalues
   cc_->clear();
   ch_->reset();
   ROS_INFO("cc_ and ch_ resetted and cleared");
-
+/*
   // check that previous grasp failed 
   // and the max amount of attempts is not reached
   while(!moveSucces_ && ch_->attemptValid())
@@ -62,9 +62,9 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
       move_group->setPoseTarget(desired_pose);
-    }
+    } 
  }
-
+*/
   ROS_INFO("Grasping_reactive::move finished");
   if(moveSucces_)
     return 1;

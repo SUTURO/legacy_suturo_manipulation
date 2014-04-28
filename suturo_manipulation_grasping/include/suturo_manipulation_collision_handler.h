@@ -11,7 +11,7 @@ class Collision_Handler
     int attempt_, maxAttempts_;
     int *collisionValues_;
     Suturo_Manipulation_Planning_Scene_Interface* pi_;
-    tf::TransformListener listener_;
+    tf::TransformListener* listener_;
 
   public:
     Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi);
