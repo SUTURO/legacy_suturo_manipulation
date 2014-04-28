@@ -1,4 +1,5 @@
 #include "suturo_manipulation_move_robot.h"
+#include <suturo_manipulation_reflexxes_interpolator.h>
 
 using namespace std;
 
@@ -17,6 +18,8 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle *
     loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
     collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
     ros::WallDuration(1.0).sleep();
+
+    // interpolator_ = new Suturo_Manipulation_Reflexxes_Interpolator(&n);
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot()
@@ -138,7 +141,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
     if (calculateZTwist(targetQuaternion))
     {
         while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_))
-        {   
+        {
 
             mtx_.lock();
             collisionsListRotation = getCollisions();
@@ -148,10 +151,10 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
             {
                 ROS_INFO_STREAM("Detect collision, move back!");
 
-                base_cmd_.linear.x=(-0.1);
+                base_cmd_.linear.x = (-0.1);
 
                 cmd_vel_pub_.publish(base_cmd_);
-                base_cmd_.linear.x=0;
+                base_cmd_.linear.x = 0;
                 continue;
             }
 
@@ -298,11 +301,11 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     targetPose_ = targetPose;
 
-//    if (checkCollision(targetPose_))
-//    {
-//        ROS_ERROR_STREAM("targetpose in collision!");
-//        return false;
-//    }
+    //    if (checkCollision(targetPose_))
+    //    {
+    //        ROS_ERROR_STREAM("targetpose in collision!");
+    //        return false;
+    //    }
 
     while (!checkLocalization())
     {
@@ -364,65 +367,95 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     // TODO: Testen ob nen double kommt
     yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
+    // Raum definieren, wenn in dem raum dann start & ziel gleich wählen => Interpolator gibt 1 zurück - check
+    // wenn möglich in ne eigene Methode packen, die dann Start & Ziel an Interpolator gibt - check
+    // Unit Tests schreiben, um zu testen ob x & y gleichzeitig erreicht wird - check
 
-    while (nh_->ok() && moved)
+    Suturo_Manipulation_Reflexxes_Interpolator *interpolator = new Suturo_Manipulation_Reflexxes_Interpolator(nh_);
+
+    std::vector<double> twist;
+
+    while (nh_->ok() && interpolator->getResultValue() != ReflexxesAPI::RML_FINAL_STATE_REACHED)
     {
+
         mtx_.lock();
         collisionsList = getCollisions();
         mtx_.unlock();
+
         // reset all the values!!!!11elf
         base_cmd_.linear.x = 0;
         base_cmd_.linear.y = 0;
         base_cmd_.angular.z = 0;
-        moved = false;
 
-        // set x twist
-        if (!xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0 && !collisionInFront(collisionsList))
-        {
-            base_cmd_.linear.x = 0.1;
-            moved = true;
-        }
+        twist = interpolator->interpolate(robotPose_, targetPose_);
 
-        // set y twist
-        if (!yCoordArrived(targetPose_) && yTwist != 0)
-        {
-            if (checkYVariation())
-            {
-                if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
-                {
-                    base_cmd_.linear.y = yTwist;
-                    moved = true;
-                }
-                else
-                {
-                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
-                }
+        base_cmd_.linear.x = twist[0];
+        base_cmd_.linear.y = twist[1];
 
-            }
-            // change y direction
-            else
-            {
-                if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
-                {
-                    yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
-                    yTwist = (yTwist * (-1));
-                    bool moveRightOld = moveRight;
-                    moveRight = moveLeft;
-                    moveLeft = moveRightOld;
-                    base_cmd_.linear.y = yTwist;
-                    moved = true;
-                    ROS_INFO_STREAM("Changed yTwist to: " << yTwist);
-                }
-                else
-                {
-                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
-                }
-            }
-        }
-        // publish twists to move
         cmd_vel_pub_.publish(base_cmd_);
         transformToBaseLink(targetPose_, targetPoseBaseLink_);
     }
+
+    // ROS_INFO_STREAM("ResultValue: " << ResultValue);
+
+    // while (nh_->ok() && moved)
+    // {
+    //     mtx_.lock();
+    //     collisionsList = getCollisions();
+    //     mtx_.unlock();
+    //     // reset all the values!!!!11elf
+    //     base_cmd_.linear.x = 0;
+    //     base_cmd_.linear.y = 0;
+    //     base_cmd_.angular.z = 0;
+    //     moved = false;
+
+    //     // set x twist
+    //     if (!xCoordArrived(targetPose) && targetPoseBaseLink_.pose.position.x > 0 && !collisionInFront(collisionsList))
+    //     {
+    //         base_cmd_.linear.x = 0.1;
+    //         moved = true;
+    //     }
+
+    //     // set y twist
+    //     if (!yCoordArrived(targetPose_) && yTwist != 0)
+    //     {
+    //         if (checkYVariation())
+    //         {
+    //             if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
+    //             {
+    //                 base_cmd_.linear.y = yTwist;
+    //                 moved = true;
+    //             }
+    //             else
+    //             {
+    //                 ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+    //             }
+
+    //         }
+    //         // change y direction
+    //         else
+    //         {
+    //             if (moveLeft && !collisionOnLeft(collisionsList) || moveRight && !collisionOnRight(collisionsList))
+    //             {
+    //                 yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
+    //                 yTwist = (yTwist * (-1));
+    //                 bool moveRightOld = moveRight;
+    //                 moveRight = moveLeft;
+    //                 moveLeft = moveRightOld;
+    //                 base_cmd_.linear.y = yTwist;
+    //                 moved = true;
+    //                 ROS_INFO_STREAM("Changed yTwist to: " << yTwist);
+    //             }
+    //             else
+    //             {
+    //                 ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+    //             }
+    //         }
+    //     }
+    //     // publish twists to move
+    //     cmd_vel_pub_.publish(base_cmd_);
+    //     transformToBaseLink(targetPose_, targetPoseBaseLink_);
+    // }
 
     ROS_INFO_STREAM(targetPose_);
     ROS_INFO_STREAM(robotPose_);

@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   suturo_manipulation_planning_scene_interface
   moveit_ros_planning_interface
+  reflexxes_type2
 )
 
 ## System dependencies are found with CMake's conventions
@@ -83,8 +84,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-#  LIBRARIES suturo_manipulation_move_robot
-#  CATKIN_DEPENDS geometry_msgs roscpp
+   LIBRARIES suturo_manipulation_move_robot suturo_manipulation_reflexxes_interpolator
+   CATKIN_DEPENDS geometry_msgs roscpp
 #  DEPENDS system_lib
 )
 
@@ -108,12 +109,18 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(suturo_manipulation_move_robot_node src/suturo_manipulation_move_robot_node.cpp)
+
+
 add_library(suturo_manipulation_move_robot src/suturo_manipulation_drive_base.cpp)
+add_library(suturo_manipulation_reflexxes_interpolator src/suturo_manipulation_reflexxes_interpolator.cpp)
+add_library(suturo_manipulation_test_reflexxes_interpolator src/suturo_manipulation_test_reflexxes_interpolator.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(suturo_manipulation_move_robot_node suturo_manipulation_move_robot_generate_messages_cpp)
 add_dependencies(suturo_manipulation_move_robot suturo_manipulation_planning_scene_interface geometry_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_reflexxes_interpolator suturo_manipulation_planning_scene_interface geometry_msgs ${catkin_EXPORTED_TARGETS})
+add_dependencies(suturo_manipulation_test_reflexxes_interpolator suturo_manipulation_reflexxes_interpolator suturo_manipulation_planning_scene_interface geometry_msgs ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against
@@ -121,11 +128,29 @@ add_dependencies(suturo_manipulation_move_robot suturo_manipulation_planning_sce
 #   ${catkin_LIBRARIES}
 # )
 
+target_link_libraries(suturo_manipulation_reflexxes_interpolator
+  ${catkin_LIBRARIES}
+)
+
 target_link_libraries(
   suturo_manipulation_move_robot
   suturo_manipulation_planning_scene_interface
   ${catkin_LIBRARIES}
 )
+
+target_link_libraries(
+  suturo_manipulation_reflexxes_interpolator
+  suturo_manipulation_planning_scene_interface
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  suturo_manipulation_test_reflexxes_interpolator
+  suturo_manipulation_reflexxes_interpolator
+  suturo_manipulation_planning_scene_interface
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##
@@ -166,11 +191,16 @@ target_link_libraries(
 ## Testing ##
 #############
 
+catkin_add_gtest(${PROJECT_NAME}-test 
+  test/test.cpp
+)
+
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_suturo_manipulation_move_robot.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
+
+if(TARGET ${PROJECT_NAME}-test)
+  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} ${catkin_LIBRARIES} suturo_manipulation_test_reflexxes_interpolator)
+endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
