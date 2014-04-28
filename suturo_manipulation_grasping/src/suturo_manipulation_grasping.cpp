@@ -88,7 +88,8 @@ int Grasping::lookAt(geometry_msgs::PoseStamped pose)
 
 int Grasping::move(move_group_interface::MoveGroup *move_group,
                    geometry_msgs::PoseStamped desired_pose,
-                   moveit_msgs::CollisionObject co)
+                   moveit_msgs::CollisionObject co,
+        geometry_msgs::PoseStamped preGraspPose)
 {
     //look
     lookAt(desired_pose);
@@ -153,7 +154,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
     while (pos_id < pre_poses.size())
     {
         ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
-        if (!move(move_group, pre_poses.at(pos_id), co))
+        if (!move(move_group, pre_poses.at(pos_id), co, pre_poses[pos_id]))
         {
             pos_id++;
             continue;
@@ -165,7 +166,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         //move Arm to goalpose
         ROS_INFO_STREAM("move to goalpose");
 
-        if (!move(move_group, poses.at(pos_id), co))
+        if (!move(move_group, poses.at(pos_id), co, pre_poses[pos_id]))
         {
             pos_id++;
             continue;

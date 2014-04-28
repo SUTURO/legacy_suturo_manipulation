@@ -122,6 +122,7 @@ add_library(suturo_manipulation_grasping_reactive
    src/suturo_manipulation_grasping_reactive.cpp
    src/suturo_manipulation_grasping.cpp
    src/suturo_manipulation_collision_checker.cpp
+   src/suturo_manipulation_collision_handler.cpp
 )
 
 ## Declare a cpp executable
