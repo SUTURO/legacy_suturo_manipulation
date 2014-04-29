@@ -16,7 +16,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
 
 {
   ROS_INFO("Grasping_reactive::move called");
-  ROS_INFO("Arm: %s", move_group->getName().c_str());
+  // ROS_INFO("Arm: %s", move_group->getName().c_str());
   //look
   lookAt(desired_pose);
   //set marker
@@ -24,20 +24,20 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   //set goal
   move_group->setPoseTarget(desired_pose);
   
-  // while(!cc_->updated_) 
-  // {
-  //   ROS_INFO("Waiting for fingertippressuredata");
-  //   ros::Duration(0.1).sleep();
-  // }
+  while(!cc_->updated_) 
+  {
+    ROS_INFO("Waiting for fingertippressuredata");
+    ros::Duration(0.1).sleep();
+  }
   // set tara for pressurevalues
   cc_->clear();
   ch_->reset();
-  ROS_INFO("cc_ and ch_ resetted and cleared");
-/*
+
   // check that previous grasp failed 
   // and the max amount of attempts is not reached
   while(!moveSucces_ && ch_->attemptValid())
   {
+    ROS_WARN("Start Grasping Attempt");
     // start threaded moving of the arm
     boost::thread* t = new boost::thread(boost::bind(&Grasping_reactive::threaded_move, this, move_group));
     int collisionValue;
@@ -49,22 +49,24 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
       if(collisionValue > 0) 
       {
         collisionDetected_ = true;
-        ROS_INFO("Fingertipcollision detected: %d", collisionValue);
+        ROS_WARN("Fingertipcollision detected: %d", collisionValue);
         move_group->stop();
         ros::Duration(0.1).sleep();
       }
     }
     // wait for threaded move_group to be finished
+    // ROS_INFO("wait for threaded move_group to be finished");
     t->join();
     if(collisionDetected_)
     {
+      ROS_WARN("Calling collision handling");
       ch_->handleCollision(collisionValue, co);
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
       move_group->setPoseTarget(desired_pose);
     } 
  }
-*/
+
   ROS_INFO("Grasping_reactive::move finished");
   if(moveSucces_)
     return 1;

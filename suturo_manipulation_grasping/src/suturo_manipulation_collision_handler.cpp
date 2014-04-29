@@ -4,6 +4,7 @@ Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Sutur
 {
   collisionValues_ = new int[maxAttempts];
   pi = pi_;
+  maxAttempts_ = maxAttempts;
 }
 
 void Collision_Handler::reset()
@@ -21,7 +22,7 @@ void Collision_Handler::reset()
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
   }
-  ROS_INFO("x: %f, y: %f",transform.getOrigin().x(),  transform.getOrigin().y());
+  // ROS_INFO("x: %f, y: %f",transform.getOrigin().x(),  transform.getOrigin().y());
 }
 
 void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::CollisionObject& co)
