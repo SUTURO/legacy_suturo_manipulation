@@ -15,7 +15,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
         geometry_msgs::PoseStamped preGraspPose)
 
 {
-  ROS_INFO("Grasping_reactive::move called");
+  ROS_WARN("Grasping_reactive::move called");
   // ROS_INFO("Arm: %s", move_group->getName().c_str());
   //look
   lookAt(desired_pose);
@@ -24,14 +24,16 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   //set goal
   move_group->setPoseTarget(desired_pose);
   
-  while(!cc_->updated_) 
-  {
-    ROS_INFO("Waiting for fingertippressuredata");
-    ros::Duration(0.1).sleep();
-  }
+  // while(!cc_->updated_) 
+  // {
+  //   ROS_WARN("Waiting for fingertippressuredata");
+  //   ros::Duration(0.1).sleep();
+  // }
   // set tara for pressurevalues
   cc_->clear();
   ch_->reset();
+  moveSucces_ = false;
+  collisionDetected_ = false;
 
   // check that previous grasp failed 
   // and the max amount of attempts is not reached
@@ -45,7 +47,8 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     while(!moveSucces_ && !collisionDetected_)
     {
       // get collision-status
-      collisionValue = cc_->r_collision();
+      // collisionValue = cc_->r_collision();
+      collisionValue = 0; // TESTINGSTUB
       if(collisionValue > 0) 
       {
         collisionDetected_ = true;
@@ -55,7 +58,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
       }
     }
     // wait for threaded move_group to be finished
-    // ROS_INFO("wait for threaded move_group to be finished");
+    ROS_WARN("wait for threaded move_group to be finished");
     t->join();
     if(collisionDetected_)
     {
@@ -67,7 +70,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     } 
  }
 
-  ROS_INFO("Grasping_reactive::move finished");
+  ROS_WARN("Grasping_reactive::move finished");
   if(moveSucces_)
     return 1;
   return 0;
