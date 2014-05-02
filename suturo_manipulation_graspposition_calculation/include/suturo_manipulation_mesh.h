@@ -2,7 +2,6 @@
 #define SUTURO_MANIPULATION_MESH
 
 #include <ros/ros.h>
-// #include <suturo_manipulation_grasp_calculator.h>
 #include <moveit/move_group_interface/move_group.h>
 #include <algorithm>
 
@@ -11,12 +10,7 @@ namespace suturo_manipulation
 
 typedef std::pair< geometry_msgs::Point, geometry_msgs::Point > Plane_parameter;
 
-struct Triangle
-{
-    std::vector<uint> vertices;
-    std::vector<uint> clusters;
-    geometry_msgs::Point normal;
-};
+
 
 struct Cluster
 {
@@ -25,10 +19,20 @@ struct Cluster
     geometry_msgs::Point normal;
 };
 
-struct Plane
+class Plane
 {
     Plane_parameter parameter_form;
     geometry_msgs::Point normal;
+public:
+    Plane(geometry_msgs::Point normal1, Plane_parameter parameter_form1);
+    geometry_msgs::Point get_normal()
+    {
+        return normal;
+    };
+    Plane_parameter get_parameter_form()
+    {
+        return parameter_form;
+    };
 };
 
 struct Vertex
@@ -37,6 +41,40 @@ struct Vertex
     std::vector<uint> clusters;
     std::vector<uint> triangles;
     std::vector<uint> connected_vertices;
+    bool operator==(const Vertex &v) const
+    {
+        return this->position.x == v.position.x
+               && this->position.y == v.position.y
+               && this->position.z == v.position.z;
+    }
+    bool operator!=(const Vertex &v) const
+    {
+        return !(*this == v);
+    }
+};
+
+struct Triangle
+{
+    std::vector<uint> vertices;
+    std::vector<uint> clusters;
+    geometry_msgs::Point normal;
+    std::string toString(std::vector<Cluster> clusterss, std::vector<Vertex> verticess)
+    {
+        std::ostringstream os;
+        os << "vertices: (";
+        for (int v = 0; v < vertices.size(); ++v)
+        {
+            os << vertices[v] << ",";
+        }
+        os << ")\n cluster: (";
+
+        for (int v = 0; v < clusters.size(); ++v)
+        {
+            os << clusters[v] << ",";
+        }
+        os << ")";
+        return "Triangle " + os.str();
+    }
 };
 
 class Mesh
@@ -45,6 +83,8 @@ class Mesh
 public:
 
     Mesh(shapes::Mesh *mesh);
+
+    Mesh(moveit_msgs::CollisionObject co);
 
     ~Mesh();
 
@@ -91,6 +131,8 @@ public:
     bool compare_vertex(uint vertex_id1, uint vertex_id2);
 
     void print();
+
+    void print_vertex(uint vertex_id);
 
     template <class T>
     bool contains(std::vector<T> v, T elem);

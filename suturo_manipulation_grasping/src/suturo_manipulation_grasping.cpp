@@ -153,6 +153,8 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
     int pos_id = 0;
     while (pos_id < pre_poses.size())
     {
+        //open gripper
+        gripper->open_gripper(force);
         ROS_INFO_STREAM("Try to move to pregraspposition #" << pos_id);
         if (!move(move_group, pre_poses.at(pos_id), co, pre_poses[pos_id]))
         {
@@ -160,8 +162,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
             continue;
         }
 
-        //open gripper
-        gripper->open_gripper(force);
+        ROS_ERROR_STREAM("pre: " << pre_poses.at(pos_id));
 
         //move Arm to goalpose
         ROS_INFO_STREAM("move to goalpose");
@@ -173,6 +174,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         }
         else
         {
+            ROS_ERROR_STREAM("grasp: " << poses.at(pos_id));
             //close gripper
             gripper->close_gripper(force);
 

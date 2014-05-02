@@ -90,7 +90,7 @@ void putObjects(ros::Publisher pub_co)
   co.operation = moveit_msgs::CollisionObject::ADD;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.057;
   co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.132;
-  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.197;
+  co.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.177;
   co.primitive_poses[0].position.x = 0.6;
   co.primitive_poses[0].position.y = 0.4;
   co.primitive_poses[0].position.z = tischposiZ + 0.03+ 0.105;//tischposiZ + 0.08;
@@ -153,8 +153,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
-	putObjects(pub_co);
-  // muh(nh);
+	// putObjects(pub_co);
+  muh(nh);
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();

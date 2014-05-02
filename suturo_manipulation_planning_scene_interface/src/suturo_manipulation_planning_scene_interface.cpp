@@ -1,5 +1,7 @@
 #include "suturo_manipulation_planning_scene_interface.h"
 
+using namespace std;
+
 Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle *nodehandle)
 {
     nh_ = nodehandle;
@@ -9,6 +11,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
     collision_object_publisher_ = nh_->advertise<moveit_msgs::CollisionObject>("collision_object", 10);
     vis_pub_ = nh_->advertise<visualization_msgs::Marker>( "visualization_marker", 10 );
     planning_scene_publisher = nh_->advertise<moveit_msgs::PlanningScene>("planning_scene", 10);
+    test_coll_ps_pub_ = nh_->advertise<moveit_msgs::PlanningScene>("/suturo/collision_ps", 10);
 
 
     //service clients
@@ -21,6 +24,22 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scene_Interface()
 {
 
+}
+
+void Suturo_Manipulation_Planning_Scene_Interface::publishTfFrame(std::string frame_id, geometry_msgs::PoseStamped pose)
+{
+
+    ROS_DEBUG_STREAM("Publish TF frame " << frame_id);
+
+    transform.setOrigin( tf::Vector3(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z) );
+
+    transform.setRotation( tf::Quaternion(pose.pose.orientation.x,
+                                          pose.pose.orientation.y,
+                                          pose.pose.orientation.z,
+                                          pose.pose.orientation.w) );
+
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), pose.header.frame_id, frame_id));
+    ros::WallDuration(0.2).sleep();
 }
 
 int Suturo_Manipulation_Planning_Scene_Interface::allowCollision(std::string object1, std::string object2)
@@ -278,32 +297,234 @@ int Suturo_Manipulation_Planning_Scene_Interface::isAnObjectAttachedToArm(std::s
     return 0;
 }
 
-void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::PoseStamped pose)
+void get_ps_with_open_gripper(moveit_msgs::PlanningScene &ps)
+{
+    double gripper_position = 0.51447;
+    double gripper_position2 = 0.88;
+
+    //search for gripper joints and open them
+    for (int joint_name_id = 0; joint_name_id < ps.robot_state.joint_state.name.size(); ++joint_name_id)
+    {
+        if (ps.robot_state.joint_state.name[joint_name_id] == "l_gripper_l_finger_joint"
+                || ps.robot_state.joint_state.name[joint_name_id] == "r_gripper_l_finger_joint"
+
+                || ps.robot_state.joint_state.name[joint_name_id] == "l_gripper_l_finger_tip_joint"
+                || ps.robot_state.joint_state.name[joint_name_id] == "r_gripper_l_finger_tip_joint"
+
+                || ps.robot_state.joint_state.name[joint_name_id] == "l_gripper_r_finger_joint"
+                || ps.robot_state.joint_state.name[joint_name_id] == "r_gripper_r_finger_joint"
+
+                || ps.robot_state.joint_state.name[joint_name_id] == "l_gripper_r_finger_tip_joint"
+                || ps.robot_state.joint_state.name[joint_name_id] == "r_gripper_r_finger_tip_joint")
+        {
+            ps.robot_state.joint_state.position[joint_name_id] = gripper_position;
+        }
+        if (ps.robot_state.joint_state.name[joint_name_id] == "l_gripper_joint"
+                || ps.robot_state.joint_state.name[joint_name_id] == "r_gripper_joint")
+        {
+            ps.robot_state.joint_state.position[joint_name_id] = gripper_position2;
+        }
+    }
+
+    //clear unnecessary objects
+    ps.robot_state.attached_collision_objects.clear();
+    ps.world.collision_objects.clear();
+    ps.fixed_frame_transforms.clear();
+
+}
+
+bool Suturo_Manipulation_Planning_Scene_Interface::check_group_object_collision(string group_name, geometry_msgs::PoseStamped eef_pose,
+        moveit_msgs::CollisionObject co)
+{
+    // geometry_msgs::PoseStamped frame_pose = eef_pose;
+    // try
+    // {
+    //     listener_.transformPose("/base_link", frame_pose, frame_pose);
+    // }
+    // catch (tf::TransformException t)
+    // {
+    //     ROS_ERROR_STREAM(t.what());
+    // }
+    publishTfFrame("1337", eef_pose);
+    moveit_msgs::PlanningScene ps;
+    getPlanningScene(ps);
+    get_ps_with_open_gripper(ps);
+    //add object to planningscene
+    geometry_msgs::PoseStamped temp_pose;
+    temp_pose.header = co.header;
+    temp_pose.pose = co.mesh_poses[0];
+    temp_pose.header.stamp = ros::Time::now();
+
+    for (int i = 0; i < 50; ++i)
+    {
+        try
+        {
+            publishTfFrame("1337", eef_pose);
+            listener_.transformPose("/1337", temp_pose, temp_pose);
+            break;
+        }
+        catch (tf::TransformException t)
+        {
+            if (i == 50) ROS_ERROR_STREAM(t.what());
+        }
+    }
+
+    co.mesh_poses[0] = temp_pose.pose;
+    co.header.stamp = temp_pose.header.stamp;
+    if (group_name == "left_gipper")
+    {
+        co.header.frame_id = "l_wrist_roll_link";
+    }
+    else co.header.frame_id = "r_wrist_roll_link";
+    ps.world.collision_objects.push_back(co);
+    test_coll_ps_pub_.publish(ps);
+    temp_pose.header.frame_id = "odom_combined";
+
+    //check collision
+    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    planning_scene::PlanningScene planning_scene(kinematic_model);
+
+    planning_scene.setPlanningSceneMsg(ps);
+
+    collision_detection::CollisionRequest collision_request;
+    collision_request.group_name = group_name;
+    collision_detection::CollisionResult collision_result;
+
+    collision_result.clear();
+    planning_scene.checkCollision(collision_request, collision_result);
+
+    return collision_result.collision;
+}
+
+void Suturo_Manipulation_Planning_Scene_Interface::publishMarker(geometry_msgs::PoseStamped pose, int id)
 {
     // Publish the Goalmarker
     visualization_msgs::Marker goal_marker;
     goal_marker.header.frame_id = pose.header.frame_id;
     goal_marker.header.stamp = ros::Time();
     goal_marker.ns = "suturo_manipulation/eef_poses";
-    goal_marker.id = 0;
+    goal_marker.id = id;
     goal_marker.type = visualization_msgs::Marker::ARROW;
     goal_marker.action = visualization_msgs::Marker::ADD;
     goal_marker.pose = pose.pose;
 
-    goal_marker.scale.x = 0.1;
-    goal_marker.scale.y = 0.1;
-    goal_marker.scale.z = 0.1;
 
     goal_marker.color.a = 1.0;
     goal_marker.color.r = 1.0;
     goal_marker.color.g = 0.0;
     goal_marker.color.b = 0.0;
 
-    goal_marker.scale.z = 0.04;
-    goal_marker.scale.y = 0.04;
-    goal_marker.scale.x = 0.09;
+    goal_marker.scale.z = 0.01;
+    goal_marker.scale.y = 0.02;
+    goal_marker.scale.x = 0.045;
 
     vis_pub_.publish( goal_marker );
+}
+
+void Suturo_Manipulation_Planning_Scene_Interface::publishMarkerPoints(std::string frame_id, std::vector<geometry_msgs::Point> points)
+{
+    //Publish the Goalmarker
+    visualization_msgs::Marker goal_marker;
+    goal_marker.header.frame_id = frame_id;
+    goal_marker.header.stamp = ros::Time();
+    goal_marker.ns = "suturo_manipulation/points";
+    goal_marker.type = visualization_msgs::Marker::SPHERE_LIST;
+    goal_marker.action = visualization_msgs::Marker::ADD;
+    goal_marker.color.a = 1.0;
+    goal_marker.color.r = 1.0;
+    goal_marker.color.g = 0.0;
+    goal_marker.color.b = 0.0;
+    goal_marker.scale.x = 0.01;
+    goal_marker.scale.y = 0.01;
+    goal_marker.scale.z = 0.01;
+    goal_marker.pose.orientation.w = 1;
+    for (int i = 0; i < points.size(); ++i)
+    {
+        // ROS_INFO_STREAM(points[i]);
+
+        // for (int p = 0; p < points.size(); ++p)
+        // {
+        goal_marker.points.push_back(points[i]);
+        goal_marker.colors.push_back(goal_marker.color);
+        // }
+        // goal_marker.pose.position = points[i];
+
+
+        if (i % 5 == 4 || i == points.size())
+        {
+            vis_pub_.publish( goal_marker);
+            goal_marker.id++;
+            goal_marker.points.clear();
+            goal_marker.colors.clear();
+        }
+    }
+    vis_pub_.publish( goal_marker);
+    goal_marker.id++;
+    goal_marker.points.clear();
+    goal_marker.colors.clear();
+}
+
+void Suturo_Manipulation_Planning_Scene_Interface::publishMarkerLine(std::string frame_id, std::vector<geometry_msgs::Point> points, int id)
+{
+    //Publish the Goalmarker
+    visualization_msgs::Marker goal_marker;
+    goal_marker.header.frame_id = frame_id;
+    goal_marker.header.stamp = ros::Time();
+    goal_marker.ns = "suturo_manipulation/line";
+    goal_marker.type = visualization_msgs::Marker::LINE_STRIP;
+    goal_marker.action = visualization_msgs::Marker::ADD;
+    goal_marker.color.a = 1.0;
+    goal_marker.color.r = 0.0;
+    goal_marker.color.g = 0.0;
+    goal_marker.color.b = 1.0;
+    goal_marker.scale.x = 0.005;
+    goal_marker.scale.y = 0.01;
+    goal_marker.scale.z = 0.01;
+    goal_marker.pose.orientation.w = 1;
+    goal_marker.id = id;
+    for (int i = 0; i < points.size(); ++i)
+    {
+        // ROS_INFO_STREAM(points[i]);
+
+        // for (int p = 0; p < points.size(); ++p)
+        // {
+        goal_marker.points.push_back(points[i]);
+        goal_marker.colors.push_back(goal_marker.color);
+        // }
+        // goal_marker.pose.position = points[i];
+
+
+        if (i % 5 == 4 || i == points.size())
+        {
+            vis_pub_.publish( goal_marker);
+            goal_marker.id++;
+            goal_marker.points.clear();
+            goal_marker.colors.clear();
+            goal_marker.points.push_back(points[i]);
+            goal_marker.colors.push_back(goal_marker.color);
+        }
+    }
+    vis_pub_.publish( goal_marker);
+    goal_marker.id++;
+    goal_marker.points.clear();
+    goal_marker.colors.clear();
+
+    // ROS_INFO_STREAM(points[i]);
+
+    // for (int p = 0; p < points.size(); ++p)
+    // {
+
+    //         goal_marker.points.push_back(points[p]);
+    //         goal_marker.colors.push_back(goal_marker.color);
+
+    // }
+    // // goal_marker.pose.position = points[i];
+
+    // goal_marker.id = id;
+
+
+    // vis_pub_.publish( goal_marker);
 }
 
 

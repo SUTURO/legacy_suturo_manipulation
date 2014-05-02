@@ -20,6 +20,8 @@
 
 #include <suturo_manipulation_mesh.h>
 
+// #include <ostream>
+
 // using namespace suturo_manipulation;
 
 class Grasp_Calculator
@@ -87,7 +89,31 @@ public:
     {
         double x;
         double y;
+        bool operator==(const DoublePoint2D &d2p) const
+        {
+            return d2p.x == this->x && d2p.y == this->y;
+        }
+        bool operator!=(const DoublePoint2D &d2p) const
+        {
+            return d2p.x != this->x || d2p.y != this->y;
+        }
+        // void normalize()
+        // {
+        //     if (!(thix->x == 0 && thix->y == 0))
+        //     {
+        //         double a = 1 / sqrt((thix->x * thix->x + thix->y * thix->y));
+        //         thix->x = thix->x * a;
+        //         thix->y = thix->y * a;
+        //     }
+        // }
+        // std::ostream &operator <<(std::ostream &s)
+        // {
+        //     s << "(" << this->x << "," << this->y << ")";
+        //     return s;
+        // }
     };
+
+    // std::ostream& operator <<(std::ostream &s, const DoublePoint2D &p);
 
     typedef std::vector<DoublePoint2D> DPolygon2D;
 
@@ -120,7 +146,9 @@ public:
 
     geometry_msgs::PointStamped get_point_above_object(std::string object_id);
 
-    void calcMeshGraspPosition(shapes::Mesh *mesh);
+    int calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
+                               std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                               double gripper_depth);
 
     DPolygon2D project_polygon_to_plane(suturo_manipulation::Plane plane, std::vector<geometry_msgs::Point> polygon);
 
@@ -128,6 +156,24 @@ public:
 
     geometry_msgs::Point get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point p);
 
+    std::vector<ClipperLib::IntPoint> calc_poly_centroid(ClipperLib::Paths polygon);
+
+    void path_to_double_polygon(DPolygon2D &double_polygon, ClipperLib::Path int_polygon);
+
+    std::vector<geometry_msgs::Point> d2d_points_to_d3d_points(suturo_manipulation::Plane plane, DPolygon2D polygon);
+
+    geometry_msgs::Point d2d_point_to_d3d_point(suturo_manipulation::Plane plane, DoublePoint2D d2p);
+
+    geometry_msgs::Quaternion get_quaternion_from_points(geometry_msgs::Point from,
+            geometry_msgs::Point to,
+            geometry_msgs::Point roll);
+
+    bool d3d_point_to_d2d_point(DoublePoint2D &p2d, geometry_msgs::Point &p, geometry_msgs::Point &q, geometry_msgs::Point &r);
+
+    geometry_msgs::Point cross_product(geometry_msgs::Point p1, geometry_msgs::Point p2);
+
+    void get_grasp_point(suturo_manipulation::Plane plane, geometry_msgs::Point m, double d, double alpha,
+                         geometry_msgs::PoseStamped &grasp_pose, geometry_msgs::PoseStamped &pre_grasp_pose);
 };
 
 
