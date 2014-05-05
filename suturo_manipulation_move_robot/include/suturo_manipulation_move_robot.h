@@ -78,7 +78,6 @@ private:
     struct pose_2d target_pose_;
     struct interpolator_2d_params *inp_params_;
     struct interpolator_2d_init_params *init_params_;
-    struct interpolator_2d_result interpoolator_result_;
 
     /**
      * Sets robotPose_ with incoming data from the localization topic.
