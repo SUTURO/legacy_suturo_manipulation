@@ -43,10 +43,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -92,10 +91,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_0_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -141,10 +139,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_1_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -190,10 +187,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_3_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -240,10 +236,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -290,10 +285,9 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1_at_once)
 
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
-
+    inp_params->target_pose_ = tp;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
-    init_params->target_pose_ = tp;
     init_params->cycle_time_ =  0.1;
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
@@ -314,6 +308,152 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1_at_once)
     ROS_INFO_STREAM("y: " << inp_params->robot_pose_.y_ << " y_target: " << tp.y_ << " = " << arrive(tp.y_, inp_params->robot_pose_.y_));
 
     ASSERT_TRUE(arrive(tp.x_, rv.int_pose_.x_) && arrive(tp.y_, rv.int_pose_.y_));
+
+    SUCCEED();
+}
+
+TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1)
+{
+
+    struct pose_2d rp;
+    struct pose_2d tp;
+
+    // Set start and goal
+    geometry_msgs::PoseStamped robotPose;
+    rp.x_ = 0;
+    rp.y_ = 0;
+
+    rp.reference_ = "/base_link";
+
+    geometry_msgs::PoseStamped targetPose;
+    tp.x_ = 1;
+    tp.y_ = 1;
+
+    tp.reference_ = "/base_link";
+
+    struct interpolator_2d_params *inp_params = new interpolator_2d_params();
+    inp_params->robot_pose_ = rp;
+    inp_params->target_pose_ = tp;
+
+    struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
+    init_params->cycle_time_ =  0.1;
+    init_params->vel_limit_ =  0.2;
+    init_params->acc_limit_ =  0.2;
+    init_params->jerk_limit_ =  0.2;
+
+    Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator;
+
+    struct interpolator_2d_result rv;
+
+    interpolator->init(*init_params);
+    while (rv.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
+    {
+        rv = interpolator->interpolate(*inp_params);
+        inp_params->robot_pose_ = rv.int_pose_;
+    }
+
+    ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
+    ROS_INFO_STREAM("y: " << inp_params->robot_pose_.y_ << " y_target: " << tp.y_ << " = " << arrive(tp.y_, inp_params->robot_pose_.y_));
+
+    ASSERT_TRUE(rv.result_value_ == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+
+    SUCCEED();
+}
+
+
+TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1)
+{
+
+    struct pose_2d rp;
+    struct pose_2d tp;
+
+    // Set start and goal
+    geometry_msgs::PoseStamped robotPose;
+    rp.x_ = 0;
+    rp.y_ = 0;
+
+    rp.reference_ = "/base_link";
+
+    geometry_msgs::PoseStamped targetPose;
+    tp.x_ = 3;
+    tp.y_ = 1;
+
+    tp.reference_ = "/base_link";
+
+    struct interpolator_2d_params *inp_params = new interpolator_2d_params();
+    inp_params->robot_pose_ = rp;
+    inp_params->target_pose_ = tp;
+
+    struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
+    init_params->cycle_time_ =  0.1;
+    init_params->vel_limit_ =  0.2;
+    init_params->acc_limit_ =  0.2;
+    init_params->jerk_limit_ =  0.2;
+
+    Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator;
+
+    struct interpolator_2d_result rv;
+
+    interpolator->init(*init_params);
+    while (rv.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
+    {
+        rv = interpolator->interpolate(*inp_params);
+        inp_params->robot_pose_ = rv.int_pose_;
+    }
+
+    ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
+    ROS_INFO_STREAM("y: " << inp_params->robot_pose_.y_ << " y_target: " << tp.y_ << " = " << arrive(tp.y_, inp_params->robot_pose_.y_));
+
+    ASSERT_TRUE(rv.result_value_ == ReflexxesAPI::RML_FINAL_STATE_REACHED);
+
+    SUCCEED();
+}
+
+
+TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1)
+{
+
+    struct pose_2d rp;
+    struct pose_2d tp;
+
+    // Set start and goal
+    geometry_msgs::PoseStamped robotPose;
+    rp.x_ = 0;
+    rp.y_ = 0;
+
+    rp.reference_ = "/base_link";
+
+    geometry_msgs::PoseStamped targetPose;
+    tp.x_ = 1;
+    tp.y_ = -1;
+
+    tp.reference_ = "/base_link";
+
+    struct interpolator_2d_params *inp_params = new interpolator_2d_params();
+    inp_params->robot_pose_ = rp;
+    inp_params->target_pose_ = tp;
+
+    struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
+    init_params->cycle_time_ =  0.1;
+    init_params->vel_limit_ =  0.2;
+    init_params->acc_limit_ =  0.2;
+    init_params->jerk_limit_ =  0.2;
+
+    Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator;
+
+    struct interpolator_2d_result rv;
+
+    interpolator->init(*init_params);
+    while (rv.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
+    {
+        rv = interpolator->interpolate(*inp_params);
+        inp_params->robot_pose_ = rv.int_pose_;
+    }
+
+    ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
+    ROS_INFO_STREAM("y: " << inp_params->robot_pose_.y_ << " y_target: " << tp.y_ << " = " << arrive(tp.y_, inp_params->robot_pose_.y_));
+
+    ASSERT_TRUE(rv.result_value_ == ReflexxesAPI::RML_FINAL_STATE_REACHED);
 
     SUCCEED();
 }

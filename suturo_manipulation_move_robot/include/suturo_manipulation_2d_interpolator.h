@@ -30,12 +30,12 @@ struct interpolator_2d_init_params
     double vel_limit_;
     double acc_limit_;
     double jerk_limit_;
-    pose_2d target_pose_;
+    // pose_2d target_pose_;
 };
 
 struct interpolator_2d_params
 {
-    pose_2d robot_pose_;
+    pose_2d robot_pose_, target_pose_;
 };
 
 struct interpolator_2d_result
@@ -87,6 +87,8 @@ private:
     RMLPositionFlags trajectory_generator_flags;
 
     int rv_;
+
+    bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_);
 };
 
 #endif
