@@ -146,7 +146,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
 
             if (collisionInFront(collisionsListRotation))
             {
-                ROS_INFO_STREAM("Detect collision, move back!");
+              //  ROS_INFO_STREAM("Detect collision, move back!");
 
                 base_cmd_.linear.x=(-0.1);
 
@@ -159,7 +159,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
             cmd_vel_pub_.publish(base_cmd_);
 
             targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-            ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
+           //ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
         }
         return true;
     }
@@ -179,7 +179,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
     }
     catch (...)
     {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        //ROS_ERROR_STREAM("ERROR: Transformation failed.");
         return false;
     }
     return true;
@@ -236,7 +236,7 @@ bool Suturo_Manipulation_Move_Robot::collisionInFront(std::vector<double> collis
         // between 90 degrees and 270 degrees
         if (collisionsList.at(position) > 1.57 && collisionsList.at(position) < 4.71)
         {
-            ROS_ERROR_STREAM("Collision in front!");
+            //ROS_ERROR_STREAM("Collision in front!");
             return true;
         }
     }
@@ -253,7 +253,7 @@ bool Suturo_Manipulation_Move_Robot::collisionOnRight(std::vector<double> collis
         // between 45 degrees and 135 degrees
         if (collisionsList.at(position) > 0.79 && collisionsList.at(position) < 2.36)
         {
-            ROS_ERROR_STREAM("Collision on right side!");
+            //ROS_ERROR_STREAM("Collision on right side!");
             return true;
         }
     }
@@ -270,7 +270,7 @@ bool Suturo_Manipulation_Move_Robot::collisionOnLeft(std::vector<double> collisi
         // between 225 degrees and 315 degrees
         if (collisionsList.at(position) > 3.93 && collisionsList.at(position) < 5.5)
         {
-            ROS_ERROR_STREAM("Collision on left side!");
+          //  ROS_ERROR_STREAM("Collision on left side!");
             return true;
         }
     }
@@ -281,7 +281,7 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
-    ROS_INFO_STREAM("yVariation: " << yVariation_ << " & currentVariation: " << currentVariation);
+    //ROS_INFO_STREAM("yVariation: " << yVariation_ << " & currentVariation: " << currentVariation);
 
     return currentVariation <= (yVariation_ + 0.05);
 }
@@ -311,7 +311,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     if (!transformToBaseLink(targetPose_, targetPoseBaseLink_))
     {
-        ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
+     //   ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
         return false;
     }
 
@@ -355,7 +355,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         moveLeft = false;
         moveRight = false;
     }
-    ROS_INFO_STREAM("yTwist: " << yTwist);
+   // ROS_INFO_STREAM("yTwist: " << yTwist);
 
     // true, if the robot moved, false if not
     bool moved = true;
@@ -395,7 +395,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
                 }
                 else
                 {
-                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+                    //ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
                 }
 
             }
@@ -411,11 +411,11 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
                     moveLeft = moveRightOld;
                     base_cmd_.linear.y = yTwist;
                     moved = true;
-                    ROS_INFO_STREAM("Changed yTwist to: " << yTwist);
+                   // ROS_INFO_STREAM("Changed yTwist to: " << yTwist);
                 }
                 else
                 {
-                    ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
+                   // ROS_ERROR_STREAM("Cant move sidewards, collision detected!");
                 }
             }
         }
