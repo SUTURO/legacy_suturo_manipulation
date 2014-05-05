@@ -762,15 +762,15 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 get_grasp_point(plane, *i, gripper_depth + Gripper::GRIPPER_DEPTH, a, temp_grasp_pose, temp_pre_grasp_pose);
                 // h++;
                 // 7. use moveit to test poses - O(much)???
-                if (!pi_->check_group_object_collision(gripper_group, temp_grasp_pose, co))
-                {
+                // if (!pi_->check_group_object_collision(gripper_group, temp_grasp_pose, co))
+                // {
                     // ROS_INFO_STREAM("collision!" );
                     // ros::WallDuration(0.5).sleep();
                     poses.push_back(temp_grasp_pose);
                     pre_poses.push_back(temp_pre_grasp_pose);
 
 
-                }
+                // }
             }
         }
     }
