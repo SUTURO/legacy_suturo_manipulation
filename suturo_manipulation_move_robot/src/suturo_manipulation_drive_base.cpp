@@ -1,7 +1,6 @@
 #include "suturo_manipulation_move_robot.h"
-#include <suturo_manipulation_reflexxes_interpolator.h>
 
-using namespace std;
+// using namespace std;
 
 //! ROS node initialization
 
@@ -371,14 +370,36 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     // wenn möglich in ne eigene Methode packen, die dann Start & Ziel an Interpolator gibt - check
     // Unit Tests schreiben, um zu testen ob x & y gleichzeitig erreicht wird - check
 
-    Suturo_Manipulation_Reflexxes_Interpolator *interpolator = new Suturo_Manipulation_Reflexxes_Interpolator(nh_);
+    Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
-    std::vector<double> twist;
+    struct interpolator_2d_init_params *init_params_ = new interpolator_2d_init_params();
+    init_params_->cycle_time_ =  0.1;
+    init_params_->vel_limit_ =  0.2;
+    init_params_->acc_limit_ =  0.2;
+    init_params_->jerk_limit_ =  0.2;
+
+    // std::vector<double> twist;
+    interpolator->init(*init_params_);
+
+    // robot_pose_.x_ = robotPose_.pose.position.x;
+    // robot_pose_.y_ = robotPose_.pose.position.y;
+    // robot_pose_.reference_ = robotPose_.header.frame_id;
+
+    struct interpolator_2d_params *inp_params_ = new interpolator_2d_params();
+    robot_pose_.x_ = 0;
+    robot_pose_.y_ = 0;
+    robot_pose_.reference_ = "/base_link";
+
+    target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
+    target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
+    target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
+
+    inp_params_->robot_pose_ = robot_pose_;
+    inp_params_->target_pose_ = target_pose_;
 
     ROS_INFO_STREAM("Before while");
-    while (nh_->ok() && interpolator->getResultValue() != ReflexxesAPI::RML_FINAL_STATE_REACHED)
+    while (nh_->ok() && interpoolator_result_.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
     {
-
         mtx_.lock();
         collisionsList = getCollisions();
         mtx_.unlock();
@@ -389,14 +410,22 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         base_cmd_.angular.z = 0;
 
         // twist = interpolator->interpolate(robotPose_, targetPose_, twist);
-        twist = interpolator->interpolate(robotPose_, targetPose_);
+        // twist = interpolator->interpolate(robotPose_, targetPose_);
+        interpoolator_result_ = interpolator->interpolate(*inp_params_);
 
-        base_cmd_.linear.x = twist.at(0);
+        base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
 
         // // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
         // if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList) )
         // {
-        base_cmd_.linear.y = twist.at(1);
+        base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
+
+        transformToBaseLink(targetPose_, targetPoseBaseLink_);
+        target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
+        target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
+        target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
+        inp_params_->target_pose_ = target_pose_;
+
         // }
         // else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList) )
         // {
@@ -410,7 +439,6 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         // ROS_INFO_STREAM("DRIVE_BASE: x: " << base_cmd_.linear.x << ", y: " << base_cmd_.linear.y);
 
         cmd_vel_pub_.publish(base_cmd_);
-        transformToBaseLink(targetPose_, targetPoseBaseLink_);
     }
 
     // ROS_INFO_STREAM("ResultValue: " << ResultValue);

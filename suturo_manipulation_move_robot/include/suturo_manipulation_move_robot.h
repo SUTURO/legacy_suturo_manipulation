@@ -30,6 +30,8 @@
 
 #include <ReflexxesAPI.h>
 
+#include <suturo_manipulation_2d_interpolator.h>
+
 
 class Suturo_Manipulation_Move_Robot
 {
@@ -71,6 +73,12 @@ private:
     double yVariation_;
 
     boost::signals2::mutex mtx_;
+
+    struct pose_2d robot_pose_;
+    struct pose_2d target_pose_;
+    struct interpolator_2d_params *inp_params_;
+    struct interpolator_2d_init_params *init_params_;
+    struct interpolator_2d_result interpoolator_result_;
 
     /**
      * Sets robotPose_ with incoming data from the localization topic.
