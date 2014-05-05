@@ -9,6 +9,10 @@
 #include <kdl/jntarray.hpp>
 
 #include <ReflexxesAPI.h>
+#include <RMLVelocityFlags.h>
+#include <RMLVelocityInputParameters.h>
+#include <RMLVelocityOutputParameters.h>
+
 
 #include <geometry_msgs/PoseStamped.h>
 
@@ -25,17 +29,27 @@ protected:
     KDL::JntArray qdot_target_;
     KDL::JntArray q_;
     KDL::JntArray qdot_;
+    KDL::JntArray qdot_export_;
     KDL::JntArray qdot_max_;
     KDL::JntArray qddot_max_;
     KDL::JntArray jerk_max_;
     int ResultValue_;
     // set up relfexxes-trajectory structures
     ReflexxesAPI *trajectory_generator;
+    
     RMLPositionInputParameters *trajectory_input;
     RMLPositionOutputParameters *trajectory_output;
     RMLPositionFlags trajectory_generator_flags;
 
+    RMLVelocityInputParameters *vi;
+    RMLVelocityOutputParameters *vo;
+    RMLVelocityFlags vf;
+
     bool selection_vector_[dof_];
+
+    bool initDone;
+
+    std::vector<double> twist_;
 
     bool arriveX(double targetPose, double robotPose);
 
@@ -49,7 +63,7 @@ protected:
 
     bool initPositions(geometry_msgs::PoseStamped robotPose, geometry_msgs::PoseStamped targetPose);
 
-    bool updateRobotPositions(geometry_msgs::PoseStamped robotPose);
+    bool updatePositions(geometry_msgs::PoseStamped robotPose, geometry_msgs::PoseStamped targetPose);
 
     bool targetInRange(geometry_msgs::PoseStamped robotPose, geometry_msgs::PoseStamped targetPose);
 

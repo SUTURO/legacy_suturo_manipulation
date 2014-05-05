@@ -162,7 +162,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
             cmd_vel_pub_.publish(base_cmd_);
 
             targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-            ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
+            // ROS_INFO_STREAM(targetQuaternion->angle(robotOrientation));
         }
         return true;
     }
@@ -340,28 +340,28 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
     // TODO: Referenzen an die Methoden uebergeben
-    if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList) && !yCoordArrived(targetPose_))
-    {
-        yTwist = 0.1;
-        moveLeft = true;
-        moveRight = false;
-    }
-    else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList) && !yCoordArrived(targetPose_))
-    {
-        yTwist = (-0.1);
-        moveRight = true;
-        moveLeft = false;
-    }
-    else
-    {
-        yTwist = 0;
-        moveLeft = false;
-        moveRight = false;
-    }
-    ROS_INFO_STREAM("yTwist: " << yTwist);
+    // if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList) && !yCoordArrived(targetPose_))
+    // {
+    //     yTwist = 0.1;
+    //     moveLeft = true;
+    //     moveRight = false;
+    // }
+    // else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList) && !yCoordArrived(targetPose_))
+    // {
+    //     yTwist = (-0.1);
+    //     moveRight = true;
+    //     moveLeft = false;
+    // }
+    // else
+    // {
+    //     yTwist = 0;
+    //     moveLeft = false;
+    //     moveRight = false;
+    // }
+    // ROS_INFO_STREAM("yTwist: " << yTwist);
 
     // true, if the robot moved, false if not
-    bool moved = true;
+    // bool moved = true;
 
     // calculate current yVariation
     // TODO: Testen ob nen double kommt
@@ -375,6 +375,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     std::vector<double> twist;
 
+    ROS_INFO_STREAM("Before while");
     while (nh_->ok() && interpolator->getResultValue() != ReflexxesAPI::RML_FINAL_STATE_REACHED)
     {
 
@@ -387,10 +388,26 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         base_cmd_.linear.y = 0;
         base_cmd_.angular.z = 0;
 
+        // twist = interpolator->interpolate(robotPose_, targetPose_, twist);
         twist = interpolator->interpolate(robotPose_, targetPose_);
 
-        base_cmd_.linear.x = twist[0];
-        base_cmd_.linear.y = twist[1];
+        base_cmd_.linear.x = twist.at(0);
+
+        // // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
+        // if (0 < targetPoseBaseLink_.pose.position.y && !collisionOnLeft(collisionsList) )
+        // {
+        base_cmd_.linear.y = twist.at(1);
+        // }
+        // else if (0 > targetPoseBaseLink_.pose.position.y && !collisionOnRight(collisionsList) )
+        // {
+        //     base_cmd_.linear.y = twist.at(1) * (-1);
+        // }
+        // else
+        // {
+        //     base_cmd_.linear.y = 0;
+        // }
+
+        // ROS_INFO_STREAM("DRIVE_BASE: x: " << base_cmd_.linear.x << ", y: " << base_cmd_.linear.y);
 
         cmd_vel_pub_.publish(base_cmd_);
         transformToBaseLink(targetPose_, targetPoseBaseLink_);
