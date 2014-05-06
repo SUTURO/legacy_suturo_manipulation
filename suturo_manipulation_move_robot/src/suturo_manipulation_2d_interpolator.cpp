@@ -54,17 +54,6 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
     q_target_(0) = params.target_pose_.x_;
     q_target_(1) = params.target_pose_.y_;
 
-    // if (targetInRange(params.robot_pose_, params.target_pose_))
-    // {
-    //     q_target_(0) = params.robot_pose_.x_;
-    //     q_target_(1) = params.robot_pose_.y_;
-    // }
-    // else
-    // {
-    //     q_target_(0) = params.target_pose_.x_;
-    //     q_target_(1) = params.target_pose_.y_;
-    // }
-
     if (params.robot_pose_.reference_ != params.target_pose_.reference_)
     {
         ROS_ERROR("robot_pose_.reference_ != target_pose_.reference_!! Frame must be equal!!");

@@ -295,7 +295,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     base_cmd_.linear.x = 0;
     base_cmd_.linear.y = 0;
     base_cmd_.angular.z = 0;
-    struct interpolator_2d_result interpoolator_result_; 
+    struct interpolator_2d_result interpoolator_result_;
 
     targetPose_ = targetPose;
 
@@ -375,9 +375,40 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
         interpoolator_result_ = interpolator->interpolate(*inp_params_);
 
-        base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
+        // TODO: Kollision vernünftig behandeln: Was ist wenn auf y das Ziel erreicht, aber auf x ne Kollision? Oder wenn auf x und y ne Kollision? Muss behandelt werden
+        // Idee 1: Bei erster Kollision das jeweilige Ziel der Achse auf die Robopose setzen
+        // => Problem: Wenn Kollision nur kurzfristig, kann Ziel nicht mehr angefahren werden
+        // Idee 2: Solange in Kollision gehen, bis auf der nicht kollidierenden Achse das Ziel erreicht ist, dann das Kollidierende Ziel auf die robotPose setzen
+        // => Problem: Was ist, wenn x und y kollidieren?
+        // Idee 3: Mit xInCollision und yInCollision als bools arbeiten, wenn eine in Kollision, die andere zum Ziel bringen, wenn einer am Ziel, der andere in Kollision => Ziel erreicht
+        // Wenn beide auf Kollision => Ziel erreicht
+        // Problem allgemein: Wie dem Planning mitteilen, dass Probleme aufgetreten sind?
+        if (robot_pose_.x_ > targetPoseBaseLink_.pose.position.x)
+        {
+            base_cmd_.linear.x = 0;
+            ROS_INFO_STREAM("Can't move back!");
+        }
+        else if (collisionInFront(collisionsList))
+        {
+            base_cmd_.linear.x = 0;
+            ROS_INFO_STREAM("Collision in Front, can't move forward!");
+        }
+        else
+        {
+            base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
+        }
 
-        base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
+
+        // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
+        if ((interpoolator_result_.twist_.ydot_ > 0 && collisionOnLeft(collisionsList)) || (interpoolator_result_.twist_.ydot_ < 0 && collisionOnRight(collisionsList)))
+        {
+            base_cmd_.linear.y = 0;
+            ROS_INFO_STREAM("Collision, can't move!");
+        }
+        else
+        {
+            base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
+        }
 
         transformToBaseLink(targetPose_, targetPoseBaseLink_);
         target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
@@ -390,8 +421,6 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     ROS_INFO_STREAM(targetPose_);
     ROS_INFO_STREAM(robotPose_);
-
-    // delete init_params_;
 
     // Finish him!
     return true;
