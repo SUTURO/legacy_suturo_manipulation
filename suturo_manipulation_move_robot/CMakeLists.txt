@@ -188,7 +188,7 @@ catkin_add_gtest(${PROJECT_NAME}-test
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_suturo_manipulation_move_robot.cpp)
 
 if(TARGET ${PROJECT_NAME}-test)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} ${catkin_LIBRARIES} suturo_manipulation_test_reflexxes_interpolator suturo_manipulation_2d_interpolator)
+  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} ${catkin_LIBRARIES} suturo_manipulation_2d_interpolator)
 endif()
 
 ## Add folders to be run by python nosetests
