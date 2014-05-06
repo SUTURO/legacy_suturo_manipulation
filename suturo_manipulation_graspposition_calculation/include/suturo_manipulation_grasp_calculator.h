@@ -81,8 +81,6 @@ protected:
                             std::vector<geometry_msgs::PoseStamped> &pre_poses,
                             double gripper_depth);
 
-    void transform_poses(std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses);
-
 public:
 
     struct DoublePoint2D
@@ -97,23 +95,9 @@ public:
         {
             return d2p.x != this->x || d2p.y != this->y;
         }
-        // void normalize()
-        // {
-        //     if (!(thix->x == 0 && thix->y == 0))
-        //     {
-        //         double a = 1 / sqrt((thix->x * thix->x + thix->y * thix->y));
-        //         thix->x = thix->x * a;
-        //         thix->y = thix->y * a;
-        //     }
-        // }
-        // std::ostream &operator <<(std::ostream &s)
-        // {
-        //     s << "(" << this->x << "," << this->y << ")";
-        //     return s;
-        // }
+
     };
 
-    // std::ostream& operator <<(std::ostream &s, const DoublePoint2D &p);
 
     typedef std::vector<DoublePoint2D> DPolygon2D;
 
@@ -154,7 +138,7 @@ public:
 
     void double_polygon_to_path(DPolygon2D double_polygon, ClipperLib::Paths &int_polygon);
 
-    geometry_msgs::Point get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point p);
+    geometry_msgs::Point get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point s, geometry_msgs::Point r);
 
     std::vector<ClipperLib::IntPoint> calc_poly_centroid(ClipperLib::Paths polygon);
 

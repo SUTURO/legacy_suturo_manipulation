@@ -353,13 +353,14 @@ bool Suturo_Manipulation_Planning_Scene_Interface::check_group_object_collision(
     geometry_msgs::PoseStamped temp_pose;
     temp_pose.header = co.header;
     temp_pose.pose = co.mesh_poses[0];
-    temp_pose.header.stamp = ros::Time::now();
+    temp_pose.header.stamp = ros::Time(0);
 
     for (int i = 0; i < 50; ++i)
     {
         try
         {
             publishTfFrame("1337", eef_pose);
+            listener_.waitForTransform(co.id, "base_link", temp_pose.header.stamp, ros::Duration(5.0));
             listener_.transformPose("/1337", temp_pose, temp_pose);
             break;
         }
@@ -367,6 +368,7 @@ bool Suturo_Manipulation_Planning_Scene_Interface::check_group_object_collision(
         {
             if (i == 50) ROS_ERROR_STREAM(t.what());
         }
+        ROS_INFO_STREAM(i);
     }
 
     co.mesh_poses[0] = temp_pose.pose;

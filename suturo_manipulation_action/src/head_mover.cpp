@@ -216,7 +216,7 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped ps;
     ps.header = co.header;
     ps.pose = co.mesh_poses[0];
-
+// ROS_ERROR_STREAM("sada");
     calc.calcMeshGraspPosition(co, poses, pre_poses, Gripper::R_GRIPPER_PALM_LENGTH);
 
     // pi.check_group_object_collision("left_gripper", ps, co);

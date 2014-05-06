@@ -261,24 +261,26 @@ int Grasp_Calculator::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std:
 geometry_msgs::PointStamped Grasp_Calculator::get_point_above_object(std::string object_id)
 {
     geometry_msgs::PointStamped p;
-    p.header.stamp = ros::Time();
+    p.header.stamp = ros::Time(0);
     p.header.frame_id = object_id;
     try
     {
+        listener_.waitForTransform(object_id, "base_link", p.header.stamp, ros::Duration(5.0));
         listener_.transformPoint("base_link", p, p);
     }
-    catch (...)
+    catch (tf::TransformException t)
     {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        ROS_ERROR_STREAM(t.what());
     }
     p.point.z += 1;
     try
     {
+        listener_.waitForTransform("base_link", object_id, p.header.stamp, ros::Duration(5.0));
         listener_.transformPoint(object_id, p, p);
     }
-    catch (...)
+    catch (tf::TransformException t)
     {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        ROS_ERROR_STREAM(t.what());
     }
     return p;
 }
@@ -348,34 +350,26 @@ int Grasp_Calculator::calcGraspPosition(moveit_msgs::CollisionObject co, std::ve
     return 0;
 }
 
-void Grasp_Calculator::transform_poses(std::string frame_id, std::vector<geometry_msgs::PoseStamped> &poses)
+geometry_msgs::Point Grasp_Calculator::get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point s, geometry_msgs::Point r)
 {
-    try
-    {
-        //transform pose to base_link
-        for (int i = 0; i < poses.size(); i++)
-        {
-            listener_.transformPose(frame_id, poses[i], poses[i]);
+    double a;
+    double b;
+    double c;
+    double d;
+    plane.get_coordinate_form(a, b, c, d);
+    geometry_msgs::Point result;
+    // geometry_msgs::Point n = plane.get_normal();
 
-        }
-    }
-    catch (...)
-    {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
-    }
-}
+    double lamda = - ((a * s.x + b * s.y + c * s.z) /
+                      (a * r.x + b * r.y + c * r.z));
 
-geometry_msgs::Point Grasp_Calculator::get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point p)
-{
-    geometry_msgs::Point r;
-    geometry_msgs::Point n = plane.get_normal();
+    // double lamda = (- (p.x * n.x + p.y * n.y + p.z * n.z) /
+    //                 (n.x * n.x + n.y * n.y + n.z * n.z));
 
-    double lamda = (- (p.x * n.x + p.y * n.y + p.z * n.z) /
-                    (n.x * n.x + n.y * n.y + n.z * n.z));
-
-    r.x = p.x + lamda * n.x;
-    r.y = p.y + lamda * n.y;
-    r.z = p.z + lamda * n.z;
+    result = s + lamda * r ;
+    // p.x + lamda * n.x;
+    // r.y = p.y + lamda * n.y;
+    // r.z = p.z + lamda * n.z;
     return r;
 }
 
@@ -497,7 +491,7 @@ Grasp_Calculator::DPolygon2D Grasp_Calculator::project_polygon_to_plane(suturo_m
     std::vector<geometry_msgs::Point> plane_poly;
     for (std::vector<geometry_msgs::Point>::iterator p = polygon.begin(); p != polygon.end(); ++p)
     {
-        plane_poly.push_back(get_point_of_intersection(plane, *p));
+        plane_poly.push_back(get_point_of_intersection(plane, *p, plane.get_normal()));
     }
     // for (int i = 0; i < plane_poly.size(); ++i)
     // {
@@ -764,10 +758,10 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 // 7. use moveit to test poses - O(much)???
                 // if (!pi_->check_group_object_collision(gripper_group, temp_grasp_pose, co))
                 // {
-                    // ROS_INFO_STREAM("collision!" );
-                    // ros::WallDuration(0.5).sleep();
-                    poses.push_back(temp_grasp_pose);
-                    pre_poses.push_back(temp_pre_grasp_pose);
+                // ROS_INFO_STREAM("collision!" );
+                // ros::WallDuration(0.5).sleep();
+                poses.push_back(temp_grasp_pose);
+                pre_poses.push_back(temp_pre_grasp_pose);
 
 
                 // }

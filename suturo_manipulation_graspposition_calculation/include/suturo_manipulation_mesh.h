@@ -33,6 +33,13 @@ public:
     {
         return parameter_form;
     };
+    void get_coordinate_form(double &a, double &b, double &c, double &d)
+    {
+        a = normal.x;
+        b = normal.y;
+        c = normal.z;
+        d = 0;
+    };
 };
 
 struct Vertex
