@@ -84,7 +84,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES suturo_manipulation_move_robot suturo_manipulation_reflexxes_interpolator
+   LIBRARIES suturo_manipulation_move_robot
    CATKIN_DEPENDS geometry_msgs roscpp
 #  DEPENDS system_lib
 )
