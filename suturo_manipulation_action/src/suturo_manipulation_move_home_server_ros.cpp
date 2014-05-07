@@ -104,7 +104,7 @@ int move_object_to_cam(move_group_interface::MoveGroup *move_group)
 
     geometry_msgs::PoseStamped desired_pose;
     desired_pose.header.frame_id = "/webcam";
-    desired_pose.pose.position.x = 0.23;
+    desired_pose.pose.position.x = 0.27;
     desired_pose.pose.position.y = aco_in_wrist_frame.pose.position.x;
     desired_pose.pose.position.z = 0;
     desired_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -M_PI_2);

@@ -13,6 +13,19 @@
       </attenuation>
       <direction>-0.500000 0.500000 -1.000000</direction>
     </light>
+    <light name='sun_2' type='point'>
+        <cast_shadows>1</cast_shadows>
+        <pose>0.262421 0.000000 0.8201365 0.000000 0.000000 0.000000</pose>
+        <diffuse>0.800000 0.800000 0.800000 1.000000</diffuse>
+        <specular>0.100000 0.100000 0.100000 1.000000</specular>
+        <attenuation>
+            <range>1000.000000</range>
+            <constant>0.900000</constant>
+            <linear>0.010000</linear>
+            <quadratic>0.001000</quadratic>
+        </attenuation>
+        <direction>-0.500000 0.500000 -1.000000</direction>
+    </light>
     <model name='ground_plane'>
       <static>1</static>
       <link name='link'>

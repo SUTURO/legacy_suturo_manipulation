@@ -98,12 +98,19 @@ double Gripper::close_gripper(double force)
 
 double Gripper::get_gripper_palm_length()
 {
-	double r = Gripper::R_GRIPPER_PALM_LENGTH;
-	double l = Gripper::L_GRIPPER_PALM_LENGTH;
+    double r = Gripper::R_GRIPPER_PALM_LENGTH;
+    double l = Gripper::L_GRIPPER_PALM_LENGTH;
     return arm_ == RIGHT_ARM ? r : l;
 }
 
 std::vector<std::string> Gripper::get_gripper_links()
 {
     return arm_ == RIGHT_ARM ? Gripper::get_r_gripper_links() : Gripper::get_l_gripper_links();
+}
+
+std::string Gripper::get_gripper_group()
+{
+    std::string r = Gripper::get_r_group_name();
+    std::string l = Gripper::get_l_group_name();
+    return arm_ == RIGHT_ARM ? r : l;
 }

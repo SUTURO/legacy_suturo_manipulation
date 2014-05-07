@@ -25,8 +25,6 @@ private:
     static const std::string R_GRIPPER_TOPIC;
     static const std::string L_GRIPPER_TOPIC;
 
-
-
     /**
      * Feedback collback function that saves the gripper state during a servercall, in
      * case the server doesn't responde in time.
@@ -39,8 +37,9 @@ public:
 
     static const double GRIPPER_DEPTH = 0.05;
 
-    static const double R_GRIPPER_PALM_LENGTH = 0.12;
-    static const double L_GRIPPER_PALM_LENGTH = 0.17;
+    static const double R_GRIPPER_PALM_LENGTH = 0.14; //this + depth should be 19cm
+    static const double L_GRIPPER_PALM_LENGTH = 0.175; //this + depth should be 22,5cm
+
 
     Gripper(std::string arm);
 
@@ -72,6 +71,8 @@ public:
     double open_gripper(double force = 20);
 
     double get_gripper_palm_length();
+
+    std::string get_gripper_group();
 
     std::vector<std::string> get_gripper_links();
 
@@ -107,6 +108,14 @@ public:
         r2.push_back("l_force_torque_link");
         static const std::vector<std::string> r = r2;
         return r;
+    }
+
+    static const std::string get_r_group_name(){
+        return "right_gripper";
+    }
+
+    static const std::string get_l_group_name(){
+        return "left_gripper";
     }
 
 };
