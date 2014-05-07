@@ -32,6 +32,7 @@ void Suturo_Manipulation_2d_Interpolator::init(const interpolator_2d_init_params
         selection_vector_[i] = true;
     }
 
+    // SetMaxVelocityElement nutzen
     trajectory_input->SetMaxVelocityVector(qdot_max_.data.data());
     trajectory_input->SetMaxAccelerationVector(qddot_max_.data.data());
     trajectory_input->SetMaxJerkVector(jerk_max_.data.data());
