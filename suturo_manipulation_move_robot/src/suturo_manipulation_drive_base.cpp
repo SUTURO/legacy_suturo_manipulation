@@ -383,32 +383,32 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         // Idee 3: Mit xInCollision und yInCollision als bools arbeiten, wenn eine in Kollision, die andere zum Ziel bringen, wenn einer am Ziel, der andere in Kollision => Ziel erreicht
         // Wenn beide auf Kollision => Ziel erreicht
         // Problem allgemein: Wie dem Planning mitteilen, dass Probleme aufgetreten sind?
-        if (robot_pose_.x_ > targetPoseBaseLink_.pose.position.x)
-        {
-            base_cmd_.linear.x = 0;
-            ROS_INFO_STREAM("Can't move back!");
-        }
-        else if (collisionInFront(collisionsList))
-        {
-            base_cmd_.linear.x = 0;
-            ROS_INFO_STREAM("Collision in Front, can't move forward!");
-        }
-        else
-        {
-            base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
-        }
+        // if (robot_pose_.x_ > targetPoseBaseLink_.pose.position.x)
+        // {
+        //     base_cmd_.linear.x = 0;
+        //     ROS_INFO_STREAM("Can't move back!");
+        // }
+        // else if (collisionInFront(collisionsList))
+        // {
+        //     base_cmd_.linear.x = 0;
+        //     ROS_INFO_STREAM("Collision in Front, can't move forward!");
+        // }
+        // else
+        // {
+        base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
+        // }
 
 
         // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
-        if ((interpoolator_result_.twist_.ydot_ > 0 && collisionOnLeft(collisionsList)) || (interpoolator_result_.twist_.ydot_ < 0 && collisionOnRight(collisionsList)))
-        {
-            base_cmd_.linear.y = 0;
-            ROS_INFO_STREAM("Collision, can't move!");
-        }
-        else
-        {
-            base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
-        }
+        // if ((interpoolator_result_.twist_.ydot_ > 0 && collisionOnLeft(collisionsList)) || (interpoolator_result_.twist_.ydot_ < 0 && collisionOnRight(collisionsList)))
+        // {
+        //     base_cmd_.linear.y = 0;
+        //     ROS_INFO_STREAM("Collision, can't move!");
+        // }
+        // else
+        // {
+        base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
+        // }
 
         transformToBaseLink(targetPose_, targetPoseBaseLink_);
         target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
