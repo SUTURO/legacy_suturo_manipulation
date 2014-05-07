@@ -47,8 +47,8 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     while(!moveSucces_ && !collisionDetected_)
     {
       // get collision-status
-      // collisionValue = cc_->r_collision();
-      collisionValue = 0; // TESTINGSTUB
+      collisionValue = cc_->r_collision();
+      // collisionValue = 0; // TESTINGSTUB
       if(collisionValue > 0) 
       {
         collisionDetected_ = true;

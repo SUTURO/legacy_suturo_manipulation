@@ -31,6 +31,16 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
      * co->position->...
      * pi->addObject(co);
      */
+  attempt_++;
+
+  // Add CollisionValue to the list
+  int i = 0;
+  while(collisionValues_[i] != 0)
+    i++;
+  collisionValues_[i] = collisionValue;
+
+  // 
+
  }
 
 bool Collision_Handler::attemptValid()
@@ -38,4 +48,9 @@ bool Collision_Handler::attemptValid()
   if(attempt_ < maxAttempts_)
     return true;
   return false;
+}
+
+int checkForPreviousCollision(int collisionValue)
+{
+  return 0;
 }
