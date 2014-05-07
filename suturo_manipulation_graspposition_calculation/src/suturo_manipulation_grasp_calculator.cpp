@@ -4,7 +4,7 @@
 //TODO: better sort algorithm
 //TODO: remove similar grasppoints
 //TODO: calc dist to surface
-//TODO: precalculate some plane variables
+//TODO: better error/exception handling... :(
 
 
 #include "suturo_manipulation_grasp_calculator.h"
@@ -509,8 +509,11 @@ geometry_msgs::Quaternion Grasp_Calculator::get_quaternion_from_points(geometry_
 
 void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
                                        geometry_msgs::PoseStamped &grasp_pose,
-                                       geometry_msgs::PoseStamped &pre_grasp_pose)
+                                       geometry_msgs::PoseStamped &pre_grasp_pose,
+                                       Mesh meshi)
 {
+
+
 
     DoublePoint2D p2d;
     p2d.x = sin(alpha) * d;
@@ -526,11 +529,19 @@ void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, doub
 
     grasp_pose.pose.orientation = get_quaternion_from_points(grasp_pose.pose.position, m, c);
 
+    double dist = 0;
+    meshi.dist_to_triangle(m, r, dist);
+    double grasp_hight = d + (dist > Gripper::GRIPPER_DEPTH ? dist : Gripper::GRIPPER_DEPTH);
+    // ROS_INFO_STREAM("dist " << d);
+
     pre_grasp_pose.pose.orientation = grasp_pose.pose.orientation;
     normalize(r);
-    pre_grasp_pose.pose.position.x = grasp_pose.pose.position.x + Gripper::GRIPPER_DEPTH * r.x;
-    pre_grasp_pose.pose.position.y = grasp_pose.pose.position.y + Gripper::GRIPPER_DEPTH * r.y;
-    pre_grasp_pose.pose.position.z = grasp_pose.pose.position.z + Gripper::GRIPPER_DEPTH * r.z;
+    grasp_pose.pose.position.x = m.x + grasp_hight * r.x;
+    grasp_pose.pose.position.y = m.y + grasp_hight * r.y;
+    grasp_pose.pose.position.z = m.z + grasp_hight * r.z;
+    pre_grasp_pose.pose.position.x = m.x + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.x;
+    pre_grasp_pose.pose.position.y = m.y + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.y;
+    pre_grasp_pose.pose.position.z = m.z + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.z;
 }
 
 int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
@@ -582,12 +593,12 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
 
 
         // 5. calc centriod - O(|vertices|)
-        Path centroids = calc_poly_centroid(solution);
+        Path int_centroids = calc_poly_centroid(solution);
 
         DPolygon2D double_centroids;
-        path_to_double_polygon(double_centroids, centroids);
-        std::vector<geometry_msgs::Point> p = d2d_points_to_d3d_points(plane, double_centroids);
-        for (std::vector<geometry_msgs::Point>::iterator i = p.begin(); i != p.end(); ++i)
+        path_to_double_polygon(double_centroids, int_centroids);
+        std::vector<geometry_msgs::Point> centroids = d2d_points_to_d3d_points(plane, double_centroids);
+        for (std::vector<geometry_msgs::Point>::iterator i = centroids.begin(); i != centroids.end(); ++i)
         {
             c.push_back(*i);
         }
@@ -598,7 +609,7 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
 
         // 6. add grasppose pointing towards centriod with differen angles - const
 
-        for (std::vector<geometry_msgs::Point>::iterator i = p.begin(); i != p.end(); ++i)
+        for (std::vector<geometry_msgs::Point>::iterator i = centroids.begin(); i != centroids.end(); ++i)
         {
             for (double a = 0; a < 2 * M_PI; a += (M_PI / 2))
             {
@@ -606,9 +617,8 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 geometry_msgs::PoseStamped temp_pre_grasp_pose;
                 temp_grasp_pose.header.frame_id = co.id;
                 temp_pre_grasp_pose.header.frame_id = co.id;
-                get_grasp_point(plane, *i, gripper_depth + Gripper::GRIPPER_DEPTH, a, temp_grasp_pose, temp_pre_grasp_pose);
 
-
+                get_grasp_point(plane, *i, gripper_depth , a, temp_grasp_pose, temp_pre_grasp_pose, meshi);
 
                 // h++;
                 // 7. use moveit to test poses - O(much)???
@@ -616,6 +626,7 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 // {
                 // ROS_INFO_STREAM("collision!" );
                 // ros::WallDuration(0.5).sleep();
+                // ROS_WARN_STREAM("centroid " << *i);
                 poses.push_back(temp_grasp_pose);
                 pre_poses.push_back(temp_pre_grasp_pose);
 

@@ -23,10 +23,8 @@ class Plane
     geometry_msgs::Point normal_;
 
     //for 2d point calculation
-    double denominator_;
-    double pq_;
-    double pp_;
-    double qq_;
+    geometry_msgs::Point u_a;
+    geometry_msgs::Point u_b;
 public:
     Plane(geometry_msgs::Point normal,
           geometry_msgs::Point support_vector,
@@ -42,7 +40,9 @@ public:
         return normal_;
     };
 
-    void orthonormalize();
+    bool orthonormalize();
+
+    bool pre_compute();
 
     void get_parameter_form(geometry_msgs::Point &support_vector,
                             geometry_msgs::Point &first_parameter,
@@ -53,7 +53,7 @@ public:
         second_parameter = second_parameter_;
     };
 
-    geometry_msgs::Point get_point_of_intersection(geometry_msgs::Point s, geometry_msgs::Point r);
+    bool get_point_of_intersection(geometry_msgs::Point &result, geometry_msgs::Point s, geometry_msgs::Point r);
 
     bool d3d_point_to_d2d_point(double &a, double &b, geometry_msgs::Point x);
 
@@ -100,10 +100,10 @@ struct Triangle
         }
         os << ")\n cluster: (";
 
-        for (int v = 0; v < clusters.size(); ++v)
-        {
-            os << clusters[v] << ",";
-        }
+        // for (int v = 0; v < clusters.size(); ++v)
+        // {
+        //     os << clusters[v] << ",";
+        // }
         os << ")";
         return "Triangle " + os.str();
     };
