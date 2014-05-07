@@ -8,10 +8,6 @@
 namespace suturo_manipulation
 {
 
-typedef std::pair< geometry_msgs::Point, geometry_msgs::Point > Plane_parameter;
-
-
-
 struct Cluster
 {
     std::vector<uint> triangles;
@@ -21,25 +17,51 @@ struct Cluster
 
 class Plane
 {
-    Plane_parameter parameter_form;
-    geometry_msgs::Point normal;
+    geometry_msgs::Point support_vector_;
+    geometry_msgs::Point first_parameter_;
+    geometry_msgs::Point second_parameter_;
+    geometry_msgs::Point normal_;
+
+    //for 2d point calculation
+    double denominator_;
+    double pq_;
+    double pp_;
+    double qq_;
 public:
-    Plane(geometry_msgs::Point normal1, Plane_parameter parameter_form1);
+    Plane(geometry_msgs::Point normal,
+          geometry_msgs::Point support_vector,
+          geometry_msgs::Point first_parameter,
+          geometry_msgs::Point second_parameter);
+
+    Plane(geometry_msgs::Point p1,
+          geometry_msgs::Point p2,
+          geometry_msgs::Point p3);
+
     geometry_msgs::Point get_normal()
     {
-        return normal;
+        return normal_;
     };
-    Plane_parameter get_parameter_form()
+
+    void orthonormalize();
+
+    void get_parameter_form(geometry_msgs::Point &support_vector,
+                            geometry_msgs::Point &first_parameter,
+                            geometry_msgs::Point &second_parameter)
     {
-        return parameter_form;
+        support_vector = support_vector_;
+        first_parameter = first_parameter_;
+        second_parameter = second_parameter_;
     };
-    void get_coordinate_form(double &a, double &b, double &c, double &d)
-    {
-        a = normal.x;
-        b = normal.y;
-        c = normal.z;
-        d = 0;
-    };
+
+    geometry_msgs::Point get_point_of_intersection(geometry_msgs::Point s, geometry_msgs::Point r);
+
+    bool d3d_point_to_d2d_point(double &a, double &b, geometry_msgs::Point x);
+
+    void get_coordinate_form(double &a, double &b, double &c, double &d);
+
+    bool dist_to_plane_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
+
+    void project_point_to_plane(geometry_msgs::Point p, double &x, double &y);
 };
 
 struct Vertex
@@ -65,6 +87,9 @@ struct Triangle
     std::vector<uint> vertices;
     std::vector<uint> clusters;
     geometry_msgs::Point normal;
+
+    Plane get_plane(std::vector<Vertex> vertices1);
+
     std::string toString(std::vector<Cluster> clusterss, std::vector<Vertex> verticess)
     {
         std::ostringstream os;
@@ -81,7 +106,9 @@ struct Triangle
         }
         os << ")";
         return "Triangle " + os.str();
-    }
+    };
+
+
 };
 
 class Mesh
@@ -145,6 +172,8 @@ public:
     bool contains(std::vector<T> v, T elem);
 
     bool are_vertices_only_connected_by_one_triangle(uint vertex_id1, uint vertex_id2, uint cluster_id);
+
+    bool dist_to_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
 
     static const double scalarproduct(geometry_msgs::Point p1, geometry_msgs::Point p2)
     {
