@@ -156,7 +156,7 @@ public:
 
     geometry_msgs::Point cross_product(geometry_msgs::Point p1, geometry_msgs::Point p2);
 
-    void get_grasp_point(suturo_manipulation::Plane plane, geometry_msgs::Point m, double d, double alpha,
+    bool get_grasp_point(suturo_manipulation::Plane plane, geometry_msgs::Point m, double d, double alpha,
                          geometry_msgs::PoseStamped &grasp_pose, geometry_msgs::PoseStamped &pre_grasp_pose,
                          suturo_manipulation::Mesh meshi);
 

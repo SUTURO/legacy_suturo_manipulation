@@ -1,9 +1,9 @@
 //TODO: place centroid between the cluster
 //TODO: centroid might not be in the polygon
+//TODO: fix Pringles
 //TODO: fix special case when there is only one cluster
 //TODO: better sort algorithm
 //TODO: remove similar grasppoints
-//TODO: calc dist to surface
 //TODO: better error/exception handling... :(
 
 
@@ -507,14 +507,11 @@ geometry_msgs::Quaternion Grasp_Calculator::get_quaternion_from_points(geometry_
 
 // }
 
-void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
+bool Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
                                        geometry_msgs::PoseStamped &grasp_pose,
                                        geometry_msgs::PoseStamped &pre_grasp_pose,
                                        Mesh meshi)
 {
-
-
-
     DoublePoint2D p2d;
     p2d.x = sin(alpha) * d;
     p2d.y = cos(alpha) * d;
@@ -530,24 +527,25 @@ void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, doub
     grasp_pose.pose.orientation = get_quaternion_from_points(grasp_pose.pose.position, m, c);
 
     double dist = 0;
-    meshi.dist_to_triangle(m, r, dist);
+    double diameter = 0;
+    meshi.dist_to_surface(m, r, plane.get_normal(), dist, diameter);
+    // ROS_INFO_STREAM(diameter);
+    if (diameter >= Gripper::GRIPPER_MAX_POSITION) return false;
     double grasp_hight = d + (dist > Gripper::GRIPPER_DEPTH ? dist : Gripper::GRIPPER_DEPTH);
     // ROS_INFO_STREAM("dist " << d);
 
     pre_grasp_pose.pose.orientation = grasp_pose.pose.orientation;
     normalize(r);
-    grasp_pose.pose.position.x = m.x + grasp_hight * r.x;
-    grasp_pose.pose.position.y = m.y + grasp_hight * r.y;
-    grasp_pose.pose.position.z = m.z + grasp_hight * r.z;
-    pre_grasp_pose.pose.position.x = m.x + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.x;
-    pre_grasp_pose.pose.position.y = m.y + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.y;
-    pre_grasp_pose.pose.position.z = m.z + (grasp_hight + Gripper::GRIPPER_DEPTH) * r.z;
+    grasp_pose.pose.position = m + grasp_hight * r;
+    pre_grasp_pose.pose.position = m + ((double)(grasp_hight + Gripper::GRIPPER_DEPTH) ) * r;
+    return true;
 }
 
 int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
         std::vector<geometry_msgs::PoseStamped> &pre_poses,
         double gripper_depth)
 {
+    ros::Time t = ros::Time::now();
     string gripper_group = gripper_depth == Gripper::R_GRIPPER_PALM_LENGTH ?
                            Gripper::get_r_group_name() : Gripper::get_l_group_name();
 
@@ -618,7 +616,8 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 temp_grasp_pose.header.frame_id = co.id;
                 temp_pre_grasp_pose.header.frame_id = co.id;
 
-                get_grasp_point(plane, *i, gripper_depth , a, temp_grasp_pose, temp_pre_grasp_pose, meshi);
+                if (!get_grasp_point(plane, *i, gripper_depth , a, temp_grasp_pose, temp_pre_grasp_pose, meshi))
+                    continue;
 
                 // h++;
                 // 7. use moveit to test poses - O(much)???
@@ -652,6 +651,7 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
         pi_->publishMarker(poses[i], i);
         pi_->publishMarker(pre_poses[i], i + poses.size());
     }
+    ROS_INFO_STREAM((ros::Time::now() - t));
     return 1;
 }
 
