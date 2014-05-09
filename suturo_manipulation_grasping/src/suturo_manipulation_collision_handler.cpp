@@ -5,6 +5,7 @@ Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Sutur
   collisionValues_ = new int[maxAttempts];
   pi = pi_;
   maxAttempts_ = maxAttempts;
+  listener_ = new tf::TransformListener();
 }
 
 void Collision_Handler::reset()
@@ -12,7 +13,6 @@ void Collision_Handler::reset()
   for(int i = 0; i < maxAttempts_; i++)
     collisionValues_[i] = 0;
   attempt_ = 0;
-  listener_ = new tf::TransformListener();
 }
 
 void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::CollisionObject& co)
