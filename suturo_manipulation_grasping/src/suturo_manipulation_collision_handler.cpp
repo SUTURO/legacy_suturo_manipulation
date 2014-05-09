@@ -34,12 +34,14 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
   if(collisionValue == 1)
   {
     // +y and +z in r_finger_tip_link
-    checkForPreviousCollision(1, 1, co);
+    // checkForPreviousCollision(1, 1, co);
+    checkForPreviousCollision(1, 0, co);
   }
   else if(collisionValue == 2)
   {
     // +y and -z in r_finger_tip_link
-    checkForPreviousCollision(1, -1, co);
+    // checkForPreviousCollision(1, -1, co);
+    checkForPreviousCollision(1, 0, co);
   }
   else if(collisionValue == 3)
   {
@@ -49,7 +51,8 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
   else if(collisionValue == 4)
   {
     // -y and +z in r_finger_tip_link
-    checkForPreviousCollision(-1, 1, co);
+    // checkForPreviousCollision(-1, 1, co);
+    checkForPreviousCollision(-1, 0, co);
   }
   else if(collisionValue == 5)
   {
@@ -59,7 +62,8 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
   else if(collisionValue == 8)
   {
     // -y and -z in r_finger_tip_link
-    checkForPreviousCollision(-1, -1, co);
+    // checkForPreviousCollision(-1, -1, co);
+    checkForPreviousCollision(-1, 0, co);
   }
   else if(collisionValue == 10)
   {
@@ -124,13 +128,13 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
           || collisionValues_[i] == 2
           || collisionValues_[i] == 3)
       {
-        yDiff = -0.05 * (1.0/(i+1));
+        yDiff = 0.05 * (1.0/(i+1));
       }
       else if (collisionValues_[i] == 4
           || collisionValues_[i] == 8
           || collisionValues_[i] == 12)
       {
-        yDiff = 0.05 * (1.0/(i+1));
+        yDiff = -0.05 * (1.0/(i+1));
       }
     }
   }
