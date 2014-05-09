@@ -3,7 +3,7 @@
 Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
   collisionValues_ = new int[maxAttempts];
-  pi = pi_;
+  pi_ = pi;
   maxAttempts_ = maxAttempts;
   listener_ = new tf::TransformListener();
 }
