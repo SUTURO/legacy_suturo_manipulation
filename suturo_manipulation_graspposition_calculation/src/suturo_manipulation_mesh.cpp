@@ -425,7 +425,7 @@ void Mesh::add_triangle_to_cluster(uint cluster_id, uint triangle_id)
 
 void Mesh::build_cluster(shapes::Mesh *mesh)
 {
-    double threshold = 0.5;
+    double threshold = 0.6;
 
     //create better useable datatypes
     // ROS_ERROR_STREAM("VERTEX : " << mesh->vertex_count);

@@ -111,7 +111,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03 + 0.0715;//tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
   
   ros::WallDuration(2.0).sleep();
 }

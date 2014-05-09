@@ -203,12 +203,14 @@ bool sort_base_link_poses(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseS
 
 bool sort_base_link_mesh_poses(geometry_msgs::PoseStamped pose1, geometry_msgs::PoseStamped pose2, geometry_msgs::PointStamped p)
 {
-    double angle1 = Grasp_Calculator::get_angle(p.point, pose1.pose.position);
-    if (90 - angle1 > angle1) angle1 = 90 - angle1;
-    double angle2 = Grasp_Calculator::get_angle(p.point, pose2.pose.position);
-    if (90 - angle2 > angle2) angle2 = 90 - angle2;
+    //~ double angle1 = Grasp_Calculator::get_angle(p.point, pose1.pose.position);
+    //~ if (90 - angle1 > angle1) angle1 = 90 - angle1;
+    //~ double angle2 = Grasp_Calculator::get_angle(p.point, pose2.pose.position);
+    //~ if (90 - angle2 > angle2) angle2 = 90 - angle2;
+    
+    return pose1.pose.position.z > pose2.pose.position.z;
 
-    return angle1 < angle2;
+    //~ return angle1 < angle2;
 }
 
 int Grasp_Calculator::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
@@ -643,8 +645,8 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
 
     //sort
     geometry_msgs::PointStamped p = get_point_above_object(co.id);
-    std::sort(poses.begin(), poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
-    std::sort(pre_poses.begin(), pre_poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
+    std::sort(poses.begin(), poses.end(), boost::bind(sort_base_link_mesh_poses, _1, _2, p));
+    std::sort(pre_poses.begin(), pre_poses.end(), boost::bind(sort_base_link_mesh_poses, _1, _2, p));
     ROS_INFO_STREAM("poses:" << poses.size());
     for (int i = 0; i < poses.size() ; ++i)
     {

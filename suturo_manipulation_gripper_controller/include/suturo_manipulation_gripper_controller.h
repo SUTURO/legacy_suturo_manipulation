@@ -37,8 +37,8 @@ public:
 
     static const double GRIPPER_DEPTH = 0.05;
 
-    static const double R_GRIPPER_PALM_LENGTH = 0.14; //this + depth should be 19cm
-    static const double L_GRIPPER_PALM_LENGTH = 0.175; //this + depth should be 22,5cm
+    static const double R_GRIPPER_PALM_LENGTH = 0.13; //this + depth should be 19cm
+    static const double L_GRIPPER_PALM_LENGTH = 0.165; //this + depth should be 22,5cm
 
 
     Gripper(std::string arm);
