@@ -39,6 +39,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -55,6 +57,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -86,6 +89,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_0_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -102,6 +107,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_0_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -133,6 +139,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_1_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -149,6 +157,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_1_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -180,6 +189,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_3_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -196,6 +207,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_3_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -228,6 +240,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -244,6 +258,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -275,6 +290,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_2_1_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -291,6 +308,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_2_1_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -323,6 +341,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_2_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -339,6 +359,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_2_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -371,6 +392,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_neg3_2_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -387,6 +410,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_neg3_2_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -419,6 +443,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1_at_once)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -435,6 +461,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1_at_once)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -466,6 +493,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -482,6 +511,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -514,6 +544,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -530,6 +562,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));
@@ -562,6 +595,8 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1)
     struct interpolator_2d_params *inp_params = new interpolator_2d_params();
     inp_params->robot_pose_ = rp;
     inp_params->target_pose_ = tp;
+    inp_params->twist_.xdot_ = 0.0;
+    inp_params->twist_.ydot_ = 0.0;
 
     struct interpolator_2d_init_params *init_params = new interpolator_2d_init_params();
     init_params->cycle_time_ =  0.1;
@@ -578,6 +613,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1)
     {
         rv = interpolator->interpolate(*inp_params);
         inp_params->robot_pose_ = rv.int_pose_;
+        inp_params->twist_ = rv.twist_;
     }
 
     ROS_INFO_STREAM("x: " << inp_params->robot_pose_.x_ << " x_target: " << tp.x_ << " = " << arrive(tp.x_, inp_params->robot_pose_.x_));

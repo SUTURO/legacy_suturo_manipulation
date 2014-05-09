@@ -36,6 +36,7 @@ struct interpolator_2d_init_params
 struct interpolator_2d_params
 {
     pose_2d robot_pose_, target_pose_;
+    twist_2d twist_;
 };
 
 struct interpolator_2d_result
@@ -67,18 +68,6 @@ private:
     interpolator_2d_result result_;
 
     const static int dof_ = 2;
-
-    KDL::JntArray q_;
-    KDL::JntArray q_target_;
-
-    KDL::JntArray qdot_;
-    KDL::JntArray qdot_max_;
-    KDL::JntArray qdot_target_;
-
-    KDL::JntArray qddot_max_;
-    KDL::JntArray jerk_max_;
-
-    bool selection_vector_[dof_];
 
     ReflexxesAPI *trajectory_generator;
 
