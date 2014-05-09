@@ -186,7 +186,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     point.point = co.primitive_poses[0].position;
     try{
-      listener_->transformPoint("/r_gripper_r_finger_tip_link", point, point);
+      listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
@@ -201,7 +201,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     point.point = co.mesh_poses[0].position;
     try{
-      listener_->transformPoint("/r_gripper_r_finger_tip_link", point, point);
+      listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
