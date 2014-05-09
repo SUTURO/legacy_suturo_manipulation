@@ -47,6 +47,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -97,6 +98,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_0_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -147,6 +149,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_0_1_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -197,6 +200,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_3_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -248,6 +252,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -298,6 +303,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_2_1_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -349,6 +355,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_2_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -400,6 +407,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_neg3_2_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -451,6 +459,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1_at_once)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.0;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -501,6 +510,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_1)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.025;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -552,6 +562,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_3_1)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.025;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 
@@ -603,6 +614,7 @@ TEST(suturo_manipulation_move_robot, interpolator_2d_arrive_1_neg1)
     init_params->vel_limit_ =  0.2;
     init_params->acc_limit_ =  0.2;
     init_params->jerk_limit_ =  0.2;
+    init_params->range_ = 0.025;
 
     Suturo_Manipulation_2d_Interpolator *interpolator = new Suturo_Manipulation_2d_Interpolator();
 

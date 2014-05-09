@@ -199,7 +199,7 @@ public:
 	 * @return true, if successfull
 	 * 					false, otherwise
 	 */
-	bool driveBase(geometry_msgs::PoseStamped targetPose);
+	bool driveBase(geometry_msgs::PoseStamped targetPose, double range);
 
 	/**
 	 * Checks if the given pose is in collision with a collisionobject.

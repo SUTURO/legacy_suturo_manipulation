@@ -30,7 +30,7 @@ struct interpolator_2d_init_params
     double vel_limit_;
     double acc_limit_;
     double jerk_limit_;
-    // pose_2d target_pose_;
+    double range_;
 };
 
 struct interpolator_2d_params
@@ -69,13 +69,15 @@ private:
 
     const static int dof_ = 2;
 
-    ReflexxesAPI *trajectory_generator;
+    ReflexxesAPI *trajectory_generator_;
 
-    RMLPositionInputParameters *trajectory_input;
-    RMLPositionOutputParameters *trajectory_output;
-    RMLPositionFlags trajectory_generator_flags;
+    RMLPositionInputParameters *trajectory_input_;
+    RMLPositionOutputParameters *trajectory_output_;
+    RMLPositionFlags trajectory_generator_flags_;
 
     int rv_;
+
+    double radius_range_;
 
     // bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_);
 };

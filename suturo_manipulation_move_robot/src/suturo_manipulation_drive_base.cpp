@@ -148,7 +148,7 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
 
             if (collisionInFront(collisionsListRotation))
             {
-              //  ROS_INFO_STREAM("Detect collision, move back!");
+                //  ROS_INFO_STREAM("Detect collision, move back!");
 
                 base_cmd_.linear.x = (-0.1);
 
@@ -271,7 +271,7 @@ bool Suturo_Manipulation_Move_Robot::collisionOnLeft(std::vector<double> collisi
         // between 225 degrees and 315 degrees
         if (collisionsList.at(position) > 3.93 && collisionsList.at(position) < 5.5)
         {
-          //  ROS_ERROR_STREAM("Collision on left side!");
+            //  ROS_ERROR_STREAM("Collision on left side!");
             return true;
         }
     }
@@ -287,7 +287,7 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
     return currentVariation <= (yVariation_ + 0.05);
 }
 
-bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose)
+bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose, double range)
 {
 
     // reset values
@@ -311,7 +311,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     if (!transformToBaseLink(targetPose_, targetPoseBaseLink_))
     {
-     //   ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
+        //   ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
         return false;
     }
 
@@ -345,6 +345,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     init_params_->vel_limit_ =  0.2;
     init_params_->acc_limit_ =  0.2;
     init_params_->jerk_limit_ =  0.2;
+    init_params_->range_ = range;
 
     interpolator->init(*init_params_);
 

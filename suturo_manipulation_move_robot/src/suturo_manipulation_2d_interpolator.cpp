@@ -1,30 +1,32 @@
 #include "suturo_manipulation_2d_interpolator.h"
 
-bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_)
+bool targetInRange(const pose_2d &robot_pose, const pose_2d &target_pose, double range)
 {
-    double x_diff = robot_pose_.x_ - target_pose_.x_;
-    double y_diff = robot_pose_.y_ - target_pose_.y_;
+    double x_diff = robot_pose.x_ - target_pose.x_;
+    double y_diff = robot_pose.y_ - target_pose.y_;
 
-    return (abs(x_diff) < 0.025) && (abs(y_diff) < 0.025);
+    return (abs(x_diff) < range) && (abs(y_diff) < range);
 }
 
 void Suturo_Manipulation_2d_Interpolator::init(const interpolator_2d_init_params &params)
 {
     rv_ = 0;
 
-    trajectory_generator = new ReflexxesAPI(dof_, params.cycle_time_);
-    trajectory_input = new RMLPositionInputParameters(dof_);
-    trajectory_output = new RMLPositionOutputParameters(dof_);
+    radius_range_ = params.range_;
+
+    trajectory_generator_ = new ReflexxesAPI(dof_, params.cycle_time_);
+    trajectory_input_ = new RMLPositionInputParameters(dof_);
+    trajectory_output_ = new RMLPositionOutputParameters(dof_);
 
     for (int i = 0; i < dof_; ++i)
     {
-        trajectory_input->SetMaxVelocityVectorElement(params.vel_limit_, i);
-        trajectory_input->SetMaxAccelerationVectorElement(params.acc_limit_, i);
-        trajectory_input->SetMaxJerkVectorElement(params.jerk_limit_, i);
+        trajectory_input_->SetMaxVelocityVectorElement(params.vel_limit_, i);
+        trajectory_input_->SetMaxAccelerationVectorElement(params.acc_limit_, i);
+        trajectory_input_->SetMaxJerkVectorElement(params.jerk_limit_, i);
 
-        trajectory_input->SetTargetVelocityVectorElement(0.0, i);
+        trajectory_input_->SetTargetVelocityVectorElement(0.0, i);
 
-        trajectory_input->SetSelectionVectorElement(true, i);
+        trajectory_input_->SetSelectionVectorElement(true, i);
     }
 
 }
@@ -32,7 +34,7 @@ void Suturo_Manipulation_2d_Interpolator::init(const interpolator_2d_init_params
 const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(const interpolator_2d_params &params)
 {
     struct twist_2d ip_twist;
-    struct pose_2d int_pose_;
+    struct pose_2d int_pose;
     struct interpolator_2d_result *ir = new interpolator_2d_result();
 
     if (params.robot_pose_.reference_ != params.target_pose_.reference_)
@@ -40,26 +42,36 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
         ROS_ERROR("robot_pose_.reference_ != target_pose_.reference_!! Frame must be equal!!");
     }
 
-    trajectory_input->SetCurrentPositionVectorElement(params.robot_pose_.x_, 0);
-    trajectory_input->SetCurrentPositionVectorElement(params.robot_pose_.y_, 1);
+    if (targetInRange(params.robot_pose_, params.target_pose_, radius_range_))
+    {
+        trajectory_input_->SetCurrentPositionVectorElement(params.robot_pose_.x_, 0);
+        trajectory_input_->SetCurrentPositionVectorElement(params.robot_pose_.y_, 1);
 
-    trajectory_input->SetTargetPositionVectorElement(params.target_pose_.x_, 0);
-    trajectory_input->SetTargetPositionVectorElement(params.target_pose_.y_, 1);
+        trajectory_input_->SetTargetPositionVectorElement(params.robot_pose_.x_, 0);
+        trajectory_input_->SetTargetPositionVectorElement(params.robot_pose_.y_, 1);
 
-    trajectory_input->SetCurrentVelocityVectorElement(params.twist_.xdot_, 0);
-    trajectory_input->SetCurrentVelocityVectorElement(params.twist_.ydot_, 1);
+        trajectory_input_->SetCurrentVelocityVectorElement(0, 0);
+        trajectory_input_->SetCurrentVelocityVectorElement(0, 1);
+    }
+    else
+    {
+        trajectory_input_->SetCurrentPositionVectorElement(params.robot_pose_.x_, 0);
+        trajectory_input_->SetCurrentPositionVectorElement(params.robot_pose_.y_, 1);
 
+        trajectory_input_->SetTargetPositionVectorElement(params.target_pose_.x_, 0);
+        trajectory_input_->SetTargetPositionVectorElement(params.target_pose_.y_, 1);
+
+        trajectory_input_->SetCurrentVelocityVectorElement(params.twist_.xdot_, 0);
+        trajectory_input_->SetCurrentVelocityVectorElement(params.twist_.ydot_, 1);
+    }
 
     // check the input
-    if (!trajectory_input->CheckForValidity())
+    if (!trajectory_input_->CheckForValidity())
     {
         ROS_WARN("Trajectory input was not valid.");
     }
 
-    // ROS_INFO_STREAM("rp x: " << params.robot_pose_.x_ << " y: " << params.robot_pose_.y_);
-    // ROS_INFO_STREAM("x: " << q_target_(0) << " and y: " << q_target_(1));
-
-    rv_ = trajectory_generator->RMLPosition(*trajectory_input, trajectory_output, trajectory_generator_flags);
+    rv_ = trajectory_generator_->RMLPosition(*trajectory_input_, trajectory_output_, trajectory_generator_flags_);
 
 
     if (rv_ < 0)
@@ -67,20 +79,18 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
         ROS_ERROR("Trajectory generator returned with an error.");
     }
 
-    trajectory_output->GetNewPositionVectorElement(&int_pose_.x_, 0);
-    trajectory_output->GetNewPositionVectorElement(&int_pose_.y_, 1);
+    trajectory_output_->GetNewPositionVectorElement(&int_pose.x_, 0);
+    trajectory_output_->GetNewPositionVectorElement(&int_pose.y_, 1);
 
-    trajectory_output->GetNewVelocityVectorElement(&ip_twist.xdot_, 0);
-    trajectory_output->GetNewVelocityVectorElement(&ip_twist.ydot_, 1);
+    trajectory_output_->GetNewVelocityVectorElement(&ip_twist.xdot_, 0);
+    trajectory_output_->GetNewVelocityVectorElement(&ip_twist.ydot_, 1);
 
     ip_twist.reference_ = params.robot_pose_.reference_;
 
-    // ROS_INFO_STREAM("qdot x: " << qdot_.data(0) << " y: " << qdot_.data(1));
-
-    int_pose_.reference_ = params.robot_pose_.reference_;
+    int_pose.reference_ = params.robot_pose_.reference_;
 
     ir->result_value_ = rv_;
-    ir->int_pose_ = int_pose_;
+    ir->int_pose_ = int_pose;
     ir->twist_ = ip_twist;
 
     return *ir;
