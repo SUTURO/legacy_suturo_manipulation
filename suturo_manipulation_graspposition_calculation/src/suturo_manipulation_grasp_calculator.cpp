@@ -1,7 +1,10 @@
 //TODO: place centroid between the cluster
 //TODO: centroid might not be in the polygon
+//TODO: fix Pringles
 //TODO: fix special case when there is only one cluster
 //TODO: better sort algorithm
+//TODO: remove similar grasppoints
+//TODO: better error/exception handling... :(
 
 
 #include "suturo_manipulation_grasp_calculator.h"
@@ -63,6 +66,14 @@ geometry_msgs::Point operator+=(const geometry_msgs::Point &p1, const geometry_m
 geometry_msgs::Point operator-=(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
 {
     return p1 - p2;
+}
+
+bool operator==(const geometry_msgs::Point p1, const geometry_msgs::Point p2)
+{
+    double tolerance = 0.00001;
+    return (p1.x <= p2.x + tolerance && p1.x >= p2.x - tolerance)
+           && (p1.y <= p2.y + tolerance && p1.y >= p2.y - tolerance)
+           && (p1.z <= p2.z + tolerance && p1.z >= p2.z - tolerance);
 }
 
 bool normalize(geometry_msgs::Point &p)
@@ -350,168 +361,13 @@ int Grasp_Calculator::calcGraspPosition(moveit_msgs::CollisionObject co, std::ve
     return 0;
 }
 
-geometry_msgs::Point Grasp_Calculator::get_point_of_intersection(suturo_manipulation::Plane plane, geometry_msgs::Point s, geometry_msgs::Point r)
+Grasp_Calculator::DPolygon2D Grasp_Calculator::project_polygon_to_plane(Plane plane, std::vector<geometry_msgs::Point> polygon)
 {
-    double a;
-    double b;
-    double c;
-    double d;
-    plane.get_coordinate_form(a, b, c, d);
-    geometry_msgs::Point result;
-    // geometry_msgs::Point n = plane.get_normal();
-
-    double lamda = - ((a * s.x + b * s.y + c * s.z) /
-                      (a * r.x + b * r.y + c * r.z));
-
-    // double lamda = (- (p.x * n.x + p.y * n.y + p.z * n.z) /
-    //                 (n.x * n.x + n.y * n.y + n.z * n.z));
-
-    result = s + lamda * r ;
-    // p.x + lamda * n.x;
-    // r.y = p.y + lamda * n.y;
-    // r.z = p.z + lamda * n.z;
-    return r;
-}
-
-double get_b(double x_n, double q_n, double p_n, double a)
-{
-    double b = (x_n - a * p_n) / q_n;
-    return b;
-}
-
-double get_a(double x_n, double q_n, double p_n, double b)
-{
-    double a = (x_n - b * q_n) / p_n;
-    return a;
-}
-
-double get_a_long_m(double x_m, double x_n, double q_m, double q_n, double p_m, double p_n)
-{
-    double a = (x_m * q_n - q_m * x_n) /
-               (p_m * q_n - p_n * q_m);
-    return a;
-}
-
-int get_a_b(double p_n, double q_n, double x_n, double &a, double &b)
-{
-    if ( p_n != 0 && q_n == 0)
-    {
-        //first equotion contains 0
-        a = x_n / p_n;
-        return 2;
-    }
-    if (p_n == 0 && q_n != 0)
-    {
-        b = x_n / q_n;
-        return 3;
-    }
-    if (p_n == 0 && q_n == 0)
-    {
-        return 5;
-    }
-    return 7;
-}
-
-bool solve(double x_n, double x_m, double p_n, double p_m, double q_n, double q_m, double &a, double &b)
-{
-    int n_gleichung = get_a_b(p_n, q_n, x_n, a, b);
-    int m_gleichung = get_a_b(p_m, q_m, x_m, a, b);
-    if (n_gleichung * m_gleichung == 6)
-    {
-        //a und b mit ersten beiden gleichungen gesetzt
-        //fertig
-        return true;
-    }
-    if (((n_gleichung * m_gleichung) % 5 == 0)
-            || ((n_gleichung * m_gleichung) % 4 == 0)
-            || ((n_gleichung * m_gleichung) % 9 == 0))
-    {
-        //eine gleichung hat 2x 0
-        return false;
-    }
-    if (n_gleichung % 2 == 0)
-    {
-        //n gleichung hat a ergeben
-        //a ist fertig
-        b = get_b(x_m, q_m, p_m, a);
-        return true;
-    }
-    if (m_gleichung % 2 == 0)
-    {
-        //m gleichung hat a ergeben
-        //a ist fertig
-        b = get_b(x_n, q_n, p_n, a);
-        return true;
-    }
-    if (n_gleichung % 3 == 0)
-    {
-        //n gleichung hat a ergeben
-        //b ist fertig
-        a = get_a(x_m, q_m, p_m, b);
-        return true;
-    }
-    if (m_gleichung % 3 == 0)
-    {
-        //n gleichung hat a ergeben
-        //b ist fertig
-        a = get_a(x_n, q_n, p_n, b);
-        return true;
-    }
-    if (n_gleichung * m_gleichung % 49 == 0)
-    {
-        //keiner fertig und keine nullen
-        //a berechnen, indem n gleichung nach b umgestellt und in m gleichung eingesetzt wird
-        a = get_a_long_m(x_n, x_m, q_n, q_m, p_n, p_m);
-        //a in n gleichung einsetzten
-
-        b = get_b(x_n, q_n, p_n, a);
-        return true;
-    }
-
-    return false;
-}
-
-bool Grasp_Calculator::d3d_point_to_d2d_point(DoublePoint2D &p2d, geometry_msgs::Point &p, geometry_msgs::Point &q, geometry_msgs::Point &r)
-{
-    return solve(r.x, r.y, p.x, p.y, q.x, q.y, p2d.x, p2d.y)
-           || solve(r.x, r.z, p.x, p.z, q.x, q.z, p2d.x, p2d.y)
-           || solve(r.y, r.z, p.y, p.z, q.y, q.z, p2d.x, p2d.y);
-}
-
-bool operator==(const geometry_msgs::Point p1, const geometry_msgs::Point p2)
-{
-    double tolerance = 0.00001;
-    return (p1.x <= p2.x + tolerance && p1.x >= p2.x - tolerance)
-           && (p1.y <= p2.y + tolerance && p1.y >= p2.y - tolerance)
-           && (p1.z <= p2.z + tolerance && p1.z >= p2.z - tolerance);
-}
-
-Grasp_Calculator::DPolygon2D Grasp_Calculator::project_polygon_to_plane(suturo_manipulation::Plane plane, std::vector<geometry_msgs::Point> polygon)
-{
-    std::vector<geometry_msgs::Point> plane_poly;
+    DPolygon2D result;
     for (std::vector<geometry_msgs::Point>::iterator p = polygon.begin(); p != polygon.end(); ++p)
     {
-        plane_poly.push_back(get_point_of_intersection(plane, *p, plane.get_normal()));
-    }
-    // for (int i = 0; i < plane_poly.size(); ++i)
-    // {
-    //     ROS_INFO_STREAM(plane_poly[i]);
-    // }
-    // ROS_ERROR_STREAM(" nicht");
-
-
-    DPolygon2D result;
-    geometry_msgs::Point p = plane.get_parameter_form().first;
-    geometry_msgs::Point q = plane.get_parameter_form().second;
-    // ROS_INFO_STREAM("planeparameter1  x= " << a.x << " y= " << a.y << " z= " << a.z);
-    // ROS_INFO_STREAM("planeparameter2  x= " << b.x << " y= " << b.y << " z= " << b.z);
-    for (std::vector<geometry_msgs::Point>::iterator r = plane_poly.begin(); r != plane_poly.end(); ++r)
-    {
         DoublePoint2D p2d;
-        d3d_point_to_d2d_point(p2d, p, q, *r);
-        geometry_msgs::Point p = d2d_point_to_d3d_point(plane, p2d);
-        if (!(*r == p)) ROS_INFO_STREAM(*r << "     " << p << std::endl);
-
+        plane.project_point_to_plane(*p, p2d.x, p2d.y);
         result.push_back(p2d);
     }
 
@@ -558,8 +414,8 @@ Path Grasp_Calculator::calc_poly_centroid(Paths polygons)
         IntPoint sum;
         sum.X = 0;
         sum.Y = 0;
-        cInt fuck_u_C = 0;
-        for (std::vector<IntPoint>::iterator ip = poly->begin(); ip != poly->end(); ++ip, fuck_u_C++)
+        cInt fuck_u_Cpp = 0;
+        for (std::vector<IntPoint>::iterator ip = poly->begin(); ip != poly->end(); ++ip, fuck_u_Cpp++)
         {
             // ROS_WARN_STREAM("ip " << *ip);
             sum.X += ip->X;
@@ -567,9 +423,9 @@ Path Grasp_Calculator::calc_poly_centroid(Paths polygons)
             // ROS_ERROR_STREAM("sum " << sum);
         }
         // ROS_INFO_STREAM((sum.X ));
-        sum.X = sum.X / fuck_u_C;
-        // ROS_INFO_STREAM((sum.X / fuck_u_C));
-        sum.Y = sum.Y / fuck_u_C;
+        sum.X = sum.X / fuck_u_Cpp;
+        // ROS_INFO_STREAM((sum.X / fuck_u_Cpp));
+        sum.Y = sum.Y / fuck_u_Cpp;
         // ROS_INFO_STREAM((sum.X ));
         // ROS_ERROR_STREAM("end sum " << sum << " poly size " << poly->size());
         sums.push_back(sum);
@@ -591,15 +447,15 @@ std::vector<geometry_msgs::Point> Grasp_Calculator::d2d_points_to_d3d_points(Pla
 
 geometry_msgs::Point Grasp_Calculator::d2d_point_to_d3d_point(Plane plane, DoublePoint2D d2p)
 {
+    geometry_msgs::Point result;
     geometry_msgs::Point p;
-    // normalize(plane.get_parameter_form().first);
-    // normalize(plane.get_parameter_form().second);
-    // ROS_ERROR_STREAM(plane.parameter_form.first << plane.parameter_form.second);
-    // ROS_INFO_STREAM("x = " << d2p.x << " y = " << d2p.y);
-    p = d2p.x * plane.get_parameter_form().first + d2p.y * plane.get_parameter_form().second;
-    // ROS_INFO_STREAM(p << endl << endl);
+    geometry_msgs::Point q;
+    geometry_msgs::Point s;
 
-    return p;
+    plane.get_parameter_form(s, p, q);
+    result = s + d2p.x * p + d2p.y * q;
+
+    return result;
 }
 
 geometry_msgs::Point Grasp_Calculator::cross_product(geometry_msgs::Point p1, geometry_msgs::Point p2)
@@ -646,11 +502,16 @@ geometry_msgs::Quaternion Grasp_Calculator::get_quaternion_from_points(geometry_
     return q_result;
 }
 
-void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
-                                       geometry_msgs::PoseStamped &grasp_pose,
-                                       geometry_msgs::PoseStamped &pre_grasp_pose)
-{
+// double dist_to_triangle(Mesh::Triangle t, geometry_msgs::Point s, geometry_msgs::Point r)
+// {
 
+// }
+
+bool Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
+                                       geometry_msgs::PoseStamped &grasp_pose,
+                                       geometry_msgs::PoseStamped &pre_grasp_pose,
+                                       Mesh meshi)
+{
     DoublePoint2D p2d;
     p2d.x = sin(alpha) * d;
     p2d.y = cos(alpha) * d;
@@ -665,17 +526,26 @@ void Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, doub
 
     grasp_pose.pose.orientation = get_quaternion_from_points(grasp_pose.pose.position, m, c);
 
+    double dist = 0;
+    double diameter = 0;
+    meshi.dist_to_surface(m, r, plane.get_normal(), dist, diameter);
+    // ROS_INFO_STREAM(diameter);
+    if (diameter >= Gripper::GRIPPER_MAX_POSITION) return false;
+    double grasp_hight = d + (dist > Gripper::GRIPPER_DEPTH ? dist : Gripper::GRIPPER_DEPTH);
+    // ROS_INFO_STREAM("dist " << d);
+
     pre_grasp_pose.pose.orientation = grasp_pose.pose.orientation;
     normalize(r);
-    pre_grasp_pose.pose.position.x = grasp_pose.pose.position.x + Gripper::GRIPPER_DEPTH * r.x;
-    pre_grasp_pose.pose.position.y = grasp_pose.pose.position.y + Gripper::GRIPPER_DEPTH * r.y;
-    pre_grasp_pose.pose.position.z = grasp_pose.pose.position.z + Gripper::GRIPPER_DEPTH * r.z;
+    grasp_pose.pose.position = m + grasp_hight * r;
+    pre_grasp_pose.pose.position = m + ((double)(grasp_hight + Gripper::GRIPPER_DEPTH) ) * r;
+    return true;
 }
 
 int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
         std::vector<geometry_msgs::PoseStamped> &pre_poses,
         double gripper_depth)
 {
+    ros::Time t = ros::Time::now();
     string gripper_group = gripper_depth == Gripper::R_GRIPPER_PALM_LENGTH ?
                            Gripper::get_r_group_name() : Gripper::get_l_group_name();
 
@@ -690,15 +560,14 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
     {
         // 3. project both cluster on a plain - o(|vertices|)?
         suturo_manipulation::Plane plane = meshi.get_plane(opposite_cluster[i].first, opposite_cluster[i].second);
+        plane.orthonormalize();
 
         std::vector<geometry_msgs::Point> p1 = meshi.create_polygon(opposite_cluster[i].first);
         std::vector<geometry_msgs::Point> p2 = meshi.create_polygon(opposite_cluster[i].second);
         if (i == 0)
         {
-            // ROS_INFO_STREAM("cluser " << opposite_cluster[i].first << "  " << opposite_cluster[i].second);
             pi_->publishMarkerLine(co.id, p1, 0);
             pi_->publishMarkerLine(co.id, p2, 1000);
-            // ROS_INFO_STREAM("poly 1 size: " << p1.size() << " poly2 size: " << p2.size());
 
         }
 
@@ -722,30 +591,23 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
 
 
         // 5. calc centriod - O(|vertices|)
-        Path centroids = calc_poly_centroid(solution);
+        Path int_centroids = calc_poly_centroid(solution);
 
         DPolygon2D double_centroids;
-        path_to_double_polygon(double_centroids, centroids);
-        // ROS_ERROR_STREAM("!!!");
-        // ROS_ERROR_STREAM("cluster 1: " << opposite_cluster[i].first << " cluster 2: " << opposite_cluster[i].second);
-        // if (double_centroids.size() != 0) ROS_INFO_STREAM("centroid: " << double_centroids[0]);
-        std::vector<geometry_msgs::Point> p = d2d_points_to_d3d_points(plane, double_centroids);
-        for (std::vector<geometry_msgs::Point>::iterator i = p.begin(); i != p.end(); ++i)
+        path_to_double_polygon(double_centroids, int_centroids);
+        std::vector<geometry_msgs::Point> centroids = d2d_points_to_d3d_points(plane, double_centroids);
+        for (std::vector<geometry_msgs::Point>::iterator i = centroids.begin(); i != centroids.end(); ++i)
         {
             c.push_back(*i);
         }
-        // if (p.size() != 0)
-        // {
-        //     ROS_INFO_STREAM("centroid: " << p[0]);
-        //     ROS_INFO_STREAM(" plane : " << plane.normal <<  " parameter_form: " << plane.parameter_form.first << " 2. " << plane.parameter_form.second << endl);
-        // }
 
         //ggf 5.2 check dist to cluster
         // http://www.uninformativ.de/bin/RaytracingSchnitttests-76a577a-CC-BY.pdf
 
+
         // 6. add grasppose pointing towards centriod with differen angles - const
 
-        for (std::vector<geometry_msgs::Point>::iterator i = p.begin(); i != p.end(); ++i)
+        for (std::vector<geometry_msgs::Point>::iterator i = centroids.begin(); i != centroids.end(); ++i)
         {
             for (double a = 0; a < 2 * M_PI; a += (M_PI / 2))
             {
@@ -753,13 +615,17 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
                 geometry_msgs::PoseStamped temp_pre_grasp_pose;
                 temp_grasp_pose.header.frame_id = co.id;
                 temp_pre_grasp_pose.header.frame_id = co.id;
-                get_grasp_point(plane, *i, gripper_depth + Gripper::GRIPPER_DEPTH, a, temp_grasp_pose, temp_pre_grasp_pose);
+
+                if (!get_grasp_point(plane, *i, gripper_depth , a, temp_grasp_pose, temp_pre_grasp_pose, meshi))
+                    continue;
+
                 // h++;
                 // 7. use moveit to test poses - O(much)???
                 // if (!pi_->check_group_object_collision(gripper_group, temp_grasp_pose, co))
                 // {
                 // ROS_INFO_STREAM("collision!" );
                 // ros::WallDuration(0.5).sleep();
+                // ROS_WARN_STREAM("centroid " << *i);
                 poses.push_back(temp_grasp_pose);
                 pre_poses.push_back(temp_pre_grasp_pose);
 
@@ -779,10 +645,114 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
     geometry_msgs::PointStamped p = get_point_above_object(co.id);
     std::sort(poses.begin(), poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
     std::sort(pre_poses.begin(), pre_poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
+    ROS_INFO_STREAM("poses:" << poses.size());
     for (int i = 0; i < poses.size() ; ++i)
     {
         pi_->publishMarker(poses[i], i);
         pi_->publishMarker(pre_poses[i], i + poses.size());
     }
+    ROS_INFO_STREAM((ros::Time::now() - t));
     return 1;
 }
+
+
+
+
+
+
+// double get_b(double x_n, double q_n, double p_n, double a)
+// {
+//     double b = (x_n - a * p_n) / q_n;
+//     return b;
+// }
+
+// double get_a(double x_n, double q_n, double p_n, double b)
+// {
+//     return get_b(x_n, p_n, q_n, b);
+// }
+
+// double get_a_long_m(double x_m, double x_n, double q_m, double q_n, double p_m, double p_n)
+// {
+//     double a = (x_m * q_n - q_m * x_n) /
+//                (p_m * q_n - p_n * q_m);
+//     return a;
+// }
+
+// int get_a_b(double p_n, double q_n, double x_n, double &a, double &b)
+// {
+//     if ( p_n != 0 && q_n == 0)
+//     {
+//         //first equotion contains 0
+//         a = x_n / p_n;
+//         return 2;
+//     }
+//     if (p_n == 0 && q_n != 0)
+//     {
+//         b = x_n / q_n;
+//         return 3;
+//     }
+//     if (p_n == 0 && q_n == 0)
+//     {
+//         return 5;
+//     }
+//     return 7;
+// }
+
+// bool solve(double x_n, double x_m, double p_n, double p_m, double q_n, double q_m, double &a, double &b)
+// {
+//     int n_gleichung = get_a_b(p_n, q_n, x_n, a, b);
+//     int m_gleichung = get_a_b(p_m, q_m, x_m, a, b);
+//     if (n_gleichung * m_gleichung == 6)
+//     {
+//         //a und b mit ersten beiden gleichungen gesetzt
+//         //fertig
+//         return true;
+//     }
+//     if (((n_gleichung * m_gleichung) % 5 == 0)
+//             || ((n_gleichung * m_gleichung) % 4 == 0)
+//             || ((n_gleichung * m_gleichung) % 9 == 0))
+//     {
+//         //eine gleichung hat 2x 0
+//         return false;
+//     }
+//     if (n_gleichung % 2 == 0)
+//     {
+//         //n gleichung hat a ergeben
+//         //a ist fertig
+//         b = get_b(x_m, q_m, p_m, a);
+//         return true;
+//     }
+//     if (m_gleichung % 2 == 0)
+//     {
+//         //m gleichung hat a ergeben
+//         //a ist fertig
+//         b = get_b(x_n, q_n, p_n, a);
+//         return true;
+//     }
+//     if (n_gleichung % 3 == 0)
+//     {
+//         //n gleichung hat a ergeben
+//         //b ist fertig
+//         a = get_a(x_m, q_m, p_m, b);
+//         return true;
+//     }
+//     if (m_gleichung % 3 == 0)
+//     {
+//         //n gleichung hat a ergeben
+//         //b ist fertig
+//         a = get_a(x_n, q_n, p_n, b);
+//         return true;
+//     }
+//     if (n_gleichung * m_gleichung % 49 == 0)
+//     {
+//         //keiner fertig und keine nullen
+//         //a berechnen, indem n gleichung nach b umgestellt und in m gleichung eingesetzt wird
+//         a = get_a_long_m(x_n, x_m, q_n, q_m, p_n, p_m);
+//         //a in n gleichung einsetzten
+
+//         b = get_b(x_n, q_n, p_n, a);
+//         return true;
+//     }
+
+//     return false;
+// }

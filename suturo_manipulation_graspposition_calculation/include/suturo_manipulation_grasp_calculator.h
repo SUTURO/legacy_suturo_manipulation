@@ -131,8 +131,8 @@ public:
     geometry_msgs::PointStamped get_point_above_object(std::string object_id);
 
     int calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
-                               std::vector<geometry_msgs::PoseStamped> &pre_poses,
-                               double gripper_depth);
+                              std::vector<geometry_msgs::PoseStamped> &pre_poses,
+                              double gripper_depth);
 
     DPolygon2D project_polygon_to_plane(suturo_manipulation::Plane plane, std::vector<geometry_msgs::Point> polygon);
 
@@ -152,12 +152,15 @@ public:
             geometry_msgs::Point to,
             geometry_msgs::Point roll);
 
-    bool d3d_point_to_d2d_point(DoublePoint2D &p2d, geometry_msgs::Point &p, geometry_msgs::Point &q, geometry_msgs::Point &r);
+    bool d3d_point_to_d2d_point(DoublePoint2D &p2d, geometry_msgs::Point x, suturo_manipulation::Plane plane);
 
     geometry_msgs::Point cross_product(geometry_msgs::Point p1, geometry_msgs::Point p2);
 
-    void get_grasp_point(suturo_manipulation::Plane plane, geometry_msgs::Point m, double d, double alpha,
-                         geometry_msgs::PoseStamped &grasp_pose, geometry_msgs::PoseStamped &pre_grasp_pose);
+    bool get_grasp_point(suturo_manipulation::Plane plane, geometry_msgs::Point m, double d, double alpha,
+                         geometry_msgs::PoseStamped &grasp_pose, geometry_msgs::PoseStamped &pre_grasp_pose,
+                         suturo_manipulation::Mesh meshi);
+
+    bool solve(double &a, double &b, geometry_msgs::Point x, geometry_msgs::Point l, geometry_msgs::Point p, geometry_msgs::Point q);
 };
 
 

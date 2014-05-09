@@ -48,22 +48,154 @@ bool normalize(geometry_msgs::Point &p)
     return true;
 }
 
-Plane::Plane(geometry_msgs::Point normal1, Plane_parameter parameter_form1)
+//Plane------------------------------------------------------------------------------------------------------------------------------
+Plane::Plane(geometry_msgs::Point normal,
+             geometry_msgs::Point support_vector,
+             geometry_msgs::Point first_parameter,
+             geometry_msgs::Point second_parameter)
 {
-    parameter_form = parameter_form1;
-    normalize(parameter_form.first);
-    normalize(parameter_form.second);
+    support_vector_ = support_vector;
 
-    geometry_msgs::Point n_2;
-    n_2 = parameter_form.second -
-          (scalarproduct(parameter_form.second, parameter_form.first) * parameter_form.first);
-    normalize(n_2);
+    first_parameter_ = first_parameter;
 
-    parameter_form.second = n_2;
+    second_parameter_ = second_parameter;
 
-    normal = normal1;
-    normalize(normal);
+    normal_ = normal;
+
+    d = scalarproduct(normal_, support_vector_);
 }
+
+bool Plane::orthonormalize()
+{
+    normalize(first_parameter_);
+
+    normalize(second_parameter_);
+
+    second_parameter_ = second_parameter_ -
+                        (scalarproduct(second_parameter_, first_parameter_) * first_parameter_);
+    normalize(second_parameter_);
+
+    normalize(normal_);
+
+    d = scalarproduct(normal_, support_vector_);
+
+    return pre_compute();
+}
+
+bool Plane::pre_compute()
+{
+    //for 2d point calculation
+
+    double qq = scalarproduct(second_parameter_, second_parameter_);
+    double pp = scalarproduct(first_parameter_, first_parameter_);
+    double pq = scalarproduct(first_parameter_, second_parameter_);
+
+    double denominator = qq * pp - pq * pq;
+
+    if (denominator == 0) return false;
+
+    u_a = ((qq / denominator) * first_parameter_) - ((pq / denominator) * second_parameter_);
+    u_b = ((pp / denominator) * second_parameter_) - ((pq / denominator) * first_parameter_);
+    return true;
+}
+
+bool Plane::get_point_of_intersection(geometry_msgs::Point &result, geometry_msgs::Point s, geometry_msgs::Point r, double &lamda)
+{
+    double temp = scalarproduct(normal_, r);
+
+    if (temp == 0)
+        return false;
+
+    lamda = ((d - scalarproduct(normal_, s)) / temp );
+
+    result = s + lamda * r ;
+    return true;
+}
+
+//x = support_vector_ + a*first_parameter_ + b*second_parameter_
+bool Plane::d3d_point_to_d2d_point(double &a, double &b, geometry_msgs::Point x)
+{
+    geometry_msgs::Point y = x - support_vector_;
+
+    a = scalarproduct(y, u_a);
+
+    b = scalarproduct(y, u_b);
+
+    return true;
+}
+
+void Plane::get_coordinate_form(double &a, double &b, double &c, double &d)
+{
+    a = normal_.x;
+    b = normal_.y;
+    c = normal_.z;
+    d = d;
+};
+
+void Plane::project_point_to_plane(geometry_msgs::Point p, double &x, double &y)
+{
+    geometry_msgs::Point r;
+    double ignore = 0;
+    get_point_of_intersection(r, p, get_normal(), ignore);
+    d3d_point_to_d2d_point(x, y, r);
+}
+
+bool Plane::dist_to_plane_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
+{
+    geometry_msgs::Point p;
+    double lamda = 0;
+    if (!get_point_of_intersection(p, s, r, lamda) || lamda < 0)
+    {
+
+        return false;
+    }
+    double a;
+    double b;
+    d3d_point_to_d2d_point(a, b, p);
+
+    if (a >= 0 && b >= 0 && (1 - a - b) >= 0)
+    {
+        geometry_msgs::Point s_to_p = p - s;
+        dist = sqrt(scalarproduct(s_to_p, s_to_p));
+        return true;
+    }
+    return false;
+}
+
+bool Plane::dist_to_plane_triangle2(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
+{
+    geometry_msgs::Point p;
+    double lamda = 0;
+    if (!get_point_of_intersection(p, s, r, lamda))
+    {
+        return false;
+    }
+    double a;
+    double b;
+    d3d_point_to_d2d_point(a, b, p);
+
+    if (a >= 0 && b >= 0 && (1 - a - b) >= 0)
+    {
+        geometry_msgs::Point s_to_p = p - s;
+        dist = sqrt(scalarproduct(s_to_p, s_to_p));
+        return true;
+    }
+    return false;
+}
+
+//Plane------------------------------------------------------------------------------------------------------------------------------
+
+void Triangle::calc_plane(std::vector<Vertex> vertices1)
+{
+    geometry_msgs::Point first_parameter;
+    geometry_msgs::Point second_parameter;
+
+    first_parameter = vertices1[vertices[1]].position - vertices1[vertices[0]].position;
+    second_parameter = vertices1[vertices[2]].position - vertices1[vertices[0]].position;
+    plane_ = new Plane(normal, vertices1[vertices[0]].position, first_parameter, second_parameter);
+    plane_->pre_compute();
+}
+
 
 Mesh::Mesh(shapes::Mesh *mesh)
 {
@@ -157,8 +289,11 @@ Plane Mesh::get_plane(uint cluster_id1, uint cluster_id2)
     if (!normalize(p1)) ROS_ERROR_STREAM("!!!!");
     if (!normalize(p2)) ROS_ERROR_STREAM("!!!!");
 
-    Plane_parameter pp(p1, p2);
-    Plane plane(plane_normal, pp);
+    geometry_msgs::Point o;
+    o.x = 0;
+    o.y = 0;
+    o.z = 0;
+    Plane plane(plane_normal, o, p1, p2);
 
     return plane;
 }
@@ -332,6 +467,9 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
         t.normal.x = mesh->triangle_normals[i * 3];
         t.normal.y = mesh->triangle_normals[(i * 3) + 1];
         t.normal.z = mesh->triangle_normals[(i * 3) + 2];
+
+        t.calc_plane(vertices);
+
         triangles.push_back(t);
 
         std::pair<Triangle, uint> pair(t, i);
@@ -443,6 +581,36 @@ bool Mesh::is_vertex_boundary_point(uint vertex_id, uint cluster_id)
     //TODO: sonderfall, mesh is ein einziges cluster
     return vertices[vertex_id].clusters.size() > 1
            && contains(vertices[vertex_id].clusters, cluster_id);
+}
+
+bool Mesh::dist_to_surface(geometry_msgs::Point s, geometry_msgs::Point r, geometry_msgs::Point n, double &dist, double &diameter)
+{
+    //setzt vorraus, dass dist niemals 0 ist, aber passt schon :)
+    dist = 0;
+    diameter = 0;
+    double diameter1 = 0;
+    double diameter2 = 0;
+    for (int t_id = 0; t_id < triangles.size(); ++t_id)
+    {
+        if (dist == 0)
+            triangles[t_id].plane_->dist_to_plane_triangle(s, r, dist);
+        
+        if (diameter1 == 0 && triangles[t_id].plane_->dist_to_plane_triangle2(s, n, diameter1))
+        {
+            continue;
+        }
+        else if (diameter1 != 0 && diameter2 == 0 && triangles[t_id].plane_->dist_to_plane_triangle2(s, n, diameter2))
+        {
+            diameter = diameter1 + diameter2;
+        }
+        if  (dist != 0 && diameter != 0)
+        {
+            return true;
+        }
+
+
+    }
+    return false;
 }
 
 Cluster Mesh::get_cluster(uint id)
