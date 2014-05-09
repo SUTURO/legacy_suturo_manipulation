@@ -1,5 +1,13 @@
 #include "suturo_manipulation_2d_interpolator.h"
 
+bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_)
+{
+    double x_diff = robot_pose_.x_ - target_pose_.x_;
+    double y_diff = robot_pose_.y_ - target_pose_.y_;
+
+    return (abs(x_diff) < 0.025) && (abs(y_diff) < 0.025);
+}
+
 void Suturo_Manipulation_2d_Interpolator::init(const interpolator_2d_init_params &params)
 {
     q_.resize(dof_);
@@ -49,11 +57,26 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
     struct pose_2d int_pose_;
     struct interpolator_2d_result *ir = new interpolator_2d_result();
 
-    q_(0) = params.robot_pose_.x_;
-    q_(1) = params.robot_pose_.y_;
 
-    q_target_(0) = params.target_pose_.x_;
-    q_target_(1) = params.target_pose_.y_;
+    if (targetInRange(params.robot_pose_, params.target_pose_))
+    {
+        q_(0) = params.target_pose_.x_;
+        q_(1) = params.target_pose_.y_;
+
+        q_target_(0) = params.target_pose_.x_;
+        q_target_(1) = params.target_pose_.y_;
+        // ROS_INFO_STREAM("tir");
+        ROS_INFO_STREAM("rp x: " << q_(0) << " y: " << q_(1));
+        // ROS_INFO_STREAM("targetInRange. changed target x: " << q_target_(0) << " and y: " << q_target_(1));
+    }
+    else
+    {
+        q_(0) = params.robot_pose_.x_;
+        q_(1) = params.robot_pose_.y_;
+
+        q_target_(0) = params.target_pose_.x_;
+        q_target_(1) = params.target_pose_.y_;
+    }
 
     if (params.robot_pose_.reference_ != params.target_pose_.reference_)
     {
@@ -70,6 +93,9 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
     {
         ROS_WARN("Trajectory input was not valid.");
     }
+
+    // ROS_INFO_STREAM("rp x: " << params.robot_pose_.x_ << " y: " << params.robot_pose_.y_);
+    // ROS_INFO_STREAM("x: " << q_target_(0) << " and y: " << q_target_(1));
 
     rv_ = trajectory_generator->RMLPosition(*trajectory_input, trajectory_output, trajectory_generator_flags);
 
@@ -97,13 +123,4 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
     ir->twist_ = twist;
 
     return *ir;
-}
-
-
-bool Suturo_Manipulation_2d_Interpolator::targetInRange(pose_2d robot_pose_, pose_2d target_pose_)
-{
-    double x_diff = robot_pose_.x_ - target_pose_.x_;
-    double y_diff = robot_pose_.y_ - target_pose_.y_;
-
-    return (abs(x_diff) < 0.05) && (abs(y_diff) < 0.05);
 }

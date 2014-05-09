@@ -88,7 +88,7 @@ private:
 
     int rv_;
 
-    bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_);
+    // bool targetInRange(pose_2d robot_pose_, pose_2d target_pose_);
 };
 
 #endif
