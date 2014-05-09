@@ -12,6 +12,7 @@ class Collision_Handler
     int *collisionValues_;
     Suturo_Manipulation_Planning_Scene_Interface* pi_;
     tf::TransformListener* listener_;
+void checkForPreviousCollision(int yValue, int z_value, moveit_msgs::CollisionObject& co);
 
   public:
     Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi);

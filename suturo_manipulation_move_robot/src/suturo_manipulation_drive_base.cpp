@@ -1,7 +1,5 @@
 #include "suturo_manipulation_move_robot.h"
 
-// using namespace std;
-
 //! ROS node initialization
 
 Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle *nodehandle)
@@ -14,11 +12,9 @@ Suturo_Manipulation_Move_Robot::Suturo_Manipulation_Move_Robot(ros::NodeHandle *
     cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("/base_controller/command", 1);
     coll_ps_pub_ = nh_->advertise<moveit_msgs::PlanningScene>("/suturo/collision_ps", 10);
     // localisation subscriber
-    loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberCb, this);
+    loc_sub_ = nh_->subscribe("/suturo/robot_location", 50, &Suturo_Manipulation_Move_Robot::subscriberLocalization, this);
     collision_sub_ = nh_->subscribe("/base_scan", 50, &Suturo_Manipulation_Move_Robot::subscriberCbLaserScan, this);
     ros::WallDuration(1.0).sleep();
-
-    // interpolator_ = new Suturo_Manipulation_Reflexxes_Interpolator(&n);
 }
 
 Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot()
@@ -26,7 +22,7 @@ Suturo_Manipulation_Move_Robot::~Suturo_Manipulation_Move_Robot()
 
 }
 
-void Suturo_Manipulation_Move_Robot::subscriberCb(const geometry_msgs::PoseStamped &robotPoseFB)
+void Suturo_Manipulation_Move_Robot::subscriberLocalization(const geometry_msgs::PoseStamped &robotPoseFB)
 {
     robotPose_.header = robotPoseFB.header;
     robotPose_.pose = robotPoseFB.pose;
@@ -86,8 +82,6 @@ bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrie
 
 bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuaternion)
 {
-    // TODO: Schöner machen
-
     zTwist_ = 0;
 
     geometry_msgs::PoseStamped homePose;
@@ -148,8 +142,6 @@ bool Suturo_Manipulation_Move_Robot::rotateBase()
 
             if (collisionInFront(collisionsListRotation))
             {
-                //  ROS_INFO_STREAM("Detect collision, move back!");
-
                 base_cmd_.linear.x = (-0.1);
 
                 cmd_vel_pub_.publish(base_cmd_);
@@ -180,7 +172,7 @@ bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStam
     }
     catch (...)
     {
-        //ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        ROS_ERROR_STREAM("ERROR: Transformation failed.");
         return false;
     }
     return true;
@@ -282,8 +274,6 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
 {
     double currentVariation = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
 
-    //ROS_INFO_STREAM("yVariation: " << yVariation_ << " & currentVariation: " << currentVariation);
-
     return currentVariation <= (yVariation_ + 0.05);
 }
 
@@ -311,7 +301,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
 
     if (!transformToBaseLink(targetPose_, targetPoseBaseLink_))
     {
-        //   ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
+        ROS_ERROR_STREAM("Transformation to base_link failed! Moving aborted!");
         return false;
     }
 
@@ -350,19 +340,15 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     interpolator->init(*init_params_);
 
     inp_params_ = new interpolator_2d_params();
-    robot_pose_.x_ = 0;
-    robot_pose_.y_ = 0;
-    robot_pose_.reference_ = "/base_link";
 
-    target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
-    target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
-    target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
+    inp_params_->target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
+    inp_params_->target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
+    inp_params_->target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
 
-    inp_params_->robot_pose_ = robot_pose_;
-    inp_params_->target_pose_ = target_pose_;
+    inp_params_->robot_pose_.x_ = 0;
+    inp_params_->robot_pose_.y_ = 0;
+    inp_params_->robot_pose_.reference_ = "/base_link";
 
-    ROS_INFO_STREAM("Before while");
-    // TODO: Collisioncheck vernünftig einbauen
     while (nh_->ok() && interpoolator_result_.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
     {
         mtx_.lock();
@@ -388,41 +374,39 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         // Problem allgemein: Wie dem Planning mitteilen, dass Probleme aufgetreten sind?
         if (interpoolator_result_.twist_.xdot_ != 0)
         {
-            if (robot_pose_.x_ > targetPoseBaseLink_.pose.position.x)
+            if (inp_params_->robot_pose_.x_ > targetPoseBaseLink_.pose.position.x)
             {
                 base_cmd_.linear.x = 0;
-                target_pose_.x_ = robot_pose_.x_;
+                inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
                 ROS_INFO_STREAM("Can't move back!");
             }
             else if (collisionInFront(collisionsList))
             {
                 base_cmd_.linear.x = 0;
-                target_pose_.x_ = robot_pose_.x_;
+                inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
                 ROS_INFO_STREAM("Collision in Front, can't move forward!");
             }
             else
             {
                 base_cmd_.linear.x = interpoolator_result_.twist_.xdot_;
-                target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
+                inp_params_->target_pose_.x_ = targetPoseBaseLink_.pose.position.x;
             }
         }
-
 
         // wenn y > 0 links vom robo ist und y < 0 rechts vom robo
         if ((interpoolator_result_.twist_.ydot_ > 0 && collisionOnLeft(collisionsList)) || (interpoolator_result_.twist_.ydot_ < 0 && collisionOnRight(collisionsList)))
         {
             base_cmd_.linear.y = 0;
-            target_pose_.y_ = robot_pose_.y_;
+            inp_params_->target_pose_.y_ = inp_params_->robot_pose_.y_;
             ROS_INFO_STREAM("Collision, can't move!");
         }
         else
         {
             base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
-            target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
+            inp_params_->target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
         }
 
-        target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
-        inp_params_->target_pose_ = target_pose_;
+        inp_params_->target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
 
         cmd_vel_pub_.publish(base_cmd_);
     }

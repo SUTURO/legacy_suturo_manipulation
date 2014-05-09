@@ -71,18 +71,17 @@ private:
     int robotToHome180_;
     // y Distance between target and robot pose at the beginning
     double yVariation_;
-
+    // Mutex for getCollisions()
     boost::signals2::mutex mtx_;
-
-    struct pose_2d robot_pose_;
-    struct pose_2d target_pose_;
-    struct interpolator_2d_params *inp_params_;
+    // Data to initialize the interpolator
     struct interpolator_2d_init_params *init_params_;
+    // Inputparams to interpolate
+    struct interpolator_2d_params *inp_params_;
 
     /**
      * Sets robotPose_ with incoming data from the localization topic.
      */
-    void subscriberCb(const geometry_msgs::PoseStamped &robotPoseFB);
+    void subscriberLocalization(const geometry_msgs::PoseStamped &robotPoseFB);
 
     /**
      * Calculates the distance between the base_foortprint and the environment.
@@ -176,44 +175,44 @@ private:
     */
     bool checkYVariation();
 
+    /**
+     * Rotates the base from the PR2 to the target orientation from
+     * the targetPose.
+     *
+     * @return true, if successfull
+     *                  false, otherwise
+     */
+    bool rotateBase();
+
 public:
 
 
-	Suturo_Manipulation_Move_Robot(ros::NodeHandle* nh);
+    Suturo_Manipulation_Move_Robot(ros::NodeHandle *nh);
 
-	~Suturo_Manipulation_Move_Robot();
- 	
-	/**
-	 * Rotates the base from the PR2 to the target orientation from
-	 * the targetPose.
-	 * 
-	 * @return true, if successfull
-	 * 					false, otherwise
-	 */
-	bool rotateBase();
+    ~Suturo_Manipulation_Move_Robot();
 
-	/**
-	 * Moves the base from the PR2 to the target coordinates from
-	 * the targetPose.
-	 * 
-	 * @return true, if successfull
-	 * 					false, otherwise
-	 */
-	bool driveBase(geometry_msgs::PoseStamped targetPose, double range);
+    /**
+     * Moves the base from the PR2 to the target coordinates from
+     * the targetPose.
+     *
+     * @return true, if successfull
+     *                  false, otherwise
+     */
+    bool driveBase(geometry_msgs::PoseStamped targetPose, double range);
 
-	/**
-	 * Checks if the given pose is in collision with a collisionobject.
-	 * 
-	 * @return true, if successfull
-	 * 					false, otherwise
-	 */	
-	bool checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone=0.05);
+    /**
+     * Checks if the given pose is in collision with a collisionobject.
+     *
+     * @return true, if successfull
+     *                  false, otherwise
+     */
+    bool checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone = 0.05);
 
-	/**
-	 * @return inCollision_
-	 */	
-	std::vector<double> getCollisions();
-	
+    /**
+     * @return inCollision_
+     */
+    std::vector<double> getCollisions();
+
 };
 
 #endif

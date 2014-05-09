@@ -2,11 +2,13 @@
 
 using namespace std;
 
-Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher) : Grasping(nh, pi, head_publisher) {
+Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh, 
+    Suturo_Manipulation_Planning_Scene_Interface* pi, 
+    ros::Publisher* head_publisher) : Grasping(nh, pi, head_publisher) 
+{
   cc_ = new Collision_Checker(nh);
+  // Collision_Handler for three tries
   ch_ = new Collision_Handler(nh, 3, pi);
-  moveSucces_ = false;
-  collisionDetected_ = false;
 }
 
 int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 
@@ -24,11 +26,11 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   //set goal
   move_group->setPoseTarget(desired_pose);
   
-  // while(!cc_->updated_) 
-  // {
-  //   ROS_WARN("Waiting for fingertippressuredata");
-  //   ros::Duration(0.1).sleep();
-  // }
+  while(!cc_->updated_) 
+  {
+    ROS_WARN("Waiting for fingertippressuredata");
+    ros::Duration(0.1).sleep();
+  }
   // set tara for pressurevalues
   cc_->clear();
   ch_->reset();
@@ -68,7 +70,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
       move_group->move();
       move_group->setPoseTarget(desired_pose);
     } 
- }
+  }
 
   ROS_WARN("Grasping_reactive::move finished");
   if(moveSucces_)
