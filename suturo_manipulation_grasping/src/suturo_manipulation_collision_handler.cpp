@@ -29,6 +29,7 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
     i++;
   collisionValues_[i] = collisionValue;
 
+  ROS_WARN("Calling checkForPreviousCollision");
   // React to collision
   if(collisionValue == 1)
   {
@@ -85,6 +86,7 @@ bool Collision_Handler::attemptValid()
 
 void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit_msgs::CollisionObject& co)
 {
+  ROS_WARN("Calculating new Position for CollisionObject");
   // check for previous collisions and move co
   double yDiff = 0;
   double zDiff = 0;
@@ -177,6 +179,8 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     }
   }
 
+  ROS_WARN("Finished Calculating, start to transform with tf");
+
   // Get transformations from planningframe to fingertips
   // to get the orientation
   geometry_msgs::PointStamped point;
@@ -186,6 +190,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     point.point = co.primitive_poses[0].position;
     try{
+      listener_->waitForTransform("/r_gripper_r_finger_tip_link", co.header.frame_id, ros::Time(0), ros::Duration(3));
       listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
     }
     catch (tf::TransformException ex){
@@ -201,6 +206,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     point.point = co.mesh_poses[0].position;
     try{
+      listener_->waitForTransform("/r_gripper_r_finger_tip_link", co.header.frame_id, ros::Time(0), ros::Duration(3));
       listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
     }
     catch (tf::TransformException ex){
@@ -212,6 +218,8 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
   }
+
+  ROS_WARN("Finished Transforming, going to publish CollisionObject");
 
   // publish moved collisionObject
   pi_->addObject(co);

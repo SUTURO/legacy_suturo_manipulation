@@ -66,6 +66,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     {
       ROS_WARN("Calling collision handling");
       ch_->handleCollision(collisionValue, co);
+      ROS_WARN("CollisionObject moved, returning to preGraspPosition");
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
       move_group->setPoseTarget(desired_pose);
