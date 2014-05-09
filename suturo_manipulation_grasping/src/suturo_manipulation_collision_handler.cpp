@@ -183,37 +183,41 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
 
   // Get transformations from planningframe to fingertips
   // to get the orientation
-  geometry_msgs::PointStamped point;
-  point.header = co.header;
+  geometry_msgs::PoseStamped pose;
+  pose.header = co.header;
   // check if position is in primitive or mesh
   if(co.primitive_poses.size() == 1)
   {
-    point.point = co.primitive_poses[0].position;
+    pose.pose.position = co.primitive_poses[0].position;
+    pose.pose.orientation = co.primitive_poses[0].orientation;
     try{
-      listener_->waitForTransform("/r_gripper_r_finger_tip_link", co.header.frame_id, ros::Time(0), ros::Duration(3));
-      listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
+      listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+      listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
     }
     // set new frame in header
-    co.header.frame_id = point.header.frame_id;
+    co.header.frame_id = pose.header.frame_id;
+    co.primitive_poses[0] = pose.pose;
     // apply corrections
     co.primitive_poses[0].position.y += yDiff;
     co.primitive_poses[0].position.z += zDiff;
   }
   else
   {
-    point.point = co.mesh_poses[0].position;
+    pose.pose.position = co.mesh_poses[0].position;
+    pose.pose.orientation = co.mesh_poses[0].orientation;
     try{
-      listener_->waitForTransform("/r_gripper_r_finger_tip_link", co.header.frame_id, ros::Time(0), ros::Duration(3));
-      listener_->transformPoint("/r_gripper_r_finger_tip_link", ros::Time(0), point, co.header.frame_id, point);
+      listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+      listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
     }
     // set new frame in header
-    co.header.frame_id = point.header.frame_id;
+    co.header.frame_id = pose.header.frame_id;
+    co.mesh_poses[0] = pose.pose;
     // apply corrections
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
