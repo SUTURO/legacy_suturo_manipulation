@@ -53,6 +53,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     // start threaded moving of the arm
     boost::thread* t = new boost::thread(boost::bind(&Grasping_reactive::threaded_move, this, move_group));
     int collisionValue;
+    collisionDetected_ = false;
     // check if grasp succeeded or gripper collided
     while(!moveSuccess_ && !collisionDetected_)
     {
@@ -74,9 +75,23 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     t->join();
     if(collisionDetected_)
     {
-      ROS_WARN("Calling collision handling");
+      // ROS_WARN("Calling collision handling");
+      // ROS_WARN("CollisionObject moved, returning to preGraspPosition");
+      geometry_msgs::PoseStamped newPreGraspPose;
+      if(rightArm)
+        newPreGraspPose.header.frame_id = "/r_wrist_roll_link";
+      else 
+        newPreGraspPose.header.frame_id = "/l_wrist_roll_link";
+      newPreGraspPose.header.stamp = ros::Time::now();
+      newPreGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH;
+      newPreGraspPose.pose.orientation.w = 1;
+      move_group->setPoseTarget(newPreGraspPose);
+      move_group->move();
       ch_->handleCollision(collisionValue, co);
-      ROS_WARN("CollisionObject moved, returning to preGraspPosition");
+      // preGraspPose.pose = co.pose;
+      // preGraspPose.header = co.header;
+      // preGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH - 0.05;
+      ros::Duration(2).sleep();
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
       move_group->setPoseTarget(desired_pose);
