@@ -61,6 +61,7 @@ const interpolator_2d_result &Suturo_Manipulation_2d_Interpolator::interpolate(c
 
         trajectory_input_->SetCurrentVelocityVectorElement(0, 0);
         trajectory_input_->SetCurrentVelocityVectorElement(0, 1);
+        ROS_INFO("Target is in range");
     }
     else
     {

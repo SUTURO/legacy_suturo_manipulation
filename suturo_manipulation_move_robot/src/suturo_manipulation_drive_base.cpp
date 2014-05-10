@@ -28,156 +28,6 @@ void Suturo_Manipulation_Move_Robot::subscriberLocalization(const geometry_msgs:
     robotPose_.pose = robotPoseFB.pose;
 }
 
-bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone)
-{
-    moveit_msgs::PlanningScene ps;
-    pi_->getPlanningScene(ps);
-
-    ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
-
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.y = robot_pose.pose.position.y;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.z = robot_pose.pose.position.z;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.x = robot_pose.pose.orientation.x;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.y = robot_pose.pose.orientation.y;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.z = robot_pose.pose.orientation.z;
-    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.w = robot_pose.pose.orientation.w;
-
-    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
-    planning_scene::PlanningScene planning_scene(kinematic_model);
-
-    planning_scene.setPlanningSceneMsg(ps);
-
-    collision_detection::CollisionRequest collision_request;
-    collision_detection::CollisionResult collision_result;
-
-    collision_result.clear();
-    planning_scene.checkCollision(collision_request, collision_result);
-
-    coll_ps_pub_.publish(ps);
-
-    return collision_result.collision;
-}
-
-bool Suturo_Manipulation_Move_Robot::checkLocalization()
-{
-    return (robotPose_.pose.position.x != 0 || robotPose_.pose.position.y != 0 || robotPose_.pose.position.z != 0);
-}
-
-bool Suturo_Manipulation_Move_Robot::xCoordArrived(geometry_msgs::PoseStamped targetPose)
-{
-    return (robotPose_.pose.position.x < targetPose.pose.position.x + 0.02 && robotPose_.pose.position.x > targetPose.pose.position.x - 0.02);
-}
-
-bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped targetPose)
-{
-    return (robotPose_.pose.position.y < targetPose.pose.position.y + 0.02 && robotPose_.pose.position.y > targetPose.pose.position.y - 0.02);
-}
-
-bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion *targetOrientation)
-{
-    return (targetOrientation->angle(robotOrientation) < 0.05) && (targetOrientation->angle(robotOrientation) > -0.05);
-}
-
-bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuaternion)
-{
-    zTwist_ = 0;
-
-    geometry_msgs::PoseStamped homePose;
-    geometry_msgs::PoseStamped homePose180;
-
-    geometry_msgs::PoseStamped homePoseBase;
-    geometry_msgs::PoseStamped homePose180Base;
-
-    homePose.header.frame_id = "/map";
-    homePose180.header.frame_id = "/map";
-
-    homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
-    homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-
-    transformToBaseLink(homePose, homePoseBase);
-    transformToBaseLink(homePose180, homePose180Base);
-
-    tf::Quaternion robotPoseQuaternion(0, 0, 0, 1);
-    tf::Quaternion homePoseOuaternion(homePoseBase.pose.orientation.x, homePoseBase.pose.orientation.y, homePoseBase.pose.orientation.z, homePoseBase.pose.orientation.w);
-    tf::Quaternion homePose180Quaternion(homePose180Base.pose.orientation.x, homePose180Base.pose.orientation.y, homePose180Base.pose.orientation.z, homePose180Base.pose.orientation.w);
-
-    robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
-    robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
-
-    if ( robotToHome_ < robotToHome180_)
-    {
-        zTwist_ = 0.2;
-        return true;
-    }
-    else
-    {
-        zTwist_ = -0.2;
-        return true;
-    }
-    ROS_ERROR_STREAM("Calculation of z twist failed, rotating and moving aborted!");
-    return false;
-}
-
-
-bool Suturo_Manipulation_Move_Robot::rotateBase()
-{
-
-    tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-    tf::Quaternion robotOrientation(0, 0, 0, 1);
-
-    std::vector<double> collisionsListRotation;
-
-    ROS_INFO("Begin to rotate base");
-
-    if (calculateZTwist(targetQuaternion))
-    {
-        while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_))
-        {
-
-            mtx_.lock();
-            collisionsListRotation = getCollisions();
-            mtx_.unlock();
-
-            if (collisionInFront(collisionsListRotation))
-            {
-                base_cmd_.linear.x = (-0.1);
-
-                cmd_vel_pub_.publish(base_cmd_);
-                base_cmd_.linear.x = 0;
-                continue;
-            }
-
-            base_cmd_.angular.z = zTwist_;
-            cmd_vel_pub_.publish(base_cmd_);
-
-            targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
-        }
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink)
-{
-    try
-    {
-        //transform pose to base_link
-        listener_.transformPose("/base_link", pose, poseInBaseLink);
-    }
-    catch (...)
-    {
-        ROS_ERROR_STREAM("ERROR: Transformation failed.");
-        return false;
-    }
-    return true;
-}
-
 void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::LaserScan &scan)
 {
     std::vector<double> collisionsListTemp;
@@ -216,7 +66,39 @@ void Suturo_Manipulation_Move_Robot::subscriberCbLaserScan(const sensor_msgs::La
     // }
 }
 
-std::vector<double> Suturo_Manipulation_Move_Robot::getCollisions()
+bool Suturo_Manipulation_Move_Robot::checkFullCollision(geometry_msgs::PoseStamped robot_pose)
+{
+    moveit_msgs::PlanningScene ps;
+    pi_->getPlanningScene(ps);
+
+    ps.robot_state.multi_dof_joint_state.header.frame_id = robot_pose.header.frame_id;
+
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.x = robot_pose.pose.position.x;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.y = robot_pose.pose.position.y;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].translation.z = robot_pose.pose.position.z;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.x = robot_pose.pose.orientation.x;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.y = robot_pose.pose.orientation.y;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.z = robot_pose.pose.orientation.z;
+    ps.robot_state.multi_dof_joint_state.joint_transforms[0].rotation.w = robot_pose.pose.orientation.w;
+
+    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    planning_scene::PlanningScene planning_scene(kinematic_model);
+
+    planning_scene.setPlanningSceneMsg(ps);
+
+    collision_detection::CollisionRequest collision_request;
+    collision_detection::CollisionResult collision_result;
+
+    collision_result.clear();
+    planning_scene.checkCollision(collision_request, collision_result);
+
+    // coll_ps_pub_.publish(ps);
+
+    return collision_result.collision;
+}
+
+std::vector<double> Suturo_Manipulation_Move_Robot::getLaserScanCollisions()
 {
     return collisions_;
 }
@@ -277,6 +159,139 @@ bool Suturo_Manipulation_Move_Robot::checkYVariation()
     return currentVariation <= (yVariation_ + 0.05);
 }
 
+
+bool Suturo_Manipulation_Move_Robot::checkLocalization()
+{
+    return (robotPose_.pose.position.x != 0 || robotPose_.pose.position.y != 0 || robotPose_.pose.position.z != 0);
+}
+
+bool Suturo_Manipulation_Move_Robot::xCoordArrived(geometry_msgs::PoseStamped targetPose)
+{
+    return (robotPose_.pose.position.x < targetPose.pose.position.x + 0.02 && robotPose_.pose.position.x > targetPose.pose.position.x - 0.02);
+}
+
+bool Suturo_Manipulation_Move_Robot::yCoordArrived(geometry_msgs::PoseStamped targetPose)
+{
+    return (robotPose_.pose.position.y < targetPose.pose.position.y + 0.02 && robotPose_.pose.position.y > targetPose.pose.position.y - 0.02);
+}
+
+bool Suturo_Manipulation_Move_Robot::orientationArrived(tf::Quaternion robotOrientation, tf::Quaternion *targetOrientation)
+{
+    return (targetOrientation->angle(robotOrientation) < 0.05) && (targetOrientation->angle(robotOrientation) > -0.05);
+}
+
+bool Suturo_Manipulation_Move_Robot::transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink)
+{
+    try
+    {
+        //transform pose to base_link
+        listener_.transformPose("/base_link", pose, poseInBaseLink);
+    }
+    catch (...)
+    {
+        ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        return false;
+    }
+    return true;
+}
+
+bool Suturo_Manipulation_Move_Robot::transformToMap(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink)
+{
+    try
+    {
+        //transform pose to base_link
+        listener_.transformPose("/map", pose, poseInBaseLink);
+    }
+    catch (...)
+    {
+        ROS_ERROR_STREAM("ERROR: Transformation failed.");
+        return false;
+    }
+    return true;
+}
+
+bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuaternion)
+{
+    zTwist_ = 0;
+
+    geometry_msgs::PoseStamped homePose;
+    geometry_msgs::PoseStamped homePose180;
+
+    geometry_msgs::PoseStamped homePoseBase;
+    geometry_msgs::PoseStamped homePose180Base;
+
+    homePose.header.frame_id = "/map";
+    homePose180.header.frame_id = "/map";
+
+    homePose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, M_PI);
+    homePose180.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+
+    transformToBaseLink(homePose, homePoseBase);
+    transformToBaseLink(homePose180, homePose180Base);
+
+    tf::Quaternion robotPoseQuaternion(0, 0, 0, 1);
+    tf::Quaternion homePoseOuaternion(homePoseBase.pose.orientation.x, homePoseBase.pose.orientation.y, homePoseBase.pose.orientation.z, homePoseBase.pose.orientation.w);
+    tf::Quaternion homePose180Quaternion(homePose180Base.pose.orientation.x, homePose180Base.pose.orientation.y, homePose180Base.pose.orientation.z, homePose180Base.pose.orientation.w);
+
+    robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
+    robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
+
+    if ( robotToHome_ < robotToHome180_)
+    {
+        zTwist_ = 0.2;
+        return true;
+    }
+    else
+    {
+        zTwist_ = -0.2;
+        return true;
+    }
+    ROS_WARN("Calculation of z twist failed, rotating and moving aborted!");
+    return false;
+}
+
+
+bool Suturo_Manipulation_Move_Robot::rotateBase()
+{
+
+    tf::Quaternion *targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+    tf::Quaternion robotOrientation(0, 0, 0, 1);
+
+    std::vector<double> collisionsListRotation;
+
+    ROS_INFO("Begin to rotate base");
+
+    if (calculateZTwist(targetQuaternion))
+    {
+        while (nh_->ok() && !orientationArrived(robotOrientation, targetQuaternion) && transformToBaseLink(targetPose_, targetPoseBaseLink_))
+        {
+
+            mtx_.lock();
+            collisionsListRotation = getLaserScanCollisions();
+            mtx_.unlock();
+
+            if (collisionInFront(collisionsListRotation))
+            {
+                base_cmd_.linear.x = (-0.1);
+
+                cmd_vel_pub_.publish(base_cmd_);
+                base_cmd_.linear.x = 0;
+                continue;
+            }
+
+            base_cmd_.angular.z = zTwist_;
+            cmd_vel_pub_.publish(base_cmd_);
+
+            targetQuaternion = new tf::Quaternion(targetPoseBaseLink_.pose.orientation.x, targetPoseBaseLink_.pose.orientation.y, targetPoseBaseLink_.pose.orientation.z, targetPoseBaseLink_.pose.orientation.w);
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped targetPose, double range)
 {
 
@@ -322,7 +337,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     std::vector<double> collisionsList;
 
     mtx_.lock();
-    collisionsList = getCollisions();
+    collisionsList = getLaserScanCollisions();
     mtx_.unlock();
 
     yVariation_ = abs(targetPose_.pose.position.y - robotPose_.pose.position.y);
@@ -352,7 +367,7 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
     while (nh_->ok() && interpoolator_result_.result_value_ != ReflexxesAPI::RML_FINAL_STATE_REACHED)
     {
         mtx_.lock();
-        collisionsList = getCollisions();
+        collisionsList = getLaserScanCollisions();
         mtx_.unlock();
 
         // reset all the values!!!!11elf
@@ -378,13 +393,13 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
             {
                 base_cmd_.linear.x = 0;
                 inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
-                ROS_INFO_STREAM("Can't move back!");
+                ROS_WARN("Can't move back!");
             }
             else if (collisionInFront(collisionsList))
             {
                 base_cmd_.linear.x = 0;
                 inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
-                ROS_INFO_STREAM("Collision in Front, can't move forward!");
+                ROS_WARN("Collision in Front, can't move forward!");
             }
             else
             {
@@ -398,12 +413,28 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         {
             base_cmd_.linear.y = 0;
             inp_params_->target_pose_.y_ = inp_params_->robot_pose_.y_;
-            ROS_INFO_STREAM("Collision, can't move!");
+            ROS_WARN("Collision on side, can't move!");
         }
         else
         {
             base_cmd_.linear.y = interpoolator_result_.twist_.ydot_;
             inp_params_->target_pose_.y_ = targetPoseBaseLink_.pose.position.y;
+        }
+
+        // Create a PoseStamped object with data from interpolator and transform to map
+        geometry_msgs::PoseStamped interpolatedPose;
+        interpolatedPose = targetPoseBaseLink_;
+        interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.x_;
+        interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.y_;
+        transformToMap(interpolatedPose, interpolatedPose);
+        interpolatedPose.pose.orientation = robotPose_.pose.orientation;
+
+        // Check for collisions in planningscene with moveit
+        if (checkFullCollision(interpolatedPose))
+        {
+            ROS_WARN("Collision in PlanningScene");
+            inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
+            inp_params_->target_pose_.y_ = inp_params_->robot_pose_.y_;
         }
 
         inp_params_->target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;

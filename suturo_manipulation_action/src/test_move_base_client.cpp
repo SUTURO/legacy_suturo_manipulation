@@ -54,6 +54,8 @@ int main(int argc, char **argv)
     goal.ps.header.frame_id = "/map";
     ROS_INFO("set frame done!");
 
+    goal.range = 0.0025;
+
     // send goal
     client.sendGoal(goal);
 

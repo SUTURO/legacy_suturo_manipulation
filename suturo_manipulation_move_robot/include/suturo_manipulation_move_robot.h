@@ -126,12 +126,21 @@ private:
 
     /**
      * Transforms a PoseStamped Object to a new PoseStamped Object with
-     * Coordinates in map frame.
+     * Coordinates in base_link frame.
      *
      * @return true, if successfull
      *                  false, otherwise
      */
     bool transformToBaseLink(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
+
+    /**
+     * Transforms a PoseStamped Object to a new PoseStamped Object with
+     * Coordinates in map frame.
+     *
+     * @return true, if successfull
+     *                  false, otherwise
+     */
+    bool transformToMap(geometry_msgs::PoseStamped pose, geometry_msgs::PoseStamped &poseInBaseLink);
 
     /**
     * Calculates the Z value for rotating the robot.
@@ -184,6 +193,14 @@ private:
      */
     bool rotateBase();
 
+    /**
+     * Checks if the given pose is in collision with a collisionobject.
+     *
+     * @return true, if successfull
+     *                  false, otherwise
+     */
+    bool checkFullCollision(geometry_msgs::PoseStamped robot_pose);
+
 public:
 
 
@@ -201,17 +218,9 @@ public:
     bool driveBase(geometry_msgs::PoseStamped targetPose, double range);
 
     /**
-     * Checks if the given pose is in collision with a collisionobject.
-     *
-     * @return true, if successfull
-     *                  false, otherwise
+     * @return collision_
      */
-    bool checkFullCollision(geometry_msgs::PoseStamped robot_pose, double danger_zone = 0.05);
-
-    /**
-     * @return inCollision_
-     */
-    std::vector<double> getCollisions();
+    std::vector<double> getLaserScanCollisions();
 
 };
 
