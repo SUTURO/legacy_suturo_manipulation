@@ -25,7 +25,15 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   pi_->publishMarker(desired_pose);
   //set goal
   move_group->setPoseTarget(desired_pose);
-  
+
+  bool rightArm;
+
+  //get arm to move
+  if(move_group->getName().compare("right_arm") == 0)
+    rightArm = true;
+  else
+    rightArm = false;
+
   while(!cc_->updated_) 
   {
     ROS_WARN("Waiting for fingertippressuredata");
@@ -33,24 +41,26 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   }
   // set tara for pressurevalues
   cc_->clear();
-  ch_->reset();
-  moveSucces_ = false;
+  ch_->reset(rightArm);
+  moveSuccess_ = false;
   collisionDetected_ = false;
 
   // check that previous grasp failed 
   // and the max amount of attempts is not reached
-  while(!moveSucces_ && ch_->attemptValid())
+  while(!moveSuccess_ && ch_->attemptValid())
   {
     ROS_WARN("Start Grasping Attempt");
     // start threaded moving of the arm
     boost::thread* t = new boost::thread(boost::bind(&Grasping_reactive::threaded_move, this, move_group));
     int collisionValue;
     // check if grasp succeeded or gripper collided
-    while(!moveSucces_ && !collisionDetected_)
+    while(!moveSuccess_ && !collisionDetected_)
     {
       // get collision-status
-      collisionValue = cc_->r_collision();
-      // collisionValue = 0; // TESTINGSTUB
+      if (rightArm)
+        collisionValue = cc_->r_collision();
+      else 
+        collisionValue = cc_->l_collision();
       if(collisionValue > 0) 
       {
         collisionDetected_ = true;
@@ -74,12 +84,12 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
   }
 
   ROS_WARN("Grasping_reactive::move finished");
-  if(moveSucces_)
+  if(moveSuccess_)
     return 1;
   return 0;
 }
 
 void Grasping_reactive::threaded_move(move_group_interface::MoveGroup* move_group){
-  moveSucces_ = move_group->move() ? 1 : 0;
+  moveSuccess_ = move_group->move() ? 1 : 0;
 }
 

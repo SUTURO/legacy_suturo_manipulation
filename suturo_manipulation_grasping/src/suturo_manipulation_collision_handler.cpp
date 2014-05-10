@@ -8,19 +8,16 @@ Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Sutur
   listener_ = new tf::TransformListener();
 }
 
-void Collision_Handler::reset()
+void Collision_Handler::reset(bool rightArm)
 {
   for(int i = 0; i < maxAttempts_; i++)
     collisionValues_[i] = 0;
   attempt_ = 0;
+  rightArm_ = rightArm;
 }
 
 void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::CollisionObject& co)
 {
-    /*
-     * co->position->...
-     * pi->addObject(co);
-     */
   attempt_++;
 
   // Add CollisionValue to the list
@@ -37,36 +34,43 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
       // {
       //   // +y and +z in r_finger_tip_link
       //   checkForPreviousCollision(1, 1, co);
+      // break;
       // }
     case 2:
       // {
       //   // +y and -z in r_finger_tip_link
       //   checkForPreviousCollision(1, -1, co);
+      // break;
       // }
     case 3:
       {
         // +y in r_finger_tip_link
         checkForPreviousCollision(1, 0, co);
+        break;
       }
       // case 4:
       //   {
       //     // -y and +z in r_finger_tip_link
       //     checkForPreviousCollision(-1, 1, co);
+      // break;
       //   }
     case 5:
       {
         // +z in r_finger_tip_link
         checkForPreviousCollision(0, 1, co);
+        break;
       }
       // case 8:
       //   {
       //     // -y and -z in r_finger_tip_link
       //     checkForPreviousCollision(-1, -1, co);
+      // break;
       //   }
     case 10:
       {
         // -z in r_finger_tip_link
         checkForPreviousCollision(0, -1, co);
+        break;
       }
     case 4:
     case 8:
@@ -74,6 +78,7 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
       {
         // -y in r_finger_tip_link
         checkForPreviousCollision(-1, 0, co);
+        break;
       }
     case 15:
       {
@@ -92,7 +97,7 @@ bool Collision_Handler::attemptValid()
 void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit_msgs::CollisionObject& co)
 {
   ROS_WARN("Calculating new Position for CollisionObject");
-  // check for previous collisions and move co
+  // check for previous collisions and calculate diff
   double yDiff = 0;
   double zDiff = 0;
   if(yValue != 0)
@@ -142,18 +147,26 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
 
   ROS_WARN("Finished Calculating, start to transform with tf");
 
-  // Get transformations from planningframe to fingertips
-  // to get the orientation
+  // create new poseStamped with data from CollisionObject
   geometry_msgs::PoseStamped pose;
   pose.header = co.header;
-  // check if position is in primitive or mesh
+
+  // check if position is in primitive_pose or mesh_pose
   if(co.primitive_poses.size() == 1)
   {
     pose.pose.position = co.primitive_poses[0].position;
     pose.pose.orientation = co.primitive_poses[0].orientation;
     try{
-      listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
-      listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      if(rightArm_)
+      {
+        listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+        listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      }
+      else
+      {
+        listener_->waitForTransform("/l_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+        listener_->transformPose("/l_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      }
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
@@ -165,13 +178,22 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     co.primitive_poses[0].position.y += yDiff;
     co.primitive_poses[0].position.z += zDiff;
   }
+  // position in mesh_pose
   else
   {
     pose.pose.position = co.mesh_poses[0].position;
     pose.pose.orientation = co.mesh_poses[0].orientation;
     try{
-      listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
-      listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      if(rightArm_)
+      {
+        listener_->waitForTransform("/r_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+        listener_->transformPose("/r_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      }
+      else
+      {
+        listener_->waitForTransform("/l_gripper_r_finger_tip_link", pose.header.frame_id, ros::Time(0), ros::Duration(3));
+        listener_->transformPose("/l_gripper_r_finger_tip_link", ros::Time(0), pose, co.header.frame_id, pose);
+      }
     }
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
