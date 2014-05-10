@@ -128,7 +128,7 @@ public:
                      (sqrt(Grasp_Calculator::scalarproduct(p1, p1)) * sqrt(Grasp_Calculator::scalarproduct(p2, p2))));
     }
 
-    geometry_msgs::PointStamped get_point_above_object(std::string object_id);
+    bool get_point_above_object(std::string object_id, geometry_msgs::PointStamped &p);
 
     int calcMeshGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
                               std::vector<geometry_msgs::PoseStamped> &pre_poses,

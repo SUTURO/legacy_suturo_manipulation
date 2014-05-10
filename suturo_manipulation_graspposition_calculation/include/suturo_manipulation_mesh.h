@@ -164,8 +164,6 @@ public:
 
     void set_connected_vertices();
 
-    bool compare_vertex(uint vertex_id1, uint vertex_id2);
-
     void print();
 
     void print_vertex(uint vertex_id);

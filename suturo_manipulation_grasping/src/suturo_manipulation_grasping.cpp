@@ -247,7 +247,8 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
     std::vector<geometry_msgs::PoseStamped> poses(0);
     std::vector<geometry_msgs::PoseStamped> pre_poses(0);
 
-    geometry_msgs::PointStamped p = grasp_calculator_->get_point_above_object(co.id);
+    geometry_msgs::PointStamped p;
+    if (!grasp_calculator_->get_point_above_object(co.id, p)) return 0;
 
     for (int i = 0; i < poses_tmp.size(); i++)
     {

@@ -263,7 +263,11 @@ int Grasp_Calculator::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std:
         addGraspPositionsY(0, y / 2, M_PI_2, co.id, poses, pre_poses, gripper_depth);
     }
 
-    geometry_msgs::PointStamped p = get_point_above_object(co.id);
+    geometry_msgs::PointStamped p;
+    if (!get_point_above_object(co.id, p))
+    {
+        return 0;
+    }
 
     std::sort(poses.begin(), poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
     std::sort(pre_poses.begin(), pre_poses.end(), boost::bind(sort_base_link_poses, _1, _2, p));
@@ -271,9 +275,8 @@ int Grasp_Calculator::calcBoxGraspPosition(moveit_msgs::CollisionObject co, std:
     return 1;
 }
 
-geometry_msgs::PointStamped Grasp_Calculator::get_point_above_object(std::string object_id)
+bool Grasp_Calculator::get_point_above_object(std::string object_id, geometry_msgs::PointStamped &p)
 {
-    geometry_msgs::PointStamped p;
     p.header.stamp = ros::Time(0);
     p.header.frame_id = object_id;
     try
@@ -284,6 +287,7 @@ geometry_msgs::PointStamped Grasp_Calculator::get_point_above_object(std::string
     catch (tf::TransformException t)
     {
         ROS_ERROR_STREAM(t.what());
+        return false;
     }
     p.point.z += 1;
     try
@@ -294,8 +298,9 @@ geometry_msgs::PointStamped Grasp_Calculator::get_point_above_object(std::string
     catch (tf::TransformException t)
     {
         ROS_ERROR_STREAM(t.what());
+        return false;
     }
-    return p;
+    return true;
 }
 
 int Grasp_Calculator::calcCylinderGraspPosition(moveit_msgs::CollisionObject co, std::vector<geometry_msgs::PoseStamped> &poses,
@@ -644,9 +649,11 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
     }
 
     //sort
-    geometry_msgs::PointStamped p = get_point_above_object(co.id);
+    geometry_msgs::PointStamped p;
+    if (!get_point_above_object(co.id, p)) return 0;
     std::sort(poses.begin(), poses.end(), boost::bind(sort_base_link_mesh_poses, _1, _2, p));
     std::sort(pre_poses.begin(), pre_poses.end(), boost::bind(sort_base_link_mesh_poses, _1, _2, p));
+
     ROS_INFO_STREAM("poses:" << poses.size());
     for (int i = 0; i < poses.size() ; ++i)
     {

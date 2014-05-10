@@ -15,10 +15,22 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
 
 
     //service clients
-    ps_service_client_ = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
+    int i = 0;
+    do
+    {
+        ps_service_client_ = nh_->serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
+        i++;
+        if (i == 20)
+        {
+            ROS_ERROR_STREAM("Can not connect to Planningscene Service");
 
-    //wait because ros
-    ros::WallDuration(0.5).sleep();
+        }
+        //wait because ros
+        ros::WallDuration(0.5).sleep();
+    }
+    while (!ps_service_client_.exists() );
+
+
 }
 
 Suturo_Manipulation_Planning_Scene_Interface::~Suturo_Manipulation_Planning_Scene_Interface()

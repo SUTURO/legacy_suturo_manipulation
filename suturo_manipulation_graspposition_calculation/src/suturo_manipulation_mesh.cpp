@@ -522,13 +522,6 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
     set_connected_vertices();
 }
 
-bool Mesh::compare_vertex(uint vertex_id1, uint vertex_id2)
-{
-    return vertices[vertex_id1].position.x == vertices[vertex_id2].position.x
-           && vertices[vertex_id1].position.y == vertices[vertex_id2].position.y
-           && vertices[vertex_id1].position.z == vertices[vertex_id2].position.z;
-}
-
 void Mesh::set_connected_vertices()
 {
     // for (std::vector<Vertex>::iterator v = vertices.begin(); v != vertices.end(); ++v)
@@ -579,6 +572,7 @@ bool Mesh::contains(std::vector<T> v, T elem)
 bool Mesh::is_vertex_boundary_point(uint vertex_id, uint cluster_id)
 {
     //TODO: sonderfall, mesh is ein einziges cluster
+    //Is the vertex part of more then one cluster and is he part of this cluster?
     return vertices[vertex_id].clusters.size() > 1
            && contains(vertices[vertex_id].clusters, cluster_id);
 }
