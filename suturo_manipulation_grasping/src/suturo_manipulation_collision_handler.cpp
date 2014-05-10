@@ -31,53 +31,54 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
 
   ROS_WARN("Calling checkForPreviousCollision");
   // React to collision
-  if(collisionValue == 1)
+  switch ( collisionValue )
   {
-    // +y and +z in r_finger_tip_link
-    // checkForPreviousCollision(1, 1, co);
-    checkForPreviousCollision(1, 0, co);
-  }
-  else if(collisionValue == 2)
-  {
-    // +y and -z in r_finger_tip_link
-    // checkForPreviousCollision(1, -1, co);
-    checkForPreviousCollision(1, 0, co);
-  }
-  else if(collisionValue == 3)
-  {
-    // +y in r_finger_tip_link
-    checkForPreviousCollision(1, 0, co);
-  }
-  else if(collisionValue == 4)
-  {
-    // -y and +z in r_finger_tip_link
-    // checkForPreviousCollision(-1, 1, co);
-    checkForPreviousCollision(-1, 0, co);
-  }
-  else if(collisionValue == 5)
-  {
-    // +z in r_finger_tip_link
-    checkForPreviousCollision(0, 1, co);
-  }
-  else if(collisionValue == 8)
-  {
-    // -y and -z in r_finger_tip_link
-    // checkForPreviousCollision(-1, -1, co);
-    checkForPreviousCollision(-1, 0, co);
-  }
-  else if(collisionValue == 10)
-  {
-    // -z in r_finger_tip_link
-    checkForPreviousCollision(0, -1, co);
-  }
-  else if(collisionValue == 12)
-  {
-    // -y in r_finger_tip_link
-    checkForPreviousCollision(-1, 0, co);
-  }
-  else if(collisionValue == 15)
-  {
-    // object too big oder collision with table
+    case 1:
+      // {
+      //   // +y and +z in r_finger_tip_link
+      //   checkForPreviousCollision(1, 1, co);
+      // }
+    case 2:
+      // {
+      //   // +y and -z in r_finger_tip_link
+      //   checkForPreviousCollision(1, -1, co);
+      // }
+    case 3:
+      {
+        // +y in r_finger_tip_link
+        checkForPreviousCollision(1, 0, co);
+      }
+      // case 4:
+      //   {
+      //     // -y and +z in r_finger_tip_link
+      //     checkForPreviousCollision(-1, 1, co);
+      //   }
+    case 5:
+      {
+        // +z in r_finger_tip_link
+        checkForPreviousCollision(0, 1, co);
+      }
+      // case 8:
+      //   {
+      //     // -y and -z in r_finger_tip_link
+      //     checkForPreviousCollision(-1, -1, co);
+      //   }
+    case 10:
+      {
+        // -z in r_finger_tip_link
+        checkForPreviousCollision(0, -1, co);
+      }
+    case 4:
+    case 8:
+    case 12:
+      {
+        // -y in r_finger_tip_link
+        checkForPreviousCollision(-1, 0, co);
+      }
+    case 15:
+      {
+        // object too big oder collision with table
+      }
   }
 }
 
@@ -94,7 +95,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   // check for previous collisions and move co
   double yDiff = 0;
   double zDiff = 0;
-  if(yValue == 1)
+  if(yValue != 0)
   {
     for(int i = 0; i < maxAttempts_; i++)
     {
@@ -116,29 +117,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
       }
     }
   }
-  else if (yValue == -1)
-  {
-    for(int i = 0; i < maxAttempts_; i++)
-    {
-      if(collisionValues_[i] == 0)
-      {
-        break;
-      }
-      else if (collisionValues_[i] == 1 
-          || collisionValues_[i] == 2
-          || collisionValues_[i] == 3)
-      {
-        yDiff = 0.05 * (1.0/(i+1));
-      }
-      else if (collisionValues_[i] == 4
-          || collisionValues_[i] == 8
-          || collisionValues_[i] == 12)
-      {
-        yDiff = -0.05 * (1.0/(i+1));
-      }
-    }
-  }
-  if(zValue == 1)
+  if(zValue != 0)
   {
     for(int i = 0; i < maxAttempts_; i++)
     {
@@ -157,28 +136,6 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
           || collisionValues_[i] == 10)
       {
         zDiff = -0.05 * (1.0/(i+1));
-      }
-    }
-  }
-  else if (zValue == -1)
-  {
-    for(int i = 0; i < maxAttempts_; i++)
-    {
-      if(collisionValues_[i] == 0)
-      {
-        break;
-      }
-      else if (collisionValues_[i] == 1 
-          || collisionValues_[i] == 4
-          || collisionValues_[i] == 5)
-      {
-        zDiff = -0.05 * (1.0/(i+1));
-      }
-      else if (collisionValues_[i] == 2
-          || collisionValues_[i] == 8
-          || collisionValues_[i] == 10)
-      {
-        zDiff = 0.05 * (1.0/(i+1));
       }
     }
   }
