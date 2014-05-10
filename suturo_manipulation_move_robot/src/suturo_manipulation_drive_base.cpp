@@ -422,22 +422,23 @@ bool Suturo_Manipulation_Move_Robot::driveBase(geometry_msgs::PoseStamped target
         }
 
         // Create a PoseStamped object with data from interpolator and transform to map
-        geometry_msgs::PoseStamped interpolatedPose;
-        interpolatedPose = targetPoseBaseLink_;
-        interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.x_;
-        interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.y_;
-        transformToMap(interpolatedPose, interpolatedPose);
-        interpolatedPose.pose.orientation = robotPose_.pose.orientation;
+        // geometry_msgs::PoseStamped interpolatedPose;
+        // interpolatedPose = targetPoseBaseLink_;
+        // interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.x_;
+        // interpolatedPose.pose.position.x = interpoolator_result_.int_pose_.y_;
+        // transformToMap(interpolatedPose, interpolatedPose);
+        // interpolatedPose.pose.orientation = robotPose_.pose.orientation;
 
-        // Check for collisions in planningscene with moveit
-        if (checkFullCollision(interpolatedPose))
-        {
-            ROS_WARN("Collision in PlanningScene");
-            inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
-            inp_params_->target_pose_.y_ = inp_params_->robot_pose_.y_;
-        }
+        // // Check for collisions in planningscene with moveit
+        // if (checkFullCollision(interpolatedPose))
+        // {
+        //     ROS_WARN("Collision in PlanningScene");
+        //     inp_params_->target_pose_.x_ = inp_params_->robot_pose_.x_;
+        //     inp_params_->target_pose_.y_ = inp_params_->robot_pose_.y_;
+        // }
 
         inp_params_->target_pose_.reference_ = targetPoseBaseLink_.header.frame_id;
+        inp_params_->twist_=interpoolator_result_.twist_;
 
         cmd_vel_pub_.publish(base_cmd_);
     }
