@@ -207,7 +207,8 @@ int Grasping::pick(std::string object_name, std::string arm, double force)
 {
     //check if there is an object attached to this arm.
     moveit_msgs::CollisionObject co;
-    if (int r = get_attached_object(arm, object_name, co) != 2)
+    int r = get_attached_object(arm, object_name, co);
+    if (r != 2)
     {
         return r;
     }
@@ -226,8 +227,10 @@ int Grasping::pick_above(std::string object_name, std::string arm, double tolera
 {
     //check if there is an object attached to this arm.
     moveit_msgs::CollisionObject co;
-    if (int r = get_attached_object(arm, object_name, co) != 2)
+    int r = get_attached_object(arm, object_name, co);
+    if (r != 2)
     {
+		
         return r;
     }
 
