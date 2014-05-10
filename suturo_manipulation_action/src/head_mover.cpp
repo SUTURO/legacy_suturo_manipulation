@@ -180,33 +180,13 @@ int main(int argc, char **argv)
     std::vector<geometry_msgs::PoseStamped> poses;
     std::vector<geometry_msgs::PoseStamped> pre_poses;
 
-    // moveit_msgs::CollisionObject co;
-    // co.header.stamp = ros::Time::now();
-    // co.header.frame_id = "/base_footprint";
-    // co.id = "corny";
-
-    // co.meshes.resize(1);
-    // co.meshes[0] = ml.load_corny_msg();
-    // co.mesh_poses.resize(1);
-    // co.mesh_poses[0].position.x = 1;
-    // co.mesh_poses[0].position.y = 0;
-    // co.mesh_poses[0].position.z = 0;
-    // co.mesh_poses[0].orientation.w = 1;
-    // pi.addObject(co);
-    // geometry_msgs::PoseStamped ps;
-    // ps.header = co.header;
-    // ps.pose = co.mesh_poses[0];
-    // // pi.publishMarkerPoint(ps);
-
-    // calc.calcMeshGraspPosition(co, poses, pre_poses, Gripper::R_GRIPPER_PALM_LENGTH);
-
     moveit_msgs::CollisionObject co;
     co.header.stamp = ros::Time::now();
     co.header.frame_id = "/base_footprint";
-    co.id = "pancake";
+    co.id = "corny";
 
     co.meshes.resize(1);
-    co.meshes[0] = ml.load_pancake_msg();
+    co.meshes[0] = ml.load_corny_msg();
     co.mesh_poses.resize(1);
     co.mesh_poses[0].position.x = 1;
     co.mesh_poses[0].position.y = 0;
@@ -216,7 +196,27 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped ps;
     ps.header = co.header;
     ps.pose = co.mesh_poses[0];
+    // pi.publishMarkerPoint(ps);
+
     calc.calcMeshGraspPosition(co, poses, pre_poses, Gripper::R_GRIPPER_PALM_LENGTH);
+
+    // moveit_msgs::CollisionObject co;
+    // co.header.stamp = ros::Time::now();
+    // co.header.frame_id = "/base_footprint";
+    // co.id = "pancake";
+
+    // co.meshes.resize(1);
+    // co.meshes[0] = ml.load_pancake_msg();
+    // co.mesh_poses.resize(1);
+    // co.mesh_poses[0].position.x = 1;
+    // co.mesh_poses[0].position.y = 0;
+    // co.mesh_poses[0].position.z = 0;
+    // co.mesh_poses[0].orientation.w = 1;
+    // pi.addObject(co);
+    // geometry_msgs::PoseStamped ps;
+    // ps.header = co.header;
+    // ps.pose = co.mesh_poses[0];
+    // calc.calcMeshGraspPosition(co, poses, pre_poses, Gripper::R_GRIPPER_PALM_LENGTH);
 
     // pi.check_group_object_collision("left_gripper", ps, co);
 
