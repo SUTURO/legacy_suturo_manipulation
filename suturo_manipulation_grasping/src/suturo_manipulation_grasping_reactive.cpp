@@ -13,7 +13,7 @@ Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh,
 
 int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 
         geometry_msgs::PoseStamped desired_pose,
-        moveit_msgs::CollisionObject co,
+        moveit_msgs::CollisionObject& co,
         geometry_msgs::PoseStamped preGraspPose)
 
 {

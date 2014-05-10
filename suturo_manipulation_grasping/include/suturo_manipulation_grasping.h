@@ -43,7 +43,7 @@ protected:
 
     virtual int move(move_group_interface::MoveGroup *move_group, 
         geometry_msgs::PoseStamped desired_pose,
-        moveit_msgs::CollisionObject co,
+        moveit_msgs::CollisionObject& co,
         geometry_msgs::PoseStamped preGraspPose);
 
     int get_attached_object(std::string arm, std::string object_name, moveit_msgs::CollisionObject &co);

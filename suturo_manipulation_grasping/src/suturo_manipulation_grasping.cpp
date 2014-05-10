@@ -88,7 +88,7 @@ int Grasping::lookAt(geometry_msgs::PoseStamped pose)
 
 int Grasping::move(move_group_interface::MoveGroup *move_group,
                    geometry_msgs::PoseStamped desired_pose,
-                   moveit_msgs::CollisionObject co,
+                   moveit_msgs::CollisionObject& co,
         geometry_msgs::PoseStamped preGraspPose)
 {
     //look
