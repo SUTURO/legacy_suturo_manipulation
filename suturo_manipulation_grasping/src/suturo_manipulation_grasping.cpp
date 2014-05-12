@@ -178,9 +178,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
             //close gripper
             gripper->close_gripper(force);
 
-            //update collisionobject in planningscene
-            if (!pi_->addObject(co))
-                return 0;
+            // //update collisionobject in planningscene
+            // if (!pi_->addObject(co))
+            //     return 0;
 
             //attach object
             ROS_INFO_STREAM("attach object");
