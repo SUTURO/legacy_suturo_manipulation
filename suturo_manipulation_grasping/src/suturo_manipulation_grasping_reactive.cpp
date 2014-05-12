@@ -75,29 +75,25 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     t->join();
     if(collisionDetected_)
     {
-      // Create new Pose to back up from collision
-      geometry_msgs::PoseStamped newPreGraspPose;
-      if(rightArm)
-        newPreGraspPose.header.frame_id = "/r_wrist_roll_link";
-      else 
-        newPreGraspPose.header.frame_id = "/l_wrist_roll_link";
-      newPreGraspPose.header.stamp = ros::Time::now();
-      newPreGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH;
-      newPreGraspPose.pose.orientation.w = 1;
-      move_group->setPoseTarget(newPreGraspPose);
+      ROS_WARN("Back up to previous PreGraspPose");
+      move_group->setPoseTarget(preGraspPose);
       move_group->move();
+      ROS_WARN("Finished Moving to previous PreGraspPose");
 
       // move collisionObject in PlanningScene
       ch_->handleCollision(collisionValue, co);
-      // preGraspPose.pose = co.pose;
-      // preGraspPose.header = co.header;
-      // preGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH - 0.05;
       ros::Duration(2).sleep();
+      ROS_WARN("Finished CollisionHandling");
       // move to new preGraspPose
+      ROS_WARN("Set new PreGraspPose");
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
+      ROS_WARN("Finished Moving to new PreGraspPose");
       // Set new CollisionObject as target
       move_group->setPoseTarget(desired_pose);
+
+      // STUB FOR ONE CYCLE
+      // break;
     } 
   }
 
