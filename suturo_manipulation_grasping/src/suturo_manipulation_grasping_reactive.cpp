@@ -75,8 +75,7 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     t->join();
     if(collisionDetected_)
     {
-      // ROS_WARN("Calling collision handling");
-      // ROS_WARN("CollisionObject moved, returning to preGraspPosition");
+      // Create new Pose to back up from collision
       geometry_msgs::PoseStamped newPreGraspPose;
       if(rightArm)
         newPreGraspPose.header.frame_id = "/r_wrist_roll_link";
@@ -87,13 +86,17 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
       newPreGraspPose.pose.orientation.w = 1;
       move_group->setPoseTarget(newPreGraspPose);
       move_group->move();
+
+      // move collisionObject in PlanningScene
       ch_->handleCollision(collisionValue, co);
       // preGraspPose.pose = co.pose;
       // preGraspPose.header = co.header;
       // preGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH - 0.05;
       ros::Duration(2).sleep();
+      // move to new preGraspPose
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
+      // Set new CollisionObject as target
       move_group->setPoseTarget(desired_pose);
     } 
   }
