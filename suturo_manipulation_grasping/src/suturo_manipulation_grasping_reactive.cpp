@@ -75,20 +75,15 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     t->join();
     if(collisionDetected_)
     {
-      ROS_WARN("Back up to previous PreGraspPose");
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
-      ROS_WARN("Finished Moving to previous PreGraspPose");
 
       // move collisionObject in PlanningScene
       ch_->handleCollision(collisionValue, co);
       ros::Duration(2).sleep();
-      ROS_WARN("Finished CollisionHandling");
       // move to new preGraspPose
-      ROS_WARN("Set new PreGraspPose");
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
-      ROS_WARN("Finished Moving to new PreGraspPose");
       // Set new CollisionObject as target
       move_group->setPoseTarget(desired_pose);
 

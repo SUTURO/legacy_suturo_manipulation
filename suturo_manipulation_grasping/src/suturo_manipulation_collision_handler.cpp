@@ -25,8 +25,9 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
   while(collisionValues_[i] != 0)
     i++;
   collisionValues_[i] = collisionValue;
+  ROS_WARN_STREAM("collisionValues " << collisionValues_[0] << ", "  
+      << collisionValues_[1] << ", " << collisionValues_[2] << endl);
 
-  ROS_WARN("Calling checkForPreviousCollision");
   // React to collision
   switch ( collisionValue )
   {
@@ -96,7 +97,6 @@ bool Collision_Handler::attemptValid()
 
 void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit_msgs::CollisionObject& co)
 {
-  ROS_WARN("Calculating new Position for CollisionObject");
   // check for previous collisions and calculate diff
   double yDiff = 0;
   double zDiff = 0;
@@ -120,6 +120,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
       {
         yDiff = -0.05 * (1.0/(i+1));
       }
+      ROS_WARN_STREAM("yDiff: " << yDiff << endl);
     }
   }
   if(zValue != 0)
@@ -144,8 +145,6 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
       }
     }
   }
-
-  ROS_WARN("Finished Calculating, start to transform with tf");
 
   // create new poseStamped with data from CollisionObject
   geometry_msgs::PoseStamped pose;
@@ -205,8 +204,6 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
   }
-
-  ROS_WARN("Finished Transforming, going to publish CollisionObject");
 
   // publish moved collisionObject
   pi_->addObject(co);
