@@ -2,6 +2,7 @@
 #include <geometric_shapes/shape_operations.h>
 #include <shape_tools/solid_primitive_dims.h>
 
+using namespace std;
 using namespace suturo_manipulation;
 
 geometry_msgs::Point operator+(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
@@ -71,6 +72,7 @@ bool Plane::orthonormalize()
 
     normalize(second_parameter_);
 
+    //create a new second parameter with a 90° angle to the first one
     second_parameter_ = second_parameter_ -
                         (scalarproduct(second_parameter_, first_parameter_) * first_parameter_);
     normalize(second_parameter_);
@@ -140,19 +142,20 @@ void Plane::project_point_to_plane(geometry_msgs::Point p, double &x, double &y)
     d3d_point_to_d2d_point(x, y, r);
 }
 
-bool Plane::dist_to_plane_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
+bool Plane::dist_ray_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
 {
     geometry_msgs::Point p;
     double lamda = 0;
     if (!get_point_of_intersection(p, s, r, lamda) || lamda < 0)
     {
-
+        //return if lamda is less then zero
         return false;
     }
     double a;
     double b;
     d3d_point_to_d2d_point(a, b, p);
 
+    //does the point lie in the triangle?
     if (a >= 0 && b >= 0 && (1 - a - b) >= 0)
     {
         geometry_msgs::Point s_to_p = p - s;
@@ -162,7 +165,7 @@ bool Plane::dist_to_plane_triangle(geometry_msgs::Point s, geometry_msgs::Point 
     return false;
 }
 
-bool Plane::dist_to_plane_triangle2(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
+bool Plane::dist_line_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist)
 {
     geometry_msgs::Point p;
     double lamda = 0;
@@ -213,6 +216,7 @@ Mesh::Mesh(moveit_msgs::CollisionObject co)
     if (co.meshes.empty()) ROS_ERROR_STREAM("invalid mesh collision object");
     shapes::Mesh *mesh = (shapes::Mesh *)shapes::constructShapeFromMsg(co.meshes[0]);
     build_cluster(mesh);
+    ROS_INFO_STREAM("Cluster size: " << clusters.size());
 }
 
 Mesh::~Mesh()
@@ -222,6 +226,7 @@ Mesh::~Mesh()
 
 std::vector< std::pair<uint, uint> > Mesh::get_opposite_cluster()
 {
+    //search for pairs of clusters, that have normals, which face in an opposite direction
     if (opposite_cluster.empty())
     {
         double threshold = 0.2;
@@ -229,7 +234,6 @@ std::vector< std::pair<uint, uint> > Mesh::get_opposite_cluster()
         {
             for (int j = i + 1; j < clusters.size(); j++)
             {
-                // ROS_INFO_STREAM("comp i= " << i << " j= " << j);
                 if (M_PI - get_angle(clusters[i].normal, clusters[j].normal) < threshold)
                 {
                     std::pair<uint, uint> c_pair(i, j);
@@ -286,9 +290,6 @@ Plane Mesh::get_plane(uint cluster_id1, uint cluster_id2)
         p2.z = 0;
     }
 
-    if (!normalize(p1)) ROS_ERROR_STREAM("!!!!");
-    if (!normalize(p2)) ROS_ERROR_STREAM("!!!!");
-
     geometry_msgs::Point o;
     o.x = 0;
     o.y = 0;
@@ -300,15 +301,13 @@ Plane Mesh::get_plane(uint cluster_id1, uint cluster_id2)
 
 
 
-std::vector<geometry_msgs::Point> Mesh::create_polygon(uint cluster_id)
+void Mesh::create_polygon(uint cluster_id)
 {
     std::vector<uint> poly;
     //1. find first bondary point
     for (int i = 0; i < clusters[cluster_id].vertices.size(); i++)
     {
         uint vertex_id = clusters[cluster_id].vertices[i];
-        // ROS_INFO_STREAM("vertex_id : " << vertex_id);
-        // ROS_INFO_STREAM("vertex cluster size : " << vertices[vertex_id].clusters.size());
         if (is_vertex_boundary_point(vertex_id, cluster_id))
         {
             //2. add to poly
@@ -316,24 +315,15 @@ std::vector<geometry_msgs::Point> Mesh::create_polygon(uint cluster_id)
             break;
         }
     }
-    // ROS_INFO_STREAM("ok");
+
     //3. get next BP
     std::vector<uint> next_vertex_ids;
-    // ROS_INFO_STREAM("ok : " << poly[0]);
     for (get_next_boundary_point(poly[0], cluster_id, next_vertex_ids);
-            ;//!(contains(poly, next_vertex_ids[0]) && contains(poly, next_vertex_ids[1]));
+            ;
             get_next_boundary_point(poly[(poly.size() - 1)], cluster_id, next_vertex_ids))
     {
-        // ROS_INFO_STREAM("ok : " << poly[(poly.size() - 1)]);
         if (next_vertex_ids.size() > 2)
-            // {
             ROS_ERROR_STREAM("next vertex size to big!!!" << next_vertex_ids.size());
-        // else ROS_INFO_STREAM("nope");
-        // for (int i = 0; i < next_vertex_ids.size(); ++i)
-        // {
-        //     print_vertex(next_vertex_ids[i]);
-        // }
-        // }
         if (!contains(poly, next_vertex_ids[0]))
         {
             poly.push_back(next_vertex_ids[0]);
@@ -345,9 +335,7 @@ std::vector<geometry_msgs::Point> Mesh::create_polygon(uint cluster_id)
         //4. if both BP in poly finish
         else
         {
-            // ROS_INFO_STREAM("polygon closed!!! " << next_vertex_ids.size());
             break;
-
         }
     }
     std::vector<geometry_msgs::Point> result;
@@ -355,20 +343,25 @@ std::vector<geometry_msgs::Point> Mesh::create_polygon(uint cluster_id)
     {
         result.push_back(vertices[poly[i]].position);
     }
-    return result;
+
+    clusters[cluster_id].bounding_polygon = result;
+}
+
+vector<geometry_msgs::Point> Mesh::get_polygon(uint cluster_id)
+{
+    if (clusters[cluster_id].bounding_polygon.empty())
+        create_polygon(cluster_id);
+    return clusters[cluster_id].bounding_polygon;
 }
 
 void Mesh::get_next_boundary_point(uint vertex_id, uint cluster_id, std::vector<uint> &next_vertex_ids)
 {
-    // Vertex np1 = vertices[vertex_id].triangles[i];
     next_vertex_ids.clear();
     for (std::vector<uint>::iterator n_v = vertices[vertex_id].connected_vertices.begin();
             n_v != vertices[vertex_id].connected_vertices.end();
             ++n_v)
     {
-        // ROS_INFO_STREAM("id: " << *n_v << " BP? " << is_vertex_boundary_point(*n_v, cluster_id) << " muh " << are_vertices_only_connected_by_one_triangle(*n_v, vertex_id, cluster_id));
-        if (is_vertex_boundary_point(*n_v, cluster_id)
-                && are_vertices_only_connected_by_one_triangle(*n_v, vertex_id, cluster_id))
+        if (are_vertices_only_connected_by_one_triangle(*n_v, vertex_id, cluster_id))
         {
             next_vertex_ids.push_back(*n_v);
         }
@@ -427,8 +420,8 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
 {
     double threshold = 0.6;
 
-    //create better useable datatypes
-    // ROS_ERROR_STREAM("VERTEX : " << mesh->vertex_count);
+    //create more useable datatypes
+    ROS_ERROR_STREAM("VERTEX : " << mesh->vertex_count);
     for (int i = 0; i < mesh->vertex_count; i++)
     {
         Vertex v;
@@ -443,7 +436,7 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
     mesh->computeTriangleNormals();
 
     std::vector< std::pair<Triangle, uint> > mesh_triangles;
-    // ROS_ERROR_STREAM("TRIANGLE : " << mesh->triangle_count);
+    ROS_ERROR_STREAM("TRIANGLE : " << mesh->triangle_count);
     for (int i = 0; i < mesh->triangle_count; i++)
     {
         Triangle t;
@@ -458,8 +451,6 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
 
         vertex_id = mesh->triangles[(i * 3) + 2];
         t.vertices.push_back(vertex_id);
-        // ROS_ERROR_STREAM("vertex_id: " << mesh->triangles[(i * 3)] << " " << mesh->triangles[(i * 3)+1] << " " <<
-        //     mesh->triangles[(i * 3)+2]);
         vertices[vertex_id].triangles.push_back(i);
 
         //sort for later intersection
@@ -476,12 +467,12 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
         mesh_triangles.push_back(pair);
     }
 
+    set_connected_vertices();
+
     uint cluster_id = 0;
     while (mesh_triangles.size() > 0)
     {
-        // ROS_INFO_STREAM(mesh_triangles.size());
         Cluster c;
-        // c.normal = mesh_triangles[0].first.normal;
         clusters.push_back(c);
         add_triangle_to_cluster(cluster_id, mesh_triangles[0].second);
         mesh_triangles.erase(mesh_triangles.begin());
@@ -494,16 +485,35 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
                 //check for two connections
                 std::vector<uint> v;
                 std::vector<uint> connected_triangles;
-                for (int trianlge_id = 0; trianlge_id < clusters[cluster_id].triangles.size(); trianlge_id++)
+
+                for (std::vector<uint>::iterator trianlge_id = clusters[cluster_id].triangles.begin(); 
+                    trianlge_id != clusters[cluster_id].triangles.end(); ++trianlge_id)
                 {
-                    std::set_intersection(get_triangle(clusters[cluster_id].triangles[trianlge_id]).vertices.begin(),
-                                          get_triangle(clusters[cluster_id].triangles[trianlge_id]).vertices.end(),
+                    
+                    v.clear();
+                    std::set_intersection(triangles[*trianlge_id].vertices.begin(),
+                                          triangles[*trianlge_id].vertices.end(),
                                           mesh_triangles[i].first.vertices.begin(),
                                           mesh_triangles[i].first.vertices.end(),
                                           back_inserter(v));
-                    if (v.size() >= 2)
-                        connected_triangles.push_back(trianlge_id);
-                    // break;
+                    if (v.size() >= 2){
+                        connected_triangles.push_back(*trianlge_id);
+                        // ROS_INFO_STREAM("triangle: " << trianlge_id);
+                        // for (std::vector<uint>::iterator g = v.begin(); g != v.end(); ++g)
+                        // {
+                        //     ROS_INFO_STREAM("v: " << *g);
+                        // }
+                    }
+                }
+                if (connected_triangles.size() > 2)
+                {
+                    ROS_INFO_STREAM("connected_triangles: " << mesh_triangles[i].second << "  " << connected_triangles.size());
+                    ROS_INFO_STREAM("cluster " << cluster_id);
+                    for (std::vector<uint>::iterator asd = connected_triangles.begin(); asd != connected_triangles.end(); ++asd)
+                    {
+                        ROS_INFO_STREAM("t: " << *asd);
+                    }
+                    ROS_INFO_STREAM("end");
                 }
                 if (u_have_to_add_this_triangle(mesh_triangles[i].second, connected_triangles, cluster_id))
                 {
@@ -519,41 +529,36 @@ void Mesh::build_cluster(shapes::Mesh *mesh)
         }
         cluster_id++;
     }
-    set_connected_vertices();
 }
 
 void Mesh::set_connected_vertices()
 {
-    // for (std::vector<Vertex>::iterator v = vertices.begin(); v != vertices.end(); ++v)
-    // {
+    //search for vertices that share trianlges
     for (uint v_id = 0; v_id < vertices.size(); ++v_id)
     {
-        // Vertex v = vertices[v_id];
         for (std::vector<uint>::iterator t = vertices[v_id].triangles.begin(); t != vertices[v_id].triangles.end(); ++t)
         {
             for (std::vector<uint>::iterator v2 = triangles[*t].vertices.begin();
                     v2 != triangles[*t].vertices.end();
                     ++v2)
             {
-                // ROS_INFO_STREAM(*v2);
                 if (v_id != *v2 && !contains(vertices[v_id].connected_vertices, *v2))
                     vertices[v_id].connected_vertices.push_back(*v2);
             }
         }
     }
-    // }
 }
 
 bool Mesh::u_have_to_add_this_triangle(uint trianlge_id, std::vector<uint> connected_triangles, uint cluster_id)
 {
     //more then 1 triangle conntected
-    return connected_triangles.size() >= 2
-           //only 1 triangle conntected
-           || (connected_triangles.size() == 1
-               //and at least 1 vertex isn't already in the cluster
-               && !(is_vertex_in_cluster(triangles[trianlge_id].vertices[0], cluster_id)
-                    && is_vertex_in_cluster(triangles[trianlge_id].vertices[1], cluster_id)
-                    && is_vertex_in_cluster(triangles[trianlge_id].vertices[2], cluster_id)));
+    return (connected_triangles.size() >= 2
+            //only 1 triangle conntected
+            || (connected_triangles.size() == 1
+                //and at least 1 vertex isn't already in the cluster
+                && !(is_vertex_in_cluster(triangles[trianlge_id].vertices[0], cluster_id)
+                     && is_vertex_in_cluster(triangles[trianlge_id].vertices[1], cluster_id)
+                     && is_vertex_in_cluster(triangles[trianlge_id].vertices[2], cluster_id))));
 }
 
 
@@ -561,7 +566,6 @@ bool Mesh::is_vertex_in_cluster(uint vertex_id, uint cluster_id)
 {
     return contains(vertices[vertex_id].clusters, cluster_id);
 }
-
 
 template <class T>
 bool Mesh::contains(std::vector<T> v, T elem)
@@ -571,10 +575,14 @@ bool Mesh::contains(std::vector<T> v, T elem)
 
 bool Mesh::is_vertex_boundary_point(uint vertex_id, uint cluster_id)
 {
-    //TODO: sonderfall, mesh is ein einziges cluster
-    //Is the vertex part of more then one cluster and is he part of this cluster?
-    return vertices[vertex_id].clusters.size() > 1
-           && contains(vertices[vertex_id].clusters, cluster_id);
+    //a vertex is a boundary point, if it shares only one triangle with a connected vertex...i hope
+    for (std::vector<uint>::iterator v = vertices[vertex_id].connected_vertices.begin();
+            v != vertices[vertex_id].connected_vertices.end(); ++v)
+    {
+        if (are_vertices_only_connected_by_one_triangle(*v, vertex_id, cluster_id))
+            return true;
+    }
+    return false;
 }
 
 bool Mesh::dist_to_surface(geometry_msgs::Point s, geometry_msgs::Point r, geometry_msgs::Point n, double &dist, double &diameter)
@@ -584,25 +592,25 @@ bool Mesh::dist_to_surface(geometry_msgs::Point s, geometry_msgs::Point r, geome
     diameter = 0;
     double diameter1 = 0;
     double diameter2 = 0;
+    //compute dist a ray and a line at the same time, to save time
     for (int t_id = 0; t_id < triangles.size(); ++t_id)
     {
         if (dist == 0)
-            triangles[t_id].plane_->dist_to_plane_triangle(s, r, dist);
-        
-        if (diameter1 == 0 && triangles[t_id].plane_->dist_to_plane_triangle2(s, n, diameter1))
+            triangles[t_id].plane_->dist_ray_triangle(s, r, dist);
+
+        if (diameter1 == 0 && triangles[t_id].plane_->dist_line_triangle(s, n, diameter1))
         {
             continue;
         }
-        else if (diameter1 != 0 && diameter2 == 0 && triangles[t_id].plane_->dist_to_plane_triangle2(s, n, diameter2))
+        else if (diameter1 != 0 && diameter2 == 0 && triangles[t_id].plane_->dist_line_triangle(s, n, diameter2))
         {
             diameter = diameter1 + diameter2;
         }
         if  (dist != 0 && diameter != 0)
         {
+            //dist and diameter computed
             return true;
         }
-
-
     }
     return false;
 }

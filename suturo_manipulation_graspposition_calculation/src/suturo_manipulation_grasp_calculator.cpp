@@ -390,9 +390,7 @@ void Grasp_Calculator::double_polygon_to_path(DPolygon2D double_polygon, Clipper
     {
         ClipperLib::IntPoint p;
         p.X = (ClipperLib::cInt)(factor * p2d->x);
-        // ROS_INFO_STREAM("p.x  " << p.X << " p2d " << p2d->x);
         p.Y = (ClipperLib::cInt)(factor * p2d->y);
-        // ROS_INFO_STREAM("p.y  " << p.Y << " p2d " << p2d->y);
         int_poly.push_back(p);
     }
     int_polygon.push_back(int_poly);
@@ -414,8 +412,6 @@ void Grasp_Calculator::path_to_double_polygon(DPolygon2D &double_polygon, Clippe
 Path Grasp_Calculator::calc_poly_centroid(Paths polygons)
 {
     std::vector<IntPoint> sums;
-    // ROS_ERROR_STREAM("???");
-    // ROS_INFO_STREAM(polygons.size());
     for (std::vector<Path>::iterator poly = polygons.begin(); poly != polygons.end(); ++poly)
     {
         IntPoint sum;
@@ -424,20 +420,13 @@ Path Grasp_Calculator::calc_poly_centroid(Paths polygons)
         cInt fuck_u_Cpp = 0;
         for (std::vector<IntPoint>::iterator ip = poly->begin(); ip != poly->end(); ++ip, fuck_u_Cpp++)
         {
-            // ROS_WARN_STREAM("ip " << *ip);
             sum.X += ip->X;
             sum.Y += ip->Y;
-            // ROS_ERROR_STREAM("sum " << sum);
         }
-        // ROS_INFO_STREAM((sum.X ));
         sum.X = sum.X / fuck_u_Cpp;
-        // ROS_INFO_STREAM((sum.X / fuck_u_Cpp));
         sum.Y = sum.Y / fuck_u_Cpp;
-        // ROS_INFO_STREAM((sum.X ));
-        // ROS_ERROR_STREAM("end sum " << sum << " poly size " << poly->size());
         sums.push_back(sum);
     }
-    // ROS_INFO_STREAM("end");
     return sums;
 }
 
@@ -509,11 +498,6 @@ geometry_msgs::Quaternion Grasp_Calculator::get_quaternion_from_points(geometry_
     return q_result;
 }
 
-// double dist_to_triangle(Mesh::Triangle t, geometry_msgs::Point s, geometry_msgs::Point r)
-// {
-
-// }
-
 bool Grasp_Calculator::get_grasp_point(Plane plane, geometry_msgs::Point m, double d, double alpha,
                                        geometry_msgs::PoseStamped &grasp_pose,
                                        geometry_msgs::PoseStamped &pre_grasp_pose,
@@ -563,14 +547,15 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
     // 2. search for cluster with opposite normal - O(|Cluster|²)
     std::vector< std::pair<uint, uint> > opposite_cluster = meshi.get_opposite_cluster();
     int h = 0;
+    ROS_INFO_STREAM("opposite cluster size: " << opposite_cluster.size());
     for (int i = 0; i < opposite_cluster.size(); i++)
     {
         // 3. project both cluster on a plain - o(|vertices|)?
         suturo_manipulation::Plane plane = meshi.get_plane(opposite_cluster[i].first, opposite_cluster[i].second);
         plane.orthonormalize();
 
-        std::vector<geometry_msgs::Point> p1 = meshi.create_polygon(opposite_cluster[i].first);
-        std::vector<geometry_msgs::Point> p2 = meshi.create_polygon(opposite_cluster[i].second);
+        std::vector<geometry_msgs::Point> p1 = meshi.get_polygon(opposite_cluster[i].first);
+        std::vector<geometry_msgs::Point> p2 = meshi.get_polygon(opposite_cluster[i].second);
         if (i == 0)
         {
             pi_->publishMarkerLine(co.id, p1, 0);
@@ -663,105 +648,3 @@ int Grasp_Calculator::calcMeshGraspPosition(moveit_msgs::CollisionObject co, std
     ROS_INFO_STREAM((ros::Time::now() - t));
     return 1;
 }
-
-
-
-
-
-
-// double get_b(double x_n, double q_n, double p_n, double a)
-// {
-//     double b = (x_n - a * p_n) / q_n;
-//     return b;
-// }
-
-// double get_a(double x_n, double q_n, double p_n, double b)
-// {
-//     return get_b(x_n, p_n, q_n, b);
-// }
-
-// double get_a_long_m(double x_m, double x_n, double q_m, double q_n, double p_m, double p_n)
-// {
-//     double a = (x_m * q_n - q_m * x_n) /
-//                (p_m * q_n - p_n * q_m);
-//     return a;
-// }
-
-// int get_a_b(double p_n, double q_n, double x_n, double &a, double &b)
-// {
-//     if ( p_n != 0 && q_n == 0)
-//     {
-//         //first equotion contains 0
-//         a = x_n / p_n;
-//         return 2;
-//     }
-//     if (p_n == 0 && q_n != 0)
-//     {
-//         b = x_n / q_n;
-//         return 3;
-//     }
-//     if (p_n == 0 && q_n == 0)
-//     {
-//         return 5;
-//     }
-//     return 7;
-// }
-
-// bool solve(double x_n, double x_m, double p_n, double p_m, double q_n, double q_m, double &a, double &b)
-// {
-//     int n_gleichung = get_a_b(p_n, q_n, x_n, a, b);
-//     int m_gleichung = get_a_b(p_m, q_m, x_m, a, b);
-//     if (n_gleichung * m_gleichung == 6)
-//     {
-//         //a und b mit ersten beiden gleichungen gesetzt
-//         //fertig
-//         return true;
-//     }
-//     if (((n_gleichung * m_gleichung) % 5 == 0)
-//             || ((n_gleichung * m_gleichung) % 4 == 0)
-//             || ((n_gleichung * m_gleichung) % 9 == 0))
-//     {
-//         //eine gleichung hat 2x 0
-//         return false;
-//     }
-//     if (n_gleichung % 2 == 0)
-//     {
-//         //n gleichung hat a ergeben
-//         //a ist fertig
-//         b = get_b(x_m, q_m, p_m, a);
-//         return true;
-//     }
-//     if (m_gleichung % 2 == 0)
-//     {
-//         //m gleichung hat a ergeben
-//         //a ist fertig
-//         b = get_b(x_n, q_n, p_n, a);
-//         return true;
-//     }
-//     if (n_gleichung % 3 == 0)
-//     {
-//         //n gleichung hat a ergeben
-//         //b ist fertig
-//         a = get_a(x_m, q_m, p_m, b);
-//         return true;
-//     }
-//     if (m_gleichung % 3 == 0)
-//     {
-//         //n gleichung hat a ergeben
-//         //b ist fertig
-//         a = get_a(x_n, q_n, p_n, b);
-//         return true;
-//     }
-//     if (n_gleichung * m_gleichung % 49 == 0)
-//     {
-//         //keiner fertig und keine nullen
-//         //a berechnen, indem n gleichung nach b umgestellt und in m gleichung eingesetzt wird
-//         a = get_a_long_m(x_n, x_m, q_n, q_m, p_n, p_m);
-//         //a in n gleichung einsetzten
-
-//         b = get_b(x_n, q_n, p_n, a);
-//         return true;
-//     }
-
-//     return false;
-// }

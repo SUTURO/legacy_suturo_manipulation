@@ -83,9 +83,6 @@ bool test(shapes::Mesh *mesh, std::string name, Grasp_Calculator *calc)
             }
         }
     }
-    // ROS_WARN_STREAM("cluster " << c_id << " vertex count check: " << (v.size() == clusters[c_id].vertices.size()));
-
-
 
     //TEST 3
     for (std::vector<suturo_manipulation::Cluster>::iterator c = clusters.begin(); c != clusters.end(); ++c)
@@ -145,8 +142,8 @@ bool test(shapes::Mesh *mesh, std::string name, Grasp_Calculator *calc)
         ROS_INFO_STREAM("opposite cluster  " << opposite_cluster[i].first << "   " << opposite_cluster[i].second);
         suturo_manipulation::Plane plane = meshi.get_plane(opposite_cluster[i].first, opposite_cluster[i].second);
         ROS_INFO_STREAM(name << " plane : " << plane.get_normal() );
-        std::vector<geometry_msgs::Point> p1 = meshi.create_polygon(opposite_cluster[i].first);
-        std::vector<geometry_msgs::Point> p2 = meshi.create_polygon(opposite_cluster[i].second);
+        std::vector<geometry_msgs::Point> p1 = meshi.get_polygon(opposite_cluster[i].first);
+        std::vector<geometry_msgs::Point> p2 = meshi.get_polygon(opposite_cluster[i].second);
 
         Grasp_Calculator::DPolygon2D dpolygon1 = calc->project_polygon_to_plane(plane, p1);
         // for (std::vector<Grasp_Calculator::DoublePoint2D>::iterator p2d = dpolygon1.begin(); p2d != dpolygon1.end(); ++p2d)
