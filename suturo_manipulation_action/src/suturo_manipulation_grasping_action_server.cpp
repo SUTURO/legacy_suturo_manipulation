@@ -23,7 +23,10 @@ using namespace std;
 
 typedef actionlib::SimpleActionServer<suturo_manipulation_msgs::suturo_manipulation_graspingAction> Server;
 
+ros::NodeHandle *nh;
 Grasping *grasper;
+ros::Publisher head_publisher;
+Suturo_Manipulation_Planning_Scene_Interface *pi;
 
 /**
 * This method grasps or drops a object!
@@ -31,7 +34,7 @@ Grasping *grasper;
 void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr &graspGoal, Server *server_grasp)
 {
     suturo_manipulation_msgs::suturo_manipulation_graspingResult r;
-
+    grasper = new Grasping(nh, pi, &head_publisher);
     // Set header
     r.succ.header.stamp = ros::Time();
     // Set Answer for planning to undefined
@@ -89,7 +92,7 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
                 ROS_INFO("Picking failed!\n");
                 r.succ.type = suturo_manipulation_msgs::ActionAnswer::FAIL;
                 server_grasp->setAborted(r);
-            }            
+            }
         }
         else if (action == suturo_manipulation_msgs::GraspingAndDrop::DROP_OBJECT)
         {
@@ -134,32 +137,35 @@ void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstP
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "suturo_manipulation_grasp_server");
-	ros::NodeHandle nh;
-	
-  Suturo_Manipulation_Planning_Scene_Interface pi(&nh);
+    ros::init(argc, argv, "suturo_manipulation_grasp_server");
+    nh = new ros::NodeHandle();
 
-  // Publish a topic for the ros intern head controller
-  ros::Publisher head_publisher = nh.advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
-  
-  bool reactive = false;
+    pi = new Suturo_Manipulation_Planning_Scene_Interface(nh);
 
-  if (nh.getParam("/suturo_manipulation_grasping_action_server/reactive", reactive) && reactive){
-    //reactive
-    ROS_WARN_STREAM("reactive grasping");
-    grasper = new Grasping_reactive(&nh, &pi, &head_publisher);
-  } else {
-    //non reactive
-    ROS_WARN_STREAM("non reactive grasping");
-    grasper = new Grasping(&nh, &pi, &head_publisher);
-  }
+    // Publish a topic for the ros intern head controller
+    head_publisher = nh->advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 
-	Server server_grasp(nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &server_grasp), false);
-	server_grasp.start();
-	
+    bool reactive = false;
+    grasper = new Grasping(nh, pi, &head_publisher);
+    if (nh->getParam("/suturo_manipulation_grasping_action_server/reactive", reactive) && reactive)
+    {
+        //reactive
+        ROS_WARN_STREAM("reactive grasping");
+        grasper = new Grasping_reactive(nh, pi, &head_publisher);
+    }
+    else
+    {
+        //non reactive
+        ROS_WARN_STREAM("non reactive grasping");
+        grasper = new Grasping(nh, pi, &head_publisher);
+    }
 
-	ROS_INFO("Ready to grasp!!!");
+    Server server_grasp(*nh, "suturo_man_grasping_server", boost::bind(&grop, _1, &server_grasp), false);
+    server_grasp.start();
 
-	ros::spin();
-	return 0;
+
+    ROS_INFO("Ready to grasp!!!");
+
+    ros::spin();
+    return 0;
 }

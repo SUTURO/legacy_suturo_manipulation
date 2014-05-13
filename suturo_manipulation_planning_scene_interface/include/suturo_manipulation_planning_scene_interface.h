@@ -85,6 +85,8 @@ public:
      */
     int getPlanningScene(moveit_msgs::PlanningScene &ps);
 
+    int publishPlanningScene(moveit_msgs::PlanningScene ps);
+
     /**
      * Get a list of all attached objects.
      *

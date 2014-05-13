@@ -1,0 +1,24 @@
+<launch>
+
+  <include file="$(find suturo_manipulation_pr2_movit)/launch/move_group.launch">
+   	<arg name="publish_monitored_planning_scene" value="true" />
+  </include>
+
+  <include file="$(find suturo_manipulation_tools)/launch/suturo_manipulation_tf.launch"/>
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_home_server_ros" type="suturo_manipulation_move_home_server_ros" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_head_server_ros" type="suturo_manipulation_move_head_server_ros" respawn="true" output="screen"/>
+
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_arm_server" type="suturo_manipulation_move_arm_server" respawn="true" output="screen"/>
+
+  <param name="/suturo_manipulation_grasping_action_server/reactive" type="bool" value="false" />
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_grasping_action_server" type="suturo_manipulation_grasping_action_server" respawn="true" output="screen"/>
+
+  <node pkg="suturo_manipulation_action" name="suturo_manipulation_base_server" type="suturo_manipulation_base_server" respawn="true" output="screen"/>
+
+  <node pkg="suturo_manipulation_tools" name="dirty_hack" type="dirty_hack" respawn="true" output="screen"/>
+
+</launch>

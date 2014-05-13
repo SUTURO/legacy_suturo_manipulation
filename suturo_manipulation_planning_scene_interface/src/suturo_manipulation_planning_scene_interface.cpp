@@ -30,6 +30,7 @@ Suturo_Manipulation_Planning_Scene_Interface::Suturo_Manipulation_Planning_Scene
     }
     while (!ps_service_client_.exists() );
 
+    ros::WallDuration(0.5).sleep();
 
 }
 
@@ -102,6 +103,12 @@ int Suturo_Manipulation_Planning_Scene_Interface::getPlanningScene(moveit_msgs::
         ROS_ERROR("Failed to call service to get planningscene.");
         return 0;
     }
+    return 1;
+}
+
+int Suturo_Manipulation_Planning_Scene_Interface::publishPlanningScene(moveit_msgs::PlanningScene ps)
+{
+    planning_scene_publisher.publish(ps);
     return 1;
 }
 

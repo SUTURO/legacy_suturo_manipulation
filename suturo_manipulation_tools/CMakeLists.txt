@@ -115,6 +115,7 @@ add_library(suturo_manipulation_mesh_loader
 
 add_executable(publish_objects_from_perception src/publish_objects_from_perception.cpp)
 add_executable(publish_objects_tf_frames src/publish_objects_tf_frames.cpp)
+add_executable(dirty_hack src/dirty_hack.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -123,6 +124,8 @@ add_executable(publish_objects_tf_frames src/publish_objects_tf_frames.cpp)
 add_dependencies(publish_objects_from_perception suturo_perception_msgs suturo_manipulation_msgs suturo_perception_lib suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(publish_objects_tf_frames suturo_manipulation_msgs suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
+
+add_dependencies(dirty_hack suturo_manipulation_msgs suturo_manipulation_planning_scene_interface ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(suturo_manipulation_mesh_loader ${catkin_EXPORTED_TARGETS})
 
@@ -145,6 +148,12 @@ target_link_libraries(
 
 target_link_libraries(
   publish_objects_tf_frames
+  suturo_manipulation_planning_scene_interface
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(
+  dirty_hack
   suturo_manipulation_planning_scene_interface
   ${catkin_LIBRARIES}
 )
