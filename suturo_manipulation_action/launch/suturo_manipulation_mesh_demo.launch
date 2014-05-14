@@ -8,9 +8,7 @@
 
   <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_home_server_ros" type="suturo_manipulation_move_home_server_ros" respawn="true" output="screen"/>
 
-
   <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_head_server_ros" type="suturo_manipulation_move_head_server_ros" respawn="true" output="screen"/>
-
 
   <node pkg="suturo_manipulation_action" name="suturo_manipulation_move_arm_server" type="suturo_manipulation_move_arm_server" respawn="true" output="screen"/>
 

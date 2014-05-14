@@ -50,5 +50,6 @@ int main(int argc, char** argv)
 			ROS_INFO("can't move home :(!");
 		}
 	} 
+	ROS_INFO_STREAM(r->succ.type);
 	return 0;
 }
