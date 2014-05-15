@@ -9,6 +9,7 @@ Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh,
   cc_ = new Collision_Checker(nh);
   // Collision_Handler for three tries
   ch_ = new Collision_Handler(nh, 3, pi);
+  ROS_ERROR("Grasping_reactive_object created");
 }
 
 int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 
@@ -75,26 +76,20 @@ int Grasping_reactive::move(move_group_interface::MoveGroup *move_group,
     t->join();
     if(collisionDetected_)
     {
-      // ROS_WARN("Calling collision handling");
-      // ROS_WARN("CollisionObject moved, returning to preGraspPosition");
-      geometry_msgs::PoseStamped newPreGraspPose;
-      if(rightArm)
-        newPreGraspPose.header.frame_id = "/r_wrist_roll_link";
-      else 
-        newPreGraspPose.header.frame_id = "/l_wrist_roll_link";
-      newPreGraspPose.header.stamp = ros::Time::now();
-      newPreGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH;
-      newPreGraspPose.pose.orientation.w = 1;
-      move_group->setPoseTarget(newPreGraspPose);
-      move_group->move();
-      ch_->handleCollision(collisionValue, co);
-      // preGraspPose.pose = co.pose;
-      // preGraspPose.header = co.header;
-      // preGraspPose.pose.position.x -= Gripper::GRIPPER_DEPTH - 0.05;
-      ros::Duration(2).sleep();
       move_group->setPoseTarget(preGraspPose);
       move_group->move();
+
+      // move collisionObject in PlanningScene
+      ch_->handleCollision(collisionValue, co);
+      ros::Duration(2).sleep();
+      // move to new preGraspPose
+      move_group->setPoseTarget(preGraspPose);
+      move_group->move();
+      // Set new CollisionObject as target
       move_group->setPoseTarget(desired_pose);
+
+      // STUB FOR ONE CYCLE
+      // break;
     } 
   }
 

@@ -1,4 +1,5 @@
 #include "suturo_manipulation_collision_handler.h"
+#include <visualization_msgs/Marker.h>
 
 Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
@@ -6,6 +7,7 @@ Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Sutur
   pi_ = pi;
   maxAttempts_ = maxAttempts;
   listener_ = new tf::TransformListener();
+  vis_pub_ = nh->advertise<visualization_msgs::Marker>( "/suturo/visualization_marker", 0 );
 }
 
 void Collision_Handler::reset(bool rightArm)
@@ -25,8 +27,9 @@ void Collision_Handler::handleCollision(int collisionValue, moveit_msgs::Collisi
   while(collisionValues_[i] != 0)
     i++;
   collisionValues_[i] = collisionValue;
+  ROS_WARN_STREAM("collisionValues " << collisionValues_[0] << ", "  
+      << collisionValues_[1] << ", " << collisionValues_[2] << endl);
 
-  ROS_WARN("Calling checkForPreviousCollision");
   // React to collision
   switch ( collisionValue )
   {
@@ -96,7 +99,6 @@ bool Collision_Handler::attemptValid()
 
 void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit_msgs::CollisionObject& co)
 {
-  ROS_WARN("Calculating new Position for CollisionObject");
   // check for previous collisions and calculate diff
   double yDiff = 0;
   double zDiff = 0;
@@ -120,6 +122,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
       {
         yDiff = -0.05 * (1.0/(i+1));
       }
+      ROS_WARN_STREAM("yDiff: " << yDiff << endl);
     }
   }
   if(zValue != 0)
@@ -145,17 +148,19 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     }
   }
 
-  ROS_WARN("Finished Calculating, start to transform with tf");
-
   // create new poseStamped with data from CollisionObject
   geometry_msgs::PoseStamped pose;
-  pose.header = co.header;
+  pose.header.frame_id = co.id;
+  pose.header.stamp = co.header.stamp;
 
   // check if position is in primitive_pose or mesh_pose
   if(co.primitive_poses.size() == 1)
   {
-    pose.pose.position = co.primitive_poses[0].position;
-    pose.pose.orientation = co.primitive_poses[0].orientation;
+    pose.pose.orientation.w = 1;
+    // ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    // std::string input;
+    // std::cin >> input;
+    publishMarker(pose);
     try{
       if(rightArm_)
       {
@@ -177,12 +182,25 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.primitive_poses[0].position.y += yDiff;
     co.primitive_poses[0].position.z += zDiff;
+    co.header.stamp = ros::Time(0);
+
+    // pose for marker
+    pose.pose.position.y += yDiff;
+    pose.pose.position.z += zDiff;
+    // ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    // std::cin >> input;
+    // publishMarker(pose);
   }
   // position in mesh_pose
   else
   {
-    pose.pose.position = co.mesh_poses[0].position;
-    pose.pose.orientation = co.mesh_poses[0].orientation;
+    pose.pose.orientation.w = 1;
+  pose.header.frame_id = co.id;
+  pose.header.stamp = co.header.stamp;
+    // ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    // std::string input;
+    // std::cin >> input;
+    publishMarker(pose);
     try{
       if(rightArm_)
       {
@@ -204,10 +222,39 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
-  }
+    co.header.stamp = ros::Time(0);
 
-  ROS_WARN("Finished Transforming, going to publish CollisionObject");
+    // pose for marker
+    pose.pose.position.y += yDiff;
+    pose.pose.position.z += zDiff;
+    // ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    // std::cin >> input;
+    // publishMarker(pose);
+  }
 
   // publish moved collisionObject
   pi_->addObject(co);
+}
+
+/**
+ * This method publishes the goal as a marker for rviz
+ */
+ void Collision_Handler::publishMarker(geometry_msgs::PoseStamped pose)
+ {
+// Publish the Goalmarker
+  visualization_msgs::Marker goal_marker;
+  goal_marker.header = pose.header;
+  goal_marker.ns = "suturo_manipulation";
+  goal_marker.id = 0;
+  goal_marker.type = visualization_msgs::Marker::SPHERE;
+  goal_marker.action = visualization_msgs::Marker::ADD;
+  goal_marker.pose = pose.pose;
+  goal_marker.scale.x = 0.1;
+  goal_marker.scale.y = 0.1;
+  goal_marker.scale.z = 0.1;
+  goal_marker.color.a = 1.0;
+  goal_marker.color.r = 0.0;
+  goal_marker.color.g = 1.0;
+  goal_marker.color.b = 0.0;
+  vis_pub_.publish( goal_marker );   
 }

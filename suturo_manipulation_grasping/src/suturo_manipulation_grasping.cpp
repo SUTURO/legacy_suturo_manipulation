@@ -78,10 +78,10 @@ int Grasping::lookAt(geometry_msgs::PoseStamped pose)
     else
     {
         head_publisher_->publish(goal_msg);
-        ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x <<
-                        ", y=" << goal_msg.goal.target.point.y <<
-                        ", z=" << goal_msg.goal.target.point.z <<
-                        " in Frame " << goal_msg.goal.pointing_frame.c_str());
+        // ROS_INFO_STREAM("current Position: x=" << goal_msg.goal.target.point.x <<
+        //                 ", y=" << goal_msg.goal.target.point.y <<
+        //                 ", z=" << goal_msg.goal.target.point.z <<
+        //                 " in Frame " << goal_msg.goal.pointing_frame.c_str());
     }
     return 1;
 }
@@ -162,7 +162,7 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
             continue;
         }
 
-        ROS_ERROR_STREAM("pre: " << pre_poses.at(pos_id));
+        // ROS_ERROR_STREAM("pre: " << pre_poses.at(pos_id));
 
         //move Arm to goalpose
         ROS_INFO_STREAM("move to goalpose");
@@ -174,13 +174,9 @@ int Grasping::pick(moveit_msgs::CollisionObject co, std::string arm,
         }
         else
         {
-            ROS_ERROR_STREAM("grasp: " << poses.at(pos_id));
+            // ROS_ERROR_STREAM("grasp: " << poses.at(pos_id));
             //close gripper
             gripper->close_gripper(force);
-
-            //update collisionobject in planningscene
-            if (!pi_->addObject(co))
-                return 0;
 
             //attach object
             ROS_INFO_STREAM("attach object");

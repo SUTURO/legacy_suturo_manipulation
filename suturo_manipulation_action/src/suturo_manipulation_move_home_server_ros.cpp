@@ -57,12 +57,12 @@ void moveHeadResult(pr2_controllers_msgs::PointHeadActionResult msg)
 {
     if (goal_msg.goal_id.id == msg.status.goal_id.id)
     {
-        ROS_INFO("Get result!");
+        // ROS_INFO("Get result!");
         moved = 1;
     }
     else
     {
-        ROS_INFO("No result!");
+        // ROS_INFO("No result!");
         moved = 0;
     }
 }
@@ -196,9 +196,14 @@ void moveHome(const suturo_manipulation_msgs::suturo_manipulation_homeGoalConstP
         // set unique id with timestamp
         goal_msg.goal_id.id = "goal_" + time_to_str(goal_msg.header.stamp);
         goal_msg.goal.target.header = goal_msg.header;
+
+        //HIER PATRICK!!!!
         goal_msg.goal.target.point.x = 1;
         goal_msg.goal.target.point.y = 0;
         goal_msg.goal.target.point.z = 0;
+        //HIER PATRICK!!!!
+
+
         goal_msg.goal.pointing_axis.x = 1;
         goal_msg.goal.pointing_axis.y = 0;
         goal_msg.goal.pointing_axis.z = 0;

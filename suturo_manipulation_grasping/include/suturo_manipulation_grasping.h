@@ -49,6 +49,7 @@ protected:
     int get_attached_object(std::string arm, std::string object_name, moveit_msgs::CollisionObject &co);
 
     bool get_move_group(std::string arm, move_group_interface::MoveGroup *&move_group);
+
     bool get_gripper(std::string arm, Gripper *&gripper_);
 
 
@@ -67,6 +68,12 @@ public:
      */
     int pick(std::string objectName, std::string arm, double force = 50.0);
 
+    /**
+     * Picks an object from above, with a tolerance of "tolerance" radian.
+     *
+     * @return 1, if succesfull
+     *                  0, otherwise
+     */
     int pick_above(std::string objectName, std::string arm, double tolerance, double force = 50.0);
 
     /**

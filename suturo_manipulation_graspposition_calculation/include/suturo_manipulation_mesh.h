@@ -12,6 +12,7 @@ struct Cluster
 {
     std::vector<uint> triangles;
     std::vector<uint> vertices;
+    std::vector<geometry_msgs::Point> bounding_polygon;
     geometry_msgs::Point normal;
 };
 
@@ -39,8 +40,19 @@ public:
         return normal_;
     };
 
+    /**
+    * Orthonormalizes the vectors of the parameterform. Calls pre_compute afterwards.
+    * After this, the value of the vactor is the same in 2D and 3D space.
+    *
+    * @return false, if it fails
+    */
     bool orthonormalize();
 
+    /**
+    * Precomputes parameters for fast 3D to 2D point calculation.
+    *
+    * @return false, if divison by zero.
+    */
     bool pre_compute();
 
     void get_parameter_form(geometry_msgs::Point &support_vector,
@@ -52,17 +64,40 @@ public:
         second_parameter = second_parameter_;
     };
 
+    /**
+    * Calculates the point of intersection between a line and the plane.
+    *
+    * @return false, if divison by zero.
+    */
     bool get_point_of_intersection(geometry_msgs::Point &result, geometry_msgs::Point s, geometry_msgs::Point r, double &lamda);
 
+
+    /**
+    * Transforms a 3D point, to a Plane point.
+    *
+    * @return false, if it fails.
+    */
     bool d3d_point_to_d2d_point(double &a, double &b, geometry_msgs::Point x);
 
     void get_coordinate_form(double &a, double &b, double &c, double &d);
 
-    bool dist_to_plane_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
-    
-    bool dist_to_plane_triangle2(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
+    /**
+    * Calculates the distance to the triangle, that is given by the parameterform.
+    *
+    * @return false, if it fails or r would be negativ.
+    */
+    bool dist_ray_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
+
+    /**
+    * Calculates the distance to the triangle, that is given by the parameterform.
+    *
+    * @return false, if it fails.
+    */
+    bool dist_line_triangle(geometry_msgs::Point s, geometry_msgs::Point r, double &dist);
 
     void project_point_to_plane(geometry_msgs::Point p, double &x, double &y);
+
+
 };
 
 struct Vertex
@@ -142,14 +177,32 @@ public:
 
     void add_vertex(Vertex v);
 
+    /**
+    * Calculates a plane, that lies between to clusters.
+    *
+    * @return a plane
+    */
     Plane get_plane(uint cluster_id1, uint cluster_id2);
 
     int get_opposite_cluster_size();
 
-    std::vector<geometry_msgs::Point> create_polygon(uint cluster_id);
+    /**
+    * Calculates a polygon that surrounds the cluster.
+    *
+    * @return a polygon
+    */
+    void create_polygon(uint cluster_id);
+    
+    std::vector<geometry_msgs::Point> get_polygon(uint cluster_id);
+
+
 
     std::vector< std::pair<uint, uint> > get_opposite_cluster();
 
+    /**
+     * Computes Clusters.
+     *
+     */
     void build_cluster(shapes::Mesh *mesh);
 
     void add_triangle_to_cluster(uint cluster_id, uint trianlge_id);
@@ -174,9 +227,10 @@ public:
     bool are_vertices_only_connected_by_one_triangle(uint vertex_id1, uint vertex_id2, uint cluster_id);
 
     /**
-    *s + r is v blaaa
+    * Computes the dist of s + r, where r is positiv and the diameter of the object at s + n
     */
-    bool dist_to_surface(geometry_msgs::Point s, geometry_msgs::Point r, geometry_msgs::Point n, double &dist, double &diameter);
+    bool dist_to_surface(geometry_msgs::Point s, geometry_msgs::Point r, geometry_msgs::Point n,
+                         double &dist, double &diameter);
 
     static const double scalarproduct(geometry_msgs::Point p1, geometry_msgs::Point p2)
     {

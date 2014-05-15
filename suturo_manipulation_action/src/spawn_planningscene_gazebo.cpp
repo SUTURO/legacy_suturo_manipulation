@@ -112,7 +112,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03 + 0.08;//tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
-  pub_co.publish(co);
+  // pub_co.publish(co);
   
   ros::WallDuration(2.0).sleep();
 }
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
-  // muh(nh);
+  muh(nh);
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();

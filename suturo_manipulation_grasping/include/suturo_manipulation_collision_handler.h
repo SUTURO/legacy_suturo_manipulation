@@ -10,10 +10,12 @@ class Collision_Handler
   protected:
     int attempt_, maxAttempts_;
     int *collisionValues_;
+    bool rightArm_;
     Suturo_Manipulation_Planning_Scene_Interface* pi_;
     tf::TransformListener* listener_;
-void checkForPreviousCollision(int yValue, int z_value, moveit_msgs::CollisionObject& co);
-    bool rightArm_;
+    ros::Publisher vis_pub_;
+    void checkForPreviousCollision(int yValue, int z_value, moveit_msgs::CollisionObject& co);
+    void publishMarker(geometry_msgs::PoseStamped pose);
 
   public:
     Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi);
