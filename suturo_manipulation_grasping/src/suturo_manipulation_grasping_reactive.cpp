@@ -9,6 +9,7 @@ Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh,
   cc_ = new Collision_Checker(nh);
   // Collision_Handler for three tries
   ch_ = new Collision_Handler(nh, 3, pi);
+  ROS_ERROR("Grasping_reactive_object created");
 }
 
 int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 

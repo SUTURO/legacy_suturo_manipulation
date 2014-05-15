@@ -150,16 +150,16 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
 
   // create new poseStamped with data from CollisionObject
   geometry_msgs::PoseStamped pose;
-  pose.header = co.header;
+  pose.header.frame_id = co.id;
+  pose.header.stamp = co.header.stamp;
 
   // check if position is in primitive_pose or mesh_pose
   if(co.primitive_poses.size() == 1)
   {
-    pose.pose.position = co.primitive_poses[0].position;
-    pose.pose.orientation = co.primitive_poses[0].orientation;
-    ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
-    std::string input;
-    std::cin >> input;
+    pose.pose.orientation.w = 1;
+    // ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    // std::string input;
+    // std::cin >> input;
     publishMarker(pose);
     try{
       if(rightArm_)
@@ -182,22 +182,24 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.primitive_poses[0].position.y += yDiff;
     co.primitive_poses[0].position.z += zDiff;
+    co.header.stamp = ros::Time(0);
 
     // pose for marker
     pose.pose.position.y += yDiff;
     pose.pose.position.z += zDiff;
-    ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
-    std::cin >> input;
-    publishMarker(pose);
+    // ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    // std::cin >> input;
+    // publishMarker(pose);
   }
   // position in mesh_pose
   else
   {
-    pose.pose.position = co.mesh_poses[0].position;
-    pose.pose.orientation = co.mesh_poses[0].orientation;
-    ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
-    std::string input;
-    std::cin >> input;
+    pose.pose.orientation.w = 1;
+  pose.header.frame_id = co.id;
+  pose.header.stamp = co.header.stamp;
+    // ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    // std::string input;
+    // std::cin >> input;
     publishMarker(pose);
     try{
       if(rightArm_)
@@ -220,13 +222,14 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
+    co.header.stamp = ros::Time(0);
 
     // pose for marker
     pose.pose.position.y += yDiff;
     pose.pose.position.z += zDiff;
-    ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
-    std::cin >> input;
-    publishMarker(pose);
+    // ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    // std::cin >> input;
+    // publishMarker(pose);
   }
 
   // publish moved collisionObject

@@ -27,6 +27,7 @@ ros::NodeHandle *nh;
 Grasping *grasper;
 ros::Publisher head_publisher;
 Suturo_Manipulation_Planning_Scene_Interface *pi;
+bool reactive;
 
 /**
 * This method grasps or drops a object!
@@ -34,7 +35,10 @@ Suturo_Manipulation_Planning_Scene_Interface *pi;
 void grop(const suturo_manipulation_msgs::suturo_manipulation_graspingGoalConstPtr &graspGoal, Server *server_grasp)
 {
     suturo_manipulation_msgs::suturo_manipulation_graspingResult r;
-    grasper = new Grasping(nh, pi, &head_publisher);
+    if(reactive)
+      grasper = new Grasping_reactive(nh, pi, &head_publisher);
+    else
+      grasper = new Grasping(nh, pi, &head_publisher);
     // Set header
     r.succ.header.stamp = ros::Time();
     // Set Answer for planning to undefined
@@ -145,7 +149,7 @@ int main(int argc, char **argv)
     // Publish a topic for the ros intern head controller
     head_publisher = nh->advertise<control_msgs::PointHeadActionGoal>("/head_traj_controller/point_head_action/goal", 1000);
 
-    bool reactive = false;
+    reactive = false;
     grasper = new Grasping(nh, pi, &head_publisher);
     if (nh->getParam("/suturo_manipulation_grasping_action_server/reactive", reactive) && reactive)
     {
