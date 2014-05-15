@@ -1,4 +1,5 @@
 #include "suturo_manipulation_collision_handler.h"
+#include <visualization_msgs/Marker.h>
 
 Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Suturo_Manipulation_Planning_Scene_Interface* pi)
 {
@@ -6,6 +7,7 @@ Collision_Handler::Collision_Handler(ros::NodeHandle* nh, int maxAttempts, Sutur
   pi_ = pi;
   maxAttempts_ = maxAttempts;
   listener_ = new tf::TransformListener();
+  vis_pub_ = nh->advertise<visualization_msgs::Marker>( "/suturo/visualization_marker", 0 );
 }
 
 void Collision_Handler::reset(bool rightArm)
@@ -155,6 +157,7 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     pose.pose.position = co.primitive_poses[0].position;
     pose.pose.orientation = co.primitive_poses[0].orientation;
+    publishMarker(pose);
     try{
       if(rightArm_)
       {
@@ -176,12 +179,18 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.primitive_poses[0].position.y += yDiff;
     co.primitive_poses[0].position.z += zDiff;
+
+    // pose for marker
+    pose.pose.position.y += yDiff;
+    pose.pose.position.z += zDiff;
+    publishMarker(pose);
   }
   // position in mesh_pose
   else
   {
     pose.pose.position = co.mesh_poses[0].position;
     pose.pose.orientation = co.mesh_poses[0].orientation;
+    publishMarker(pose);
     try{
       if(rightArm_)
       {
@@ -203,8 +212,36 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // apply corrections
     co.mesh_poses[0].position.y += yDiff;
     co.mesh_poses[0].position.z += zDiff;
+
+    // pose for marker
+    pose.pose.position.y += yDiff;
+    pose.pose.position.z += zDiff;
+    publishMarker(pose);
   }
 
   // publish moved collisionObject
   pi_->addObject(co);
+}
+
+/**
+ * This method publishes the goal as a marker for rviz
+ */
+ void Collision_Handler::publishMarker(geometry_msgs::PoseStamped pose)
+ {
+// Publish the Goalmarker
+  visualization_msgs::Marker goal_marker;
+  goal_marker.header = pose.header;
+  goal_marker.ns = "suturo_manipulation";
+  goal_marker.id = 0;
+  goal_marker.type = visualization_msgs::Marker::SPHERE;
+  goal_marker.action = visualization_msgs::Marker::ADD;
+  goal_marker.pose = pose.pose;
+  goal_marker.scale.x = 0.1;
+  goal_marker.scale.y = 0.1;
+  goal_marker.scale.z = 0.1;
+  goal_marker.color.a = 1.0;
+  goal_marker.color.r = 0.0;
+  goal_marker.color.g = 1.0;
+  goal_marker.color.b = 0.0;
+  vis_pub_.publish( goal_marker );   
 }
