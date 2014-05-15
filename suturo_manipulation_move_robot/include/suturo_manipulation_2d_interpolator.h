@@ -6,8 +6,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <kdl/jntarray.hpp>
-
 #include <ReflexxesAPI.h>
 
 using namespace std;

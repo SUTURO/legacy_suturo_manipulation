@@ -26,8 +26,6 @@
 
 #include <fstream>
 
-#include <kdl/jntarray.hpp>
-
 #include <ReflexxesAPI.h>
 
 #include <suturo_manipulation_2d_interpolator.h>
