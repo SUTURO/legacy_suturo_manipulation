@@ -212,6 +212,7 @@ bool Suturo_Manipulation_Move_Robot::transformToMap(geometry_msgs::PoseStamped p
 
 bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuaternion)
 {
+    // TODO: fixen, fährt derzeit immer in die entgegengesetzte Richtung
     zTwist_ = 0;
 
     geometry_msgs::PoseStamped homePose;
@@ -236,8 +237,7 @@ bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuate
     robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
     robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
 
-    // if ( robotToHome_ < robotToHome180_)
-    if (abs(homePoseOuaternion.angle(*targetQuaternion)) < 0.05)
+    if ( robotToHome_ < robotToHome180_)
     {
         zTwist_ = 0.2;
         return true;
