@@ -236,7 +236,8 @@ bool Suturo_Manipulation_Move_Robot::calculateZTwist(tf::Quaternion *targetQuate
     robotToHome_ = robotPoseQuaternion.angle(homePoseOuaternion);
     robotToHome180_ = robotPoseQuaternion.angle(homePose180Quaternion);
 
-    if ( robotToHome_ < robotToHome180_)
+    // if ( robotToHome_ < robotToHome180_)
+    if (abs(homePoseOuaternion.angle(*targetQuaternion)) < 0.05)
     {
         zTwist_ = 0.2;
         return true;
