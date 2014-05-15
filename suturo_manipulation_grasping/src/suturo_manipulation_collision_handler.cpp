@@ -157,6 +157,9 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     pose.pose.position = co.primitive_poses[0].position;
     pose.pose.orientation = co.primitive_poses[0].orientation;
+    ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    std::string input;
+    std::cin >> input;
     publishMarker(pose);
     try{
       if(rightArm_)
@@ -183,6 +186,8 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // pose for marker
     pose.pose.position.y += yDiff;
     pose.pose.position.z += zDiff;
+    ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    std::cin >> input;
     publishMarker(pose);
   }
   // position in mesh_pose
@@ -190,6 +195,9 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
   {
     pose.pose.position = co.mesh_poses[0].position;
     pose.pose.orientation = co.mesh_poses[0].orientation;
+    ROS_WARN("Going to publish the marker BEFORE transformation, press any key and enter to continue");
+    std::string input;
+    std::cin >> input;
     publishMarker(pose);
     try{
       if(rightArm_)
@@ -216,6 +224,8 @@ void Collision_Handler::checkForPreviousCollision(int yValue, int zValue, moveit
     // pose for marker
     pose.pose.position.y += yDiff;
     pose.pose.position.z += zDiff;
+    ROS_WARN("Going to publish the marker AFTER transformation, press any key and enter to continue");
+    std::cin >> input;
     publishMarker(pose);
   }
 
