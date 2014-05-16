@@ -7,6 +7,7 @@
 #include <moveit/move_group/capability_names.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <tf/transform_broadcaster.h>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -14,111 +15,128 @@
 
 #include <visualization_msgs/Marker.h>
 
-class Suturo_Manipulation_Planning_Scene_Interface{
+class Suturo_Manipulation_Planning_Scene_Interface
+{
 private:
-	ros::NodeHandle* nh_; 
-	ros::Publisher attached_object_publisher_;
-	ros::Publisher collision_object_publisher_;
-	ros::Publisher vis_pub_;
-	ros::Publisher planning_scene_publisher;
-	
-	ros::ServiceClient ps_service_client_;
+    ros::NodeHandle *nh_;
+    ros::Publisher attached_object_publisher_;
+    ros::Publisher collision_object_publisher_;
+    ros::Publisher vis_pub_;
+    ros::Publisher planning_scene_publisher;
+    ros::Publisher test_coll_ps_pub_;
+
+    tf::Transform transform;
+    tf::TransformBroadcaster br;
+    tf::TransformListener listener_;
+
+    ros::ServiceClient ps_service_client_;
 
 public:
-	Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle* nodehandle);
+    Suturo_Manipulation_Planning_Scene_Interface(ros::NodeHandle *nodehandle);
 
-	~Suturo_Manipulation_Planning_Scene_Interface();
-	
-	/**
-	 * Attach an object to the robot and publish it to the planningscene.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */
-	int attachObject(std::string objectName, std::string link_name,
-							std::vector<std::string> gripper_links);
+    ~Suturo_Manipulation_Planning_Scene_Interface();
 
-	/**
-	 * Detach an object from the robot and publish it to the planningscene.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */	
-	int detachObject(std::string object_name);
-	
-	/**
-	 * Get an object from the planningscene.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */
-	int getObject(std::string object_name, moveit_msgs::CollisionObject &co);
-	
-	/**
-	 * Remove an object (in case it already existed) and add it back to the planningscene.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */
-	int addObject(moveit_msgs::CollisionObject co);
-	
-	/**
-	 * Remove an object from the planningscene.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */	
-	int removeObject(moveit_msgs::CollisionObject co);
-	
-	/**
-	 * Get the whole planningscene
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */	
-	int getPlanningScene(moveit_msgs::PlanningScene &ps);	
+    /**
+     * Attach an object to the robot and publish it to the planningscene.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int attachObject(std::string objectName, std::string link_name,
+                     std::vector<std::string> gripper_links);
 
-	/**
-	 * Get a list of all attached objects.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */	
-	int getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos);
+    /**
+     * Detach an object from the robot and publish it to the planningscene.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int detachObject(std::string object_name);
 
-	/**
-	 * Get a list of all collision objects.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */		
-	int getObjects(std::vector<moveit_msgs::CollisionObject> &cos);
+    /**
+     * Get an object from the planningscene.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int getObject(std::string object_name, moveit_msgs::CollisionObject &co);
 
-	/**
-	 * Get an attached object.
-	 * 
-	 * @return 1, if successfull
-	 * 					0, otherwise
-	 */	
-	int getAttachedObject(std::string object_name, moveit_msgs::AttachedCollisionObject &co);
-	
-	/**
-	 * Check if the object is attached to the robot.
-	 * 
-	 * @return 1, if the object is attached
-	 * 					0, otherwise
-	 */	
-	int isAnObjectAttachedToArm(std::string link_name, moveit_msgs::AttachedCollisionObject &aco);
-	
-	int allowCollision(std::string object1, std::string object2);
+    /**
+     * Remove an object (in case it already existed) and add it back to the planningscene.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int addObject(moveit_msgs::CollisionObject co);
 
-	int denyCollision(std::string object1, std::string object2);
-	
-	/**
-	 * Publish a Marker for rviz at the given pose.
-	 * 
-	 */	
-	void publishMarker(geometry_msgs::PoseStamped pose);
+    /**
+     * Remove an object from the planningscene.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int removeObject(moveit_msgs::CollisionObject co);
+
+    /**
+     * Get the whole planningscene
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int getPlanningScene(moveit_msgs::PlanningScene &ps);
+
+    int publishPlanningScene(moveit_msgs::PlanningScene ps);
+
+    /**
+     * Get a list of all attached objects.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int getAttachedObjects(std::vector<moveit_msgs::AttachedCollisionObject> &acos);
+
+    /**
+     * Get a list of all collision objects.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int getObjects(std::vector<moveit_msgs::CollisionObject> &cos);
+
+    /**
+     * Get an attached object.
+     *
+     * @return 1, if successfull
+     *                  0, otherwise
+     */
+    int getAttachedObject(std::string object_name, moveit_msgs::AttachedCollisionObject &co);
+
+    /**
+     * Check if the object is attached to the robot.
+     *
+     * @return 1, if the object is attached
+     *                  0, otherwise
+     */
+    int isAnObjectAttachedToArm(std::string link_name, moveit_msgs::AttachedCollisionObject &aco);
+
+    int allowCollision(std::string object1, std::string object2);
+
+    int denyCollision(std::string object1, std::string object2);
+
+    bool check_group_object_collision(std::string group_name, geometry_msgs::PoseStamped eef_pose,
+                                      moveit_msgs::CollisionObject co);
+
+    /**
+     * Publish a Marker for rviz at the given pose.
+     *
+     */
+    void publishMarker(geometry_msgs::PoseStamped pose, int id = 0);
+
+    void publishMarkerPoints(std::string frame_id, std::vector<geometry_msgs::Point> points);
+
+    void publishMarkerLine(std::string frame_id, std::vector<geometry_msgs::Point> points, int id);
+
+    void publishTfFrame(std::string frame_id, geometry_msgs::PoseStamped pose);
 };
-     
+
 #endif

@@ -50,10 +50,11 @@ int main(int argc, char** argv)
 	// Get feedback from server
 	if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
 		if (suturo_manipulation_msgs::ActionAnswer::SUCCESS == r->succ.type){
-			ROS_INFO("object grasped! result: %i", r->succ.type);
+			ROS_INFO("object grasped! result:");
 		} else {
-			ROS_INFO("object not grasped! result: %i", r->succ.type);
+			ROS_INFO("object not grasped! result:");
 		}
 	}
+	ROS_INFO_STREAM(r->succ.type);
 	return 0;
 }

@@ -28,7 +28,7 @@ void moveBase(const suturo_manipulation_msgs::suturo_manipulation_baseGoalConstP
     // Set Answer fot planning to undefined
     r.succ.type = suturo_manipulation_msgs::ActionAnswer::UNDEFINED;
     //~ ROS_INFO_STREAM();
-    if (moveRobot_->driveBase(baseGoal->ps))
+    if (moveRobot_->driveBase(baseGoal->ps, baseGoal->range))
     {
         // Set Answer fot planning to success
         r.succ.type = suturo_manipulation_msgs::ActionAnswer::SUCCESS;

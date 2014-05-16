@@ -53,13 +53,22 @@ int Collision_Checker::r_collision()
 }
 
 int Collision_Checker::l_collision()
-{
-  ROS_INFO("l_tara_3 %d", r_arm_l_finger_tara_[3]);
-  ROS_INFO("l_tara_4 %d", r_arm_l_finger_tara_[4]);
-  ROS_INFO("r_tara_3 %d", r_arm_r_finger_tara_[3]);
-  ROS_INFO("r_tara_4 %d", r_arm_r_finger_tara_[4]);
+{ 
+  int result = 0;
 
-  return r_arm_r_finger_[3];
+  if (l_arm_l_finger_[3] - l_arm_l_finger_tara_[3] > 1000) 
+    result = result + 1;
+
+  if (l_arm_l_finger_[4] - l_arm_l_finger_tara_[4] > 1000) 
+    result = result + 2;
+
+  if (l_arm_r_finger_[3] - l_arm_r_finger_tara_[3] > 1000) 
+    result = result + 4;
+
+  if (l_arm_r_finger_[4] - l_arm_r_finger_tara_[4] > 1000) 
+    result = result + 8;
+
+  return result;
 }
 
 Collision_Checker::Collision_Checker(ros::NodeHandle* nh)

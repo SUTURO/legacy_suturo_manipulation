@@ -1,54 +1,105 @@
 #include "suturo_manipulation_grasping_reactive.h"
-#include <suturo_manipulation_collision_checker.h>
 
 using namespace std;
 
-Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh, Suturo_Manipulation_Planning_Scene_Interface* pi, ros::Publisher* head_publisher) : Grasping(nh, pi, head_publisher) {
+Grasping_reactive::Grasping_reactive(ros::NodeHandle* nh, 
+    Suturo_Manipulation_Planning_Scene_Interface* pi, 
+    ros::Publisher* head_publisher) : Grasping(nh, pi, head_publisher) 
+{
   cc_ = new Collision_Checker(nh);
-  moveSucces_ = false;
-  collisionDetected_ = false;
+  // Collision_Handler for three tries
+  ch_ = new Collision_Handler(nh, 3, pi);
+  ROS_ERROR("Grasping_reactive_object created");
 }
 
 int Grasping_reactive::move(move_group_interface::MoveGroup *move_group, 
         geometry_msgs::PoseStamped desired_pose,
-        moveit_msgs::CollisionObject co)
+        moveit_msgs::CollisionObject& co,
+        geometry_msgs::PoseStamped preGraspPose)
+
 {
-  ROS_INFO("Grasping_reactive::move called");
-  // this->Grasping::move(move_group, desired_pose);
+  ROS_WARN("Grasping_reactive::move called");
+  // ROS_INFO("Arm: %s", move_group->getName().c_str());
   //look
   lookAt(desired_pose);
   //set marker
   pi_->publishMarker(desired_pose);
   //set goal
   move_group->setPoseTarget(desired_pose);
-  //move
-  // return move_group->move() ? 1 : 0;
 
-  // boost::thread* thr = new boost::thread(boost::bind(&move_group_interface::MoveGroup::move, move_group));
+  bool rightArm;
 
-  boost::thread* t = new boost::thread(boost::bind(&Grasping_reactive::threaded_move, this, move_group));
+  //get arm to move
+  if(move_group->getName().compare("right_arm") == 0)
+    rightArm = true;
+  else
+    rightArm = false;
 
-  cc_->clear();
-  while(!moveSucces_ && !collisionDetected_)
+  while(!cc_->updated_) 
   {
-    if(cc_->updated_)
+    ROS_WARN("Waiting for fingertippressuredata");
+    ros::Duration(0.1).sleep();
+  }
+  // set tara for pressurevalues
+  cc_->clear();
+  ch_->reset(rightArm);
+  moveSuccess_ = false;
+  collisionDetected_ = false;
+
+  // check that previous grasp failed 
+  // and the max amount of attempts is not reached
+  while(!moveSuccess_ && ch_->attemptValid())
+  {
+    ROS_WARN("Start Grasping Attempt");
+    // start threaded moving of the arm
+    boost::thread* t = new boost::thread(boost::bind(&Grasping_reactive::threaded_move, this, move_group));
+    int collisionValue;
+    collisionDetected_ = false;
+    // check if grasp succeeded or gripper collided
+    while(!moveSuccess_ && !collisionDetected_)
     {
-      if(cc_->r_collision() > 0) 
+      // get collision-status
+      if (rightArm)
+        collisionValue = cc_->r_collision();
+      else 
+        collisionValue = cc_->l_collision();
+      if(collisionValue > 0) 
       {
         collisionDetected_ = true;
+        ROS_WARN("Fingertipcollision detected: %d", collisionValue);
         move_group->stop();
+        ros::Duration(0.1).sleep();
       }
-      ros::Duration(0.1).sleep();
     }
+    // wait for threaded move_group to be finished
+    ROS_WARN("wait for threaded move_group to be finished");
+    t->join();
+    if(collisionDetected_)
+    {
+      move_group->setPoseTarget(preGraspPose);
+      move_group->move();
+
+      // move collisionObject in PlanningScene
+      ch_->handleCollision(collisionValue, co);
+      ros::Duration(2).sleep();
+      // move to new preGraspPose
+      move_group->setPoseTarget(preGraspPose);
+      move_group->move();
+      // Set new CollisionObject as target
+      move_group->setPoseTarget(desired_pose);
+
+      // STUB FOR ONE CYCLE
+      // break;
+    } 
   }
 
-
-  t->join();
-  ROS_INFO("Grasping_reactive::move finished");
-  return 1;
+  ROS_WARN("Grasping_reactive::move finished");
+  if(moveSuccess_)
+    return 1;
+  return 0;
 }
 
 void Grasping_reactive::threaded_move(move_group_interface::MoveGroup* move_group){
-  moveSucces_ = move_group->move() ? 1 : 0;
+  moveSuccess_ = move_group->move() ? 1 : 0;
 }
 

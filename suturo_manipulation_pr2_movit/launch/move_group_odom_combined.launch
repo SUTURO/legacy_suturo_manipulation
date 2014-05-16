@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find suturo_manipulation_pr2_movit)/launch/planning_context.launch" />
+  <include file="$(find suturo_manipulation_pr2_movit)/launch/planning_context_odom_combined.launch" />
 
   <arg name="debug" default="false" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />

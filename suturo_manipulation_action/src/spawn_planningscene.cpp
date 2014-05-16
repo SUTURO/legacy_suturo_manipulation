@@ -33,7 +33,7 @@ void putObjects(ros::Publisher pub_co)
 
   co.id = "dlink";
   co.operation = moveit_msgs::CollisionObject::REMOVE;
-  //~ pub_co.publish(co);
+  pub_co.publish(co);
 
   // add box2
   co.operation = moveit_msgs::CollisionObject::ADD;
@@ -111,7 +111,7 @@ void putObjects(ros::Publisher pub_co)
   co.primitive_poses[0].position.z = tischposiZ + 0.03 + 0.0715;//tischposiZ + 0.08;
   co.primitive_poses[0].orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   
-  pub_co.publish(co);
+  //~ pub_co.publish(co);
   
   ros::WallDuration(2.0).sleep();
 }
@@ -126,6 +126,8 @@ int main(int argc, char **argv)
 	
 	ros::Publisher pub_co = nh.advertise<moveit_msgs::CollisionObject>("collision_object", 10);
 	putObjects(pub_co);
+  ROS_INFO_STREAM(moveit_msgs::CollisionObject::REMOVE);
+  ROS_INFO_STREAM("add" << moveit_msgs::CollisionObject::ADD);
 	
 	ROS_INFO_STREAM("finish");
 	ros::waitForShutdown();
